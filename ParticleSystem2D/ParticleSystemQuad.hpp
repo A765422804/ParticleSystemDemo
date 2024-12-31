@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include "../Common/Head.h"
 #include "ParticleSystem.hpp"
 #include "../Renderer/Renderer.hpp"
 #include "../Common/VertexType.hpp"

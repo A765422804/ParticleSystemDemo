@@ -1,25 +1,11 @@
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
-
+#include "Common/Head.h"
 #include "Function/Shader.hpp"
 #include "Function/Texture2D.hpp"
 #include "Tool/PointGenerate.hpp"
 #include "Tool/CatmullRom.hpp"
-#include "Function/Drawer.hpp"
-#include "Function/SequenceFrame.hpp"
 #include "Function/ToolFunction.h"
 #include "ParticleSystem2D/ParticleSystemQuad.hpp"
-
 #include "Parameters.hpp"
-
-#include <array>
-#include <chrono>
-#include <thread>
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow *window);

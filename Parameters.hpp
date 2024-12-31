@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include "Common/Head.h"
 #include "Function/DecayFunction.hpp"
 #include "Function/SpeedChange.hpp"
 

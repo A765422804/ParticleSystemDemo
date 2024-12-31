@@ -8,14 +8,7 @@
 #ifndef CatmullRom_hpp
 #define CatmullRom_hpp
 
-#include <iostream>
-#include <vector>
-#include <utility>
-#include <cmath>
-
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
+#include "../Common/Head.h"
 
 class CatmullRom
 {

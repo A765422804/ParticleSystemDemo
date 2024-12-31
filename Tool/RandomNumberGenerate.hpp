@@ -9,8 +9,7 @@
 
 // 工具类，命名规范TF - ToolFunction
 
-#include <iostream>
-#include <random>
+#include "../Common/Head.h"
 
 // M11: [-1, 1]
 inline float TFRandomM11()

@@ -8,8 +8,7 @@
 #ifndef SpeedChange_hpp
 #define SpeedChange_hpp
 
-#include <cmath>
-#include <iostream>
+#include "../Common/Head.h"
 
 class SpeedChange
 {

@@ -7,11 +7,7 @@
 
 #pragma once
 
-#include <memory>
-#include <vector>
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-
+#include "../Common/Head.h"
 #include "../Common/VertexType.hpp"
 #include "../Function/Shader.hpp"
 #include "../Common/Camera.hpp"

@@ -8,14 +8,7 @@
 #ifndef PointGenerate_hpp
 #define PointGenerate_hpp
 
-#include <iostream>
-#include <vector>
-#include <cmath>
-#include <random>
-
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
+#include "../Common/Head.h"
 
 class PointGenerate
 {
