@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "../Common/Head.h"
+#include "../Head.h"
 #include "../Common/VertexType.hpp"
 #include "../Function/Shader.hpp"
 #include "../Common/Camera.hpp"
@@ -22,16 +22,27 @@ public:
     ~Renderer() = default;
     
 public:
-    static RendererPtr CreateRenderer();
-    
-public:
     void SetVertexData(std::vector<V3_C4_T2> vertices);
+    void SetVertexData(std::vector<V3> vertices);
     void SetIndexData(std::vector<unsigned int> indices);
-    void Render();
     
 public:
-    void SetupVertexDesc();
-    void SetupShaderProgram(const char* vertexPath, const char* fragmentPath);
+    void Render();
+    void RenderPoint(float size, vec4 color);
+    void RenderCircle(unsigned int segmentCount);
+    
+public: // shader
+    void SetUseTexture(bool useTexture);
+    void SetWireFrameColor(vec4 wireFrameColor);
+    
+public: // gl
+    void SetIsWireframeEnable(bool isWireFrameEnable);
+    
+public:
+    void SetupVertexDescV3_C4_T2();
+    void SetupVertexDescV3();
+    
+    void SetupShaderProgram(const char *vertexPath, const char *fragmentPath);
     
 private:
     void InitOpenGLResources();
@@ -41,8 +52,10 @@ private:
     unsigned int _indexCount;
     ShaderPtr _shader;
     CameraPtr _camera;
+    bool _isWireFrameEnable;
 };
 
 using RendererPtr = Renderer::RendererPtr;
 
 // CreateRenderer->SetupVertexDesc->SetupShaderProgram->SetVertexData->SetIndexData->Render
+

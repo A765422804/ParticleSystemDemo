@@ -7,7 +7,7 @@
 
 #include "PointGenerate.hpp"
 
-PointGenerate::PointGenerate(std::vector<glm::vec2> array , const float &len):particle_length(len) 
+PointGenerate::PointGenerate(std::vector<vec2> array , const float &len):particle_length(len) 
 {
     for (auto &i : array)
     {
@@ -23,7 +23,7 @@ PointGenerate::PointGenerate(const int &num, const float &len, const float &step
     for (int i = 0 ; i < count; ++i)
     {
         float y = functionGetY(x);
-        point_array.push_back(glm::vec2(x, y));
+        point_array.push_back(vec2(x, y));
         vertices_array.push_back(getRectangleVertices(x, y));
         x += this->step;
     }
@@ -34,7 +34,7 @@ std::vector<std::vector<float>> PointGenerate::getVerticesArray() const
     return vertices_array;
 }
 
-std::vector<glm::vec2> PointGenerate::getPointArray() const
+std::vector<vec2> PointGenerate::getPointArray() const
 {
     return point_array;
 }

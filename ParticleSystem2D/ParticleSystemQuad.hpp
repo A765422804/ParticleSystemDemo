@@ -7,10 +7,12 @@
 
 #pragma once
 
-#include "../Common/Head.h"
+#include "../Head.h"
 #include "ParticleSystem.hpp"
 #include "../Renderer/Renderer.hpp"
 #include "../Common/VertexType.hpp"
+
+#define DEBUG_MODE
 
 class ParticleSystemQuad : public ParticleSystem
 {
@@ -32,13 +34,17 @@ public:
     
     void UpdateParticleQuads() override; // 更新粒子Quads
     void Draw() override;
-    void UpdatePosWithParticle(int quadIndex);
+    void UpdatePosWithParticle(vec3 newPos, int quadIndex);
     
 private:
     std::vector<V3_C4_T2_Quad> _quads; // quads to be rendered
     std::vector<unsigned int> _indices; // indices
     
     RendererPtr _renderer; // 渲染器
+    
+#ifdef DEBUG_MODE
+    RendererPtr _emitterRenderer;
+#endif
 };
 
 using ParticleSystemQuadPtr = ParticleSystemQuad::ParticleSystemQuadPtr;

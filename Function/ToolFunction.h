@@ -19,9 +19,9 @@
 class ToolFunction
 {
 public:
-  static std::vector<glm::vec2> calculatePointsOnCircle(double r, int n)
+  static std::vector<vec2> calculatePointsOnCircle(double r, int n)
     {
-      std::vector<glm::vec2> points;
+      std::vector<vec2> points;
       double angleIncrement = 2 * M_PI / n; // 计算每个点之间的角度差
 
       for (int i = 0; i < n; ++i) 
@@ -29,7 +29,7 @@ public:
           double angle = i * angleIncrement;
           double x = r * cos(angle);
           double y = r * sin(angle);
-          points.push_back(glm::vec2(x, y));
+          points.push_back(vec2(x, y));
       }
 
       return points;
@@ -44,7 +44,7 @@ public:
         return dis(gen);
     }
     
-    static glm::vec2 randomPointInAnnulus(float r1, float r2)
+    static vec2 randomPointInAnnulus(float r1, float r2)
     {
         static std::random_device rd;  // 用于生成随机种子
         static std::mt19937 gen(rd()); // 使用 Mersenne Twister 作为随机数生成器
@@ -59,7 +59,7 @@ public:
         float x = r * cos(theta);
         float y = r * sin(theta);
 
-        return glm::vec2(x, y);
+        return vec2(x, y);
     }
 };
 

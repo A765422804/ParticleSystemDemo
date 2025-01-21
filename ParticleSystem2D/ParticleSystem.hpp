@@ -7,14 +7,15 @@
 
 #pragma once
 
-#include "Head.h"
-
+#include "../Head.h"
+#include "../Common/Node.hpp"
 #include "Particle.hpp"
 #include "../Function/Texture2D.hpp"
+#include "../Tool/Gradient.hpp"
 
 struct GravityModeAttribute
 {
-    glm::vec2 Gravity;
+    vec2 Gravity;
     
     float Speed;
     float SpeedVar;
@@ -48,9 +49,16 @@ enum EmitterMode
     ROTATION,
 };
 
+enum PositionType
+{
+    FREE,
+    RELATIVE,
+    GROUPED,
+};
+
 #pragma mark -
 
-class ParticleSystem
+class ParticleSystem : public Node
 {
 public:
     ParticleSystem();
@@ -91,8 +99,9 @@ protected:
 #pragma mark ParticleAttribute
 protected:
     // pos
-    glm::vec2 _sourcePosition; // TODO: when to init?
-    glm::vec2 _positionVar;
+    vec2 _sourcePosition; // TODO: when to init?
+    vec2 _positionVar;
+    PositionType _positionType;
     
     // size
     float _startSize;
@@ -101,10 +110,11 @@ protected:
     float _endSizeVar;
     
     // color
-    glm::vec4 _startColor;
-    glm::vec4 _startColorVar;
-    glm::vec4 _endColor;
-    glm::vec4 _endColorVar;
+    // GradientPtr _colorRamp;
+    vec4 _startColor;
+    vec4 _startColorVar;
+    vec4 _endColor;
+    vec4 _endColorVar;
     
     // rotate 粒子自旋的角度degree
     float _startSpin;

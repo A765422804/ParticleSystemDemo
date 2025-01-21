@@ -8,7 +8,7 @@
 #ifndef SpeedChange_hpp
 #define SpeedChange_hpp
 
-#include "../Common/Head.h"
+#include "../Head.h"
 
 class SpeedChange
 {

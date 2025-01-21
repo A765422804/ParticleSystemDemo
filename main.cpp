@@ -1,4 +1,4 @@
-#include "Common/Head.h"
+#include "Head.h"
 #include "Function/Shader.hpp"
 #include "Function/Texture2D.hpp"
 #include "Tool/PointGenerate.hpp"
@@ -6,6 +6,8 @@
 #include "Function/ToolFunction.h"
 #include "ParticleSystem2D/ParticleSystemQuad.hpp"
 #include "Parameters.hpp"
+#include "Common/Node.hpp"
+#include "Point/Point.hpp"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow *window);
@@ -55,7 +57,13 @@ int main()
     
     // ParticleSystem2D
     ParticleSystemQuadPtr particleSystem = ParticleSystemQuad::Create();
-
+    
+    // Point (parent node)
+    PointPtr point = Point::Create(10.0f, vec4(0.0, 1.0, 0.0, 1.0));
+    point->SetPosition3D(vec3(2.0f,2.0f,0.0f));
+    point->AddChild(std::static_pointer_cast<Node>(particleSystem));
+    particleSystem->SetPosition3D(vec3(-4.0, -4.0f,0.0f));
+    
     // render loop
     while (!glfwWindowShouldClose(window))
     {
@@ -76,6 +84,8 @@ int main()
         // Update
         // ------
         particleSystem->Update(deltaTime);
+        point->Move(vec3(1.0f,0.0f,0.0f), deltaTime);
+        particleSystem->Move(vec3(-1.0f, 0.0f ,0.0f), deltaTime);
 
         // render
         // ------
@@ -83,6 +93,7 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT);
         
         particleSystem->Draw();
+        point->Draw();
         
         glfwSwapBuffers(window);
         glfwPollEvents();

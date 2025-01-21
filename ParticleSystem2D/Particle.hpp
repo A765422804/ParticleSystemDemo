@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "../Common/Head.h"
+#include "../Head.h"
 
 struct GravityMode
 {

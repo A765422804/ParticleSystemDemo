@@ -17,9 +17,15 @@ ParticleSystemQuadPtr ParticleSystemQuad::Create()
     ParticleSystemQuadPtr ret = std::make_shared<ParticleSystemQuad>();
     
     // 初始化renderer并配置顶点描述
-    ret->_renderer = Renderer::CreateRenderer();
-    ret->_renderer->SetupVertexDesc();
+    ret->_renderer = std::make_shared<Renderer>();
+    ret->_renderer->SetupVertexDescV3_C4_T2();
     ret->_renderer->SetupShaderProgram("./shader_file/particle_shader.vs", "./shader_file/particle_shader.fs");
+    
+#ifdef DEBUG_MODE
+    ret->_emitterRenderer = std::make_shared<Renderer>();
+    ret->_emitterRenderer->SetupVertexDescV3();
+    ret->_emitterRenderer->SetupShaderProgram("./shader_file/debug_shader.vs", "./shader_file/debug_shader.fs");
+#endif
     
     ret->Init();
     
@@ -65,12 +71,34 @@ void ParticleSystemQuad::UpdateParticleQuads()
     if (_particleCount <= 0)
         return;
     
-    // position
-    // TODO: use positionType to deal with 坐标系变换
-    
-    for (int i = 0 ; i < _particleCount; ++i)
+    if (_positionType == PositionType::FREE)
     {
-        UpdatePosWithParticle(i);
+        vec3 newPos;
+        for (int i = 0 ; i < _particleCount; ++i)
+        {
+            newPos = vec3(_particles[i]._startPosX + _particles[i]._posX, _particles[i]._startPosY + _particles[i]._posY, 0.0f);
+            UpdatePosWithParticle(newPos, i);
+        }
+    }
+    else if (_positionType == PositionType::RELATIVE)
+    {
+        vec3 currentPosition = GetParent()->ConvertToWorldSpace(vec3(0.0f));
+        vec3 newPos;
+        for (int i = 0 ; i < _particleCount; ++i)
+        {
+            newPos = vec3(currentPosition.x + _particles[i]._startPosX + _particles[i]._posX, currentPosition.y + _particles[i]._startPosY + _particles[i]._posY, 0.0f);
+            UpdatePosWithParticle(newPos, i);
+        }
+    }
+    else
+    {
+        vec3 currentPosition = ConvertToWorldSpace(vec3(0.0f));
+        vec3 newPos;
+        for (int i = 0; i < _particleCount; ++i)
+        {
+            newPos = vec3(currentPosition.x + _particles[i]._posX, currentPosition.y + _particles[i]._posY, 0.0f);
+            UpdatePosWithParticle(newPos, i);
+        }
     }
     
     // color
@@ -81,25 +109,24 @@ void ParticleSystemQuad::UpdateParticleQuads()
         float colorB = _particles[i]._colorB;
         float colorA = _particles[i]._colorA;
         
-        _quads[i].bl.Colors = glm::vec4(colorR, colorG, colorB, colorA);
-        _quads[i].br.Colors = glm::vec4(colorR, colorG, colorB, colorA);
-        _quads[i].tl.Colors = glm::vec4(colorR, colorG, colorB, colorA);
-        _quads[i].tr.Colors = glm::vec4(colorR, colorG, colorB, colorA);
+        _quads[i].bl.Colors = vec4(colorR, colorG, colorB, colorA);
+        _quads[i].br.Colors = vec4(colorR, colorG, colorB, colorA);
+        _quads[i].tl.Colors = vec4(colorR, colorG, colorB, colorA);
+        _quads[i].tr.Colors = vec4(colorR, colorG, colorB, colorA);
     }
     
     // texCoord
     for (int i = 0; i < _particleCount; ++i)
     {
-        _quads[i].bl.TexCoords = glm::vec2(0.0f, 0.0f);
-        _quads[i].br.TexCoords = glm::vec2(1.0f, 0.0f);
-        _quads[i].tl.TexCoords = glm::vec2(0.0f, 1.0f);
-        _quads[i].tr.TexCoords = glm::vec2(1.0f, 1.0f);
+        _quads[i].bl.TexCoords = vec2(0.0f, 0.0f);
+        _quads[i].br.TexCoords = vec2(1.0f, 0.0f);
+        _quads[i].tl.TexCoords = vec2(0.0f, 1.0f);
+        _quads[i].tr.TexCoords = vec2(1.0f, 1.0f);
     }
 }
 
-void ParticleSystemQuad::UpdatePosWithParticle(int quadIndex)
+void ParticleSystemQuad::UpdatePosWithParticle(vec3 newPos, int quadIndex)
 {
-    glm::vec2 newPos = glm::vec2(_particles[quadIndex]._posX, _particles[quadIndex]._posY);
     float size = _particles[quadIndex]._size;
     float rotation = _particles[quadIndex]._rotation;
     
@@ -111,9 +138,9 @@ void ParticleSystemQuad::UpdatePosWithParticle(int quadIndex)
     float x = newPos.x;
     float y = newPos.y;
     
-    float r = -glm::radians(rotation);
-    float cr = glm::cos(r);
-    float sr = glm::sin(r);
+    float r = -radians(rotation);
+    float cr = cos(r);
+    float sr = sin(r);
     
     float ax = x1 * cr - y1 * sr + x;
     float ay = x1 * sr + y1 * cr + y;
@@ -140,22 +167,84 @@ void ParticleSystemQuad::UpdatePosWithParticle(int quadIndex)
 void ParticleSystemQuad::Draw()
 {
     // 绑定纹理
-    _texture->Bind();
+    if (_texture != nullptr)
+    {
+        _renderer->SetUseTexture(true);
+        _texture->Bind();
+    }
+    else
+    {
+        _renderer->SetUseTexture(false);
+    }
     
     // 传递属性
     if (_particleCount > 0)
     {
         std::vector<V3_C4_T2> vertices;
-        for (auto& i : _quads)
+        for (int i = 0 ; i < _particleCount; ++ i)
         {
-            vertices.push_back(i.tl);
-            vertices.push_back(i.bl);
-            vertices.push_back(i.tr);
-            vertices.push_back(i.br);
+            vertices.push_back(_quads[i].tl);
+            vertices.push_back(_quads[i].bl);
+            vertices.push_back(_quads[i].tr);
+            vertices.push_back(_quads[i].br);
         }
+        std::vector<unsigned int> indices(_indices.begin(), _indices.begin() + std::min(_particleCount * 6, static_cast<int>(_indices.size())));
         
         _renderer->SetVertexData(vertices);
-        _renderer->SetIndexData(_indices);
+        _renderer->SetIndexData(indices);
         _renderer->Render();
     }
+    
+#ifdef DEBUG_MODE
+    if (_emitterMode == EmitterMode::GRAVITY)
+    {
+        std::vector<V3> emitterPosition;
+        emitterPosition.resize(4);
+        emitterPosition[0].Position = vec3(GetWorldPosition().x - _positionVar.x, GetWorldPosition().y + _positionVar.y, 0.0f);
+        emitterPosition[1].Position = vec3(GetWorldPosition().x - _positionVar.x, GetWorldPosition().y - _positionVar.y, 0.0f);
+        emitterPosition[2].Position = vec3(GetWorldPosition().x + _positionVar.x, GetWorldPosition().y + _positionVar.y, 0.0f);
+        emitterPosition[3].Position = vec3(GetWorldPosition().x + _positionVar.x, GetWorldPosition().y - _positionVar.y, 0.0f);
+        std::vector<unsigned int> emitterIndices = {
+            0, 1, 2,
+            1, 2, 3
+        };
+        _emitterRenderer->SetVertexData(emitterPosition);
+        _emitterRenderer->SetIndexData(emitterIndices);
+        _emitterRenderer->SetIsWireframeEnable(true);
+        _emitterRenderer->SetWireFrameColor(vec4(1.0f, 0.0f, 0.0f, 1.0f));
+        _emitterRenderer->Render();
+    }
+    else
+    {
+        std::vector<V3> emitterPosition;
+        V3 v3;
+        unsigned int segmentCount = 1000;
+        for (int i = 0; i <= segmentCount; ++i)
+        {
+            float theta = 2.0f * 3.1415926f * float(i) / float(segmentCount);
+            float x = _rotationAttribute.StartRadius * cos(theta) + GetWorldPosition().x;
+            float y = _rotationAttribute.StartRadius * sin(theta) + GetWorldPosition().y;
+            v3.Position = vec3(x, y, 0);
+            emitterPosition.push_back(v3);
+        }
+        
+        _emitterRenderer->SetVertexData(emitterPosition);
+        _emitterRenderer->SetWireFrameColor(vec4(1.0f, 0.0f, 0.0f, 1.0f));
+        _emitterRenderer->RenderCircle(segmentCount);
+        
+        emitterPosition.clear();
+        for (int i = 0; i <= segmentCount; ++i)
+        {
+            float theta = 2.0f * 3.1415926f * float(i) / float(segmentCount);
+            float x = _rotationAttribute.EndRadius * cos(theta) + GetWorldPosition().x;
+            float y = _rotationAttribute.EndRadius * sin(theta) + GetWorldPosition().y;
+            v3.Position = vec3(x, y, 0);
+            emitterPosition.push_back(v3);
+        }
+        
+        _emitterRenderer->SetVertexData(emitterPosition);
+        _emitterRenderer->SetWireFrameColor(vec4(1.0f, 0.0f, 0.0f, 1.0f));
+        _emitterRenderer->RenderCircle(segmentCount);
+    }
+#endif
 }

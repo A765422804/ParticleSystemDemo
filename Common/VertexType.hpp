@@ -7,13 +7,13 @@
 
 #pragma once
 
-#include "Head.h"
+#include "../Head.h"
 
 struct V3_C4_T2 // 每个顶点的数据结构
 {
-    glm::vec3 Vertices;
-    glm::vec4 Colors;
-    glm::vec2 TexCoords;
+    vec3 Vertices;
+    vec4 Colors;
+    vec2 TexCoords;
 };
 
 struct V3_C4_T2_Quad // 每个Quad的数据结构
@@ -22,4 +22,9 @@ struct V3_C4_T2_Quad // 每个Quad的数据结构
     V3_C4_T2 bl;
     V3_C4_T2 tr;
     V3_C4_T2 br;
+};
+
+struct V3
+{
+    vec3 Position;
 };

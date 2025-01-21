@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "Common/Head.h"
+#include "Head.h"
 #include "Function/DecayFunction.hpp"
 #include "Function/SpeedChange.hpp"
 
@@ -27,9 +27,9 @@ const int NUM_POINT = 100; //每两个点之间插值生成的子点数
 const float LINE_LENGTH = 0.001; // 子点的长度
 
 // 摄像机相关
-const glm::vec3 CAMERA_POS = glm::vec3(0.0f); // 相机位置
-const glm::vec3 CAMERA_TARGET = glm::vec3(0.0f, 0.0f, -1.0f); // 相机目标
-const glm::vec3 UP_VECTOR = glm::vec3(0.0f, 1.0f, 0.0f); // 相机上方向
+const vec3 CAMERA_POS = vec3(0.0f); // 相机位置
+const vec3 CAMERA_TARGET = vec3(0.0f, 0.0f, -1.0f); // 相机目标
+const vec3 UP_VECTOR = vec3(0.0f, 1.0f, 0.0f); // 相机上方向
 const float NEAR_PLANE = 0.1f; // 近平面
 const float FAR_PLANE = 10.0f; // 远平面
 const float FOV = 45.0f; //视场角

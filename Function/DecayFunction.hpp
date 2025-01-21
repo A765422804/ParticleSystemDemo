@@ -8,7 +8,7 @@
 #ifndef DecayFunction_hpp
 #define DecayFunction_hpp
 
-#include "../Common/Head.h"
+#include "../Head.h"
 
 class DecayFunction
 {
