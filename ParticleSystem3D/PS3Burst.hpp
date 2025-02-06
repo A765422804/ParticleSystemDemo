@@ -15,11 +15,12 @@ class PS3ParticleSystem;
 class PS3Burst
 {
 public:
-    PS3Burst();
+    PS3Burst(float time, int repeatCount, float repeatInterval, CurveRangePtr count);
     ~PS3Burst() = default;
     
 public:
     void Update(PS3ParticleSystem* ps, float dt);
+    void Reset();
     
 private: // 属性
     float _time; //  从开始运行到触发burst的时间

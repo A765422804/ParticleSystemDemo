@@ -7,6 +7,21 @@
 
 #include "GradientRange.hpp"
 
+GradientRange::GradientRange()
+{
+    // TODO: do nothing 暂时
+}
+
+std::shared_ptr<GradientRange> GradientRange::CreateByOneColor(vec4 color)
+{
+    std::shared_ptr<GradientRange> ret = std::make_shared<GradientRange>();
+    
+    ret->_color = color;
+    ret->_mode = ColorMode::COLOR;
+    
+    return ret;
+}
+
 vec4 GradientRange::Evaluate(float time, float rndRatio)
 {
     switch (_mode) {

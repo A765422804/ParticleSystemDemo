@@ -8,6 +8,67 @@
 #include "PS3ShapeModule.hpp"
 #include "../PS3ParticleSystem.hpp"
 
+inline const vec3 BOX = vec3(0.5f);
+
+std::vector<vec3> cubeVertices = {
+    vec3(-0.5f, -0.5f, -0.5f),  // 0
+    vec3(0.5f, -0.5f, -0.5f),   // 1
+    vec3(0.5f, 0.5f, -0.5f),    // 2
+    vec3(-0.5f, 0.5f, -0.5f),   // 3
+    vec3(-0.5f, -0.5f, 0.5f),   // 4
+    vec3(0.5f, -0.5f, 0.5f),    // 5
+    vec3(0.5f, 0.5f, 0.5f),     // 6
+    vec3(-0.5f, 0.5f, 0.5f)     // 7
+};
+std::vector<unsigned int> edgeIndices = {
+    0, 1, 1, 2, 2, 3, 3, 0, // 底面
+    4, 5, 5, 6, 6, 7, 7, 4, // 顶面
+    0, 4, 1, 5, 2, 6, 3, 7  // 侧面连接
+};
+
+PS3ShapeModule::PS3ShapeModule()
+{
+    _emitterRenderer = std::make_shared<Renderer>();
+    _emitterRenderer->SetupVertexDescVec3();
+    _emitterRenderer->SetupShaderProgram("./shader_file/debug_shader.vs", "./shader_file/debug_shader.fs");
+    
+}
+
+std::shared_ptr<PS3ShapeModule> PS3ShapeModule::CreateBoxEmitter(EmitLocation emitLocation, vec3 boxThickness, PS3ParticleSystem* ps)
+{
+    PS3ShapeModulePtr ret = std::make_shared<PS3ShapeModule>();
+    
+    ret->_shapeType = ShapeType::BOX;
+    ret->_emitLocation = emitLocation;
+    ret->_boxThickness = boxThickness;
+    
+    ret->_enable = true;
+    ret->_ps = ps;
+    
+    return ret;
+}
+
+std::shared_ptr<PS3ShapeModule> PS3ShapeModule::CreateConeEmitter(EmitLocation emitLocation, ArcMode arcMode, float arcSpread, float arc, CurveRangePtr arcSpeed, float radius, float radiusThickness, float angle, float length, PS3ParticleSystem* ps)
+{
+    PS3ShapeModulePtr ret = std::make_shared<PS3ShapeModule>();
+    
+    ret->_shapeType = ShapeType::CONE;
+    ret->_emitLocation = emitLocation;
+    ret->_arcMode = arcMode;
+    ret->_arcSpeed = arcSpeed;
+    ret->_arc = arc;
+    ret->_arcSpeed = arcSpeed;
+    ret->_radius = radius;
+    ret->_radiusThickness = radiusThickness;
+    ret->_angle = angle;
+    ret->_length = length;
+    
+    ret->_enable = true;
+    ret->_ps = ps;
+    
+    return ret;
+}
+
 void PS3ShapeModule::Emit(PS3ParticlePtr particle)
 {
     switch(_shapeType)
@@ -163,12 +224,12 @@ void PS3ShapeModule::HemisphereEmit(vec3 &pos, vec3 &dir)
 void PS3ShapeModule::BoxEmit(vec3& pos, vec3& dir)
 {
     std::vector<float> tmp(3, 0);
-    dir = vec3(0, 0, -1);
+    dir = vec3(0, 1, 0);
     switch (_emitLocation)
     {
         case EmitLocation::VOLUME:
         {
-            pos = RandomPointInCube(vec3(0.5));
+            pos = RandomPointInCube(BOX);
             return;
         }
         case EmitLocation::SHELL:
@@ -177,7 +238,8 @@ void PS3ShapeModule::BoxEmit(vec3& pos, vec3& dir)
             tmp[1] = RandomRange(-0.5, 0.5);
             tmp[2] = RandomSign() * 0.5;
             RandomSortArray(tmp);
-            ApplyBoxThickness(tmp);
+            
+            //ApplyBoxThickness(tmp); 暂时不考虑boxThickness
             pos = vec3(tmp[0], tmp[1], tmp[2]);
             return;
         }
@@ -187,7 +249,7 @@ void PS3ShapeModule::BoxEmit(vec3& pos, vec3& dir)
             tmp[1] = RandomSign() * 0.5;
             tmp[2] = RandomSign() * 0.5;
             RandomSortArray(tmp);
-            ApplyBoxThickness(tmp);
+            //ApplyBoxThickness(tmp);
             pos = vec3(tmp[0], tmp[1], tmp[2]);
             return;
         }
@@ -209,5 +271,21 @@ void PS3ShapeModule::ApplyBoxThickness(std::vector<float>& pos)
     if (_boxThickness.z > 0) {
         pos[2] += 0.5 * RandomRange(-_boxThickness.z, _boxThickness.z);
         pos[2] = clamp(pos[2], -0.5f, 0.5f);
+    }
+}
+
+void PS3ShapeModule::RenderEmitter()
+{
+    switch (_shapeType) {
+        case ShapeType::BOX:
+        {
+            _emitterRenderer->SetVertexData(cubeVertices);
+            _emitterRenderer->SetIndexData(edgeIndices);
+            _emitterRenderer->RenderBox();
+            
+            break;
+        }
+        default:
+            break;
     }
 }

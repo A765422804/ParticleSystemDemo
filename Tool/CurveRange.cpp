@@ -7,6 +7,21 @@
 
 #include "CurveRange.hpp"
 
+CurveRange::CurveRange()
+{
+    // TODO: do nothing 暂时
+}
+
+std::shared_ptr<CurveRange> CurveRange::CreateCurveByConstant(float constant)
+{
+    std::shared_ptr<CurveRange> ret = std::make_shared<CurveRange>();
+    
+    ret->_constant = constant;
+    ret->_mode = RangeMode::Constant;
+    
+    return ret;
+}
+
 float CurveRange::Evaluate(float time, float rndRatio)
 {
     switch (_mode) {

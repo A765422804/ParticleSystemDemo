@@ -10,10 +10,18 @@
 #include "../PS3Common.h"
 #include "PS3ParticleSystemRendererBase.hpp"
 
-
-
 class PS3RendererCPU : public PS3ParticleSystemRendererBase
 {
+public:
+    PS3RendererCPU(int maxParticleCount);
+    ~PS3RendererCPU() = default;
+    
+public:
+    void SetNewParticle(PS3ParticlePtr particle) override;
+    int UpdateParticles(float dt) override;
+    PS3ParticlePtr GetFreeParticle() override;
+    int GetParticleCount() override;
+    
 public:
     void UpdateRenderData() override;
     void Render() override; // 在原版里是beforeRender
@@ -23,5 +31,7 @@ public:
     
 public:
     std::vector<PS3ParticlePtr> _particles; // 粒子池
-    PVData _particleVertexData;
+    PVData _particleVertexData; // 顶点属性data
 };
+
+using PS3RendererCPUPtr = std::shared_ptr<PS3RendererCPU>;

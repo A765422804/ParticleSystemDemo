@@ -10,11 +10,21 @@
 #include "../PS3Common.h"
 #include "../PS3Particle.hpp"
 #include "../../Tool/CurveRange.hpp"
+#include "../../Renderer/Renderer.hpp"
 
 class PS3ParticleSystem;
 
 class PS3ShapeModule
 {
+public:
+    PS3ShapeModule();
+    ~PS3ShapeModule() = default;
+    
+public: // 初始化各种shapeModule
+    static std::shared_ptr<PS3ShapeModule> CreateBoxEmitter(EmitLocation emitLocation, vec3 boxThickness, PS3ParticleSystem* ps);
+    
+    static std::shared_ptr<PS3ShapeModule> CreateConeEmitter(EmitLocation emitLocation, ArcMode arcMode, float arcSpread, float arc, CurveRangePtr arcSpeed, float radius, float radiusThickness, float angle, float length, PS3ParticleSystem* ps);
+    
 public:
     void OnInit(std::shared_ptr<PS3ParticleSystem> ps); // TODO: 把发射形状作用到粒子系统
     void Emit(PS3ParticlePtr particle);
@@ -30,7 +40,10 @@ public:
     void ApplyBoxThickness(std::vector<float>& pos);
     
     float GenerateArcAngle(); // 计算当前时刻circle、cone的发射弧度
-
+    
+public: // 我自己的函数
+    void RenderEmitter(); // 渲染发射器
+    
 public:
     ShapeType _shapeType; // 发射器类型
     EmitLocation _emitLocation; // 发射位置
@@ -54,6 +67,9 @@ public:
 public:
     float _lastTime;
     float _totalAngle; // 当前角度
+    
+public:
+    RendererPtr _emitterRenderer;
 };
 
 using PS3ShapeModulePtr = std::shared_ptr<PS3ShapeModule>;

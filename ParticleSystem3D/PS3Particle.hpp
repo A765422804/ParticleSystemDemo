@@ -39,8 +39,8 @@ public:
     
     unsigned int randomSeed;
     
-    int _remainingLifeTime;
-    int _startLifeTime;
+    float _remainingLifeTime;
+    float _startLifeTime;
     
     int _frameIndex; // 帧序列
 };

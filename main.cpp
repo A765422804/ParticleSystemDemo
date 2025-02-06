@@ -8,12 +8,21 @@
 #include "Parameters.hpp"
 #include "Common/Node.hpp"
 #include "Point/Point.hpp"
+#include "ParticleSystem3D/PS3ParticleSystem.hpp"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+void mouse_callback(GLFWwindow* window, double xpos, double ypos);
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow *window);
 
 float deltaTime = 0.0f; // 当前帧与上一帧的时间差
 float lastFrame = 0.0f; // 上一帧的时间
+
+// camera
+CameraPtr camera = std::make_shared<Camera>();
+float lastX = (float)SCR_WIDTH / 2.0;
+float lastY = (float)SCR_HEIGHT / 2.0;
+bool firstMouse = true;
 
 int main()
 {
@@ -39,6 +48,11 @@ int main()
     }
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glfwSetCursorPosCallback(window, mouse_callback);
+    glfwSetScrollCallback(window, scroll_callback);
+    
+    // tell GLFW to capture our mouse
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     // glad: load all OpenGL function pointers
     // ---------------------------------------
@@ -56,13 +70,18 @@ int main()
     glEnable(GL_PROGRAM_POINT_SIZE);
     
     // ParticleSystem2D
-    ParticleSystemQuadPtr particleSystem = ParticleSystemQuad::Create();
+//    ParticleSystemQuadPtr particleSystem = ParticleSystemQuad::Create();
     
     // Point (parent node)
-    PointPtr point = Point::Create(10.0f, vec4(0.0, 1.0, 0.0, 1.0));
-    point->SetPosition3D(vec3(2.0f,2.0f,0.0f));
-    point->AddChild(std::static_pointer_cast<Node>(particleSystem));
-    particleSystem->SetPosition3D(vec3(-4.0, -4.0f,0.0f));
+//    PointPtr point = Point::Create(10.0f, vec4(0.0, 1.0, 0.0, 1.0));
+//    point->SetPosition3D(vec3(2.0f,2.0f,0.0f));
+//    point->AddChild(std::static_pointer_cast<Node>(particleSystem));
+//    particleSystem->SetPosition3D(vec3(-4.0, -4.0f,0.0f));
+    
+    // ParticleSystem3D
+    PS3ParticleSystemPtr particleSystem = std::make_shared<PS3ParticleSystem>(150);
+    particleSystem->_processor->_model->_renderer->SetCamera(camera);
+    particleSystem->_shapeModule->_emitterRenderer->SetCamera(camera);
     
     // render loop
     while (!glfwWindowShouldClose(window))
@@ -83,17 +102,19 @@ int main()
         
         // Update
         // ------
+//        particleSystem->Update(deltaTime);
+//        point->Move(vec3(1.0f,0.0f,0.0f), deltaTime);
+//        particleSystem->Move(vec3(-1.0f, 0.0f ,0.0f), deltaTime);
         particleSystem->Update(deltaTime);
-        point->Move(vec3(1.0f,0.0f,0.0f), deltaTime);
-        particleSystem->Move(vec3(-1.0f, 0.0f ,0.0f), deltaTime);
 
         // render
         // ------
         glClearColor(0.f, 0.f, 0.f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         
-        particleSystem->Draw();
-        point->Draw();
+//        particleSystem->Draw();
+//        point->Draw();
+        particleSystem->Render();
         
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -107,6 +128,15 @@ void processInput(GLFWwindow *window)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
+    
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        camera->ProcessKeyboardMovement(FORWARD, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        camera->ProcessKeyboardMovement(BACKWARD, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        camera->ProcessKeyboardMovement(LEFT, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        camera->ProcessKeyboardMovement(RIGHT, deltaTime);
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
@@ -115,4 +145,29 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
     // make sure the viewport matches the new window dimensions; note that width and
     // height will be significantly larger than specified on retina displays.
     glViewport(0, 0, width, height);
+}
+
+void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
+{
+    float xpos = static_cast<float>(xposIn);
+    float ypos = static_cast<float>(yposIn);
+    if (firstMouse)
+    {
+        lastX = xpos;
+        lastY = ypos;
+        firstMouse = false;
+    }
+
+    float xoffset = xpos - lastX;
+    float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
+
+    lastX = xpos;
+    lastY = ypos;
+
+    camera->ProcessMouseMovement(xoffset, yoffset);
+}
+
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+    camera->ProcessMouseScroll(static_cast<float>(yoffset));
 }

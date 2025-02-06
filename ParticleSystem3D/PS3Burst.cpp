@@ -8,18 +8,36 @@
 #include "PS3Burst.hpp"
 #include "PS3ParticleSystem.hpp"
 
+PS3Burst::PS3Burst(float time, int repeatCount, float repeatInterval, CurveRangePtr count)
+: _time(time)
+, _repeatCount(repeatCount)
+, _repeatInterval(repeatInterval)
+, _count(count)
+, _remainingCount(0)
+, _curTime(0.0f)
+{
+}
+
+void PS3Burst::Reset()
+{
+    _remainingCount = 0;
+    _curTime = 0.0f;
+}
+
 void PS3Burst::Update(PS3ParticleSystem* ps, float dt)
 {
-    // TODO: 初始化的一些函数写在构造里
-//    this._remainingCount = this._repeatCount;
-//    this._curTime = this._time;
+    if (_remainingCount == 0)
+    {
+        _remainingCount = _repeatCount;
+        _curTime = _time;
+    }
     
     if (_remainingCount > 0)
     {
-        // 计算上一帧的时间和当前帧的时间
-        int preFrameTime = Repeat(ps->_time - ps->_startDelay->Evaluate(0, 1), ps->_duration) - dt;
+        // 计算上一帧的时间点和当前帧的时间点
+        float preFrameTime = Repeat(ps->_time - ps->_startDelay->Evaluate(0, 1), ps->_duration) - dt;
         preFrameTime = (preFrameTime > 0.0) ? preFrameTime : 0.0;
-        int curFrameTime = Repeat(ps->_time - ps->_startDelay->Evaluate(0, 1), ps->_duration);
+        float curFrameTime = Repeat(ps->_time - ps->_startDelay->Evaluate(0, 1), ps->_duration);
         // 如果curTime在这之间则执行burst
         if (_curTime >= preFrameTime && _curTime < curFrameTime)
         {

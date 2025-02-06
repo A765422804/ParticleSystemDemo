@@ -13,14 +13,15 @@
 #include "../Common/Node.hpp"
 #include "PS3Burst.hpp"
 #include "Renderer/PS3ParticleSystemRendererBase.hpp"
+#include "Renderer/PS3RendererCPU.hpp"
 #include "Emitter/PS3ShapeModule.hpp"
 #include "Animator/PS3TextureAnimationModule.hpp"
 
 class PS3ParticleSystem : public Node
 {
 public:
-    PS3ParticleSystem();
-    ~PS3ParticleSystem();
+    PS3ParticleSystem(int maxParticleCount);
+    ~PS3ParticleSystem() = default;
     
 public:
     void ToEmit(float dt); // 调用EmitParticles
@@ -32,6 +33,9 @@ public:
     
 public:
     void PrewarmSystem(); // 系统预热
+    void Stop();
+    void Clear(); // 将所有粒子清除
+    void Reset(); // 重置
     
 public:
     int GetParticleCount();
@@ -82,10 +86,14 @@ public: // 状态 - 动
     
     float _time; // 实际运行时间
     
+    bool _isPlaying; // 是否在运行
+    bool _isPaused; // 是否暂停
+    bool _isStopped; // 是否停止播放
     bool _isEmitting; // 是否正在发射
+    bool _needRefresh; // 需要刷新
     
-    int _emitRateTimeCounter; // 随时间的发射数量
-    int _emitRateDistanceCounter; // 随距离的发射数量
+    float _emitRateTimeCounter; // 随时间的发射数量
+    float _emitRateDistanceCounter; // 随距离的发射数量
 };
 
 using PS3ParticleSystemPtr = std::shared_ptr<PS3ParticleSystem>;

@@ -1,10 +1,7 @@
 #version 330 core
 
-out vec4 color; // 最终输出的颜色
+out vec4 FragColor;
 
-uniform vec4 wireFrameColor;
-
-void main()
-{
-    color = vec4(wireFrameColor);
+void main() {
+    FragColor = vec4(1.0, 0.0, 0.0, 1.0); // 红色线条
 }

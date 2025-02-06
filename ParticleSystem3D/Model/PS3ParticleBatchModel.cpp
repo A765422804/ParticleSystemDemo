@@ -7,6 +7,23 @@
 
 #include "PS3ParticleBatchModel.hpp"
 
+PS3ParticleBatchModel::PS3ParticleBatchModel(int maxParticleCount)
+: _capacity(maxParticleCount)
+{
+    _vDataF.resize(4 * 16 * maxParticleCount);
+    _iDataI.resize(6 * maxParticleCount);
+    
+    _renderer = std::make_shared<ParticleRenderer>();
+    
+    SetVertexAttributes();
+    SetIndexData();
+}
+
+void PS3ParticleBatchModel::SetVertexAttributes()
+{
+    _renderer->SetupVertexDesc(); // 调用renderer的初始化顶点数据
+}
+
 void PS3ParticleBatchModel::SetIndexData()
 {
     int dst = 0;
@@ -37,9 +54,10 @@ void PS3ParticleBatchModel::AddParticleVertexData(int index, PVData pvdata)
     _vDataF[offset ++] = pvdata.Rotation.x;
     _vDataF[offset ++] = pvdata.Rotation.y;
     _vDataF[offset ++] = pvdata.Rotation.z;
-    _vDataF[offset ++] = pvdata.Color.x;
-    _vDataF[offset ++] = pvdata.Color.y;
-    _vDataF[offset ++] = pvdata.Color.z;
+    _vDataF[offset ++] = pvdata.Color.r;
+    _vDataF[offset ++] = pvdata.Color.g;
+    _vDataF[offset ++] = pvdata.Color.b;
+    _vDataF[offset ++] = pvdata.Color.a;
 }
 
 void PS3ParticleBatchModel::RenderModel(int count)
@@ -48,7 +66,17 @@ void PS3ParticleBatchModel::RenderModel(int count)
         return;
     
     // 已知顶点数据和索引数据，可以render了
-    // TODO: 调用ParticleRenderer的Render方法
+    // 根据count得到vertex和index的数量
+    
+    int vertexCount = 16 * 4 * count;
+    int indexCount = 6 * count;
+    std::vector<float> vertices(_vDataF.begin(), _vDataF.begin() + vertexCount);
+    std::vector<unsigned int> indices(_iDataI.begin(), _iDataI.begin() + indexCount);
+    
+    _renderer->SetVertexData(vertices);
+    _renderer->SetIndexData(indices);
+    
+    _renderer->Render();
 }
 
 // vert
@@ -317,7 +345,7 @@ void PS3ParticleBatchModel::RenderModel(int count)
         vec3 rotEuler = a_texCoord2; // 设置旋转
       vec4 rot = quaternionFromEuler(rotEuler);
   #endif
-    vec2 cornerOffset = vec2((a_texCoord.xy - 0.5));
+    vec2 cornerOffset = vec2((a_texCoord.xy - 0.5)); // 得到当前顶点在四边形的位置
       computeVertPos(pos, cornerOffset, rot, compScale, cc_matViewInv); // 计算顶点实际位置
     color = a_color; // 设置颜色
     uv = computeUV(a_texCoord.z, a_texCoord.xy, frameTile_velLenScale.xy) * mainTiling_Offset.xy + mainTiling_Offset.zw; // 设置uv

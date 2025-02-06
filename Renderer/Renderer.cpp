@@ -17,7 +17,6 @@ Renderer::Renderer()
 , _isWireFrameEnable(false)
 {
     InitOpenGLResources();
-    _camera = std::make_shared<Camera>();
 }
 
 void Renderer::InitOpenGLResources()
@@ -59,17 +58,22 @@ void Renderer::SetupVertexDescV3()
     glBindVertexArray(0);
 }
 
+void Renderer::SetupVertexDescVec3()
+{
+    glBindVertexArray(VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    
+    // 位置属性
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vec3), (void*)0);
+    glEnableVertexAttribArray(0);
+    
+    glBindVertexArray(0);
+}
+
 void Renderer::SetupShaderProgram(const char* vertexPath, const char* fragmentPath)
 {
     _shader = std::make_shared<Shader>(vertexPath, fragmentPath);
-    
-    // 计算VP矩阵
-    auto view = _camera->GetViewTransform();
-    auto projection = _camera->GetProjTransform();
-    
-    _shader->use();
-    _shader->setMat4("view", view);
-    _shader->setMat4("projection", projection);
 }
 
 void Renderer::SetVertexData(std::vector<V3_C4_T2> vertices)
@@ -82,6 +86,12 @@ void Renderer::SetVertexData(std::vector<V3> vertices)
 {
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(V3), vertices.data(), GL_STATIC_DRAW);
+}
+
+void Renderer::SetVertexData(std::vector<vec3> vertices)
+{
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(vec3), vertices.data(), GL_STATIC_DRAW);
 }
 
 void Renderer::SetIndexData(std::vector<unsigned int> indices)
@@ -131,6 +141,23 @@ void Renderer::RenderCircle(unsigned int segmentCount)
     glBindVertexArray(0);
 }
 
+void Renderer::RenderBox()
+{
+    _shader->use();
+    
+    // 计算VP矩阵
+    auto view = _camera->GetViewTransform();
+    auto projection = _camera->GetProjTransform();
+
+    _shader->setMat4("view", view);
+    _shader->setMat4("projection", projection);
+    
+    glBindVertexArray(VAO);
+    glDrawElements(GL_LINES, 24, GL_UNSIGNED_INT, 0);
+    
+    glBindVertexArray(0);
+}
+
 void Renderer::SetUseTexture(bool useTexture)
 {
     _shader->use();
@@ -146,4 +173,9 @@ void Renderer::SetWireFrameColor(vec4 wireFrameColor)
 void Renderer::SetIsWireframeEnable(bool isWireFrameEnable)
 {
     _isWireFrameEnable = isWireFrameEnable;
+}
+
+void Renderer::SetCamera(CameraPtr camera)
+{
+    _camera = camera;
 }

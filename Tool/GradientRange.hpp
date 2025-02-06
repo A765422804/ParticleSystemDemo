@@ -26,6 +26,9 @@ public:
     ~GradientRange() = default;
     
 public:
+    static std::shared_ptr<GradientRange> CreateByOneColor(vec4 color);
+    
+public:
     vec4 Evaluate(float time,float rndRatio);
     
 private:
