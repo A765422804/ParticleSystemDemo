@@ -21,15 +21,15 @@ void Node::SetParent(Node* parent)
     if (parent)
     {
         auto& siblings = parent->_children;
-        siblings.erase(std::remove_if(siblings.begin(), siblings.end(), [this](const NodePtr& node) {
-                           return node.get() == this;
+        siblings.erase(std::remove_if(siblings.begin(), siblings.end(), [this](Node* node) {
+                           return node == this;
                        }),
                        siblings.end());
     }
     _parent = parent;
     if (_parent)
     {
-        _parent->_children.push_back(NodePtr(this));
+        _parent->_children.push_back(this);
     }
 }
 

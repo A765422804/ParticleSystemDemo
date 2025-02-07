@@ -28,6 +28,11 @@ std::vector<unsigned int> cubeIndices = {
 
 PS3ShapeModule::PS3ShapeModule()
 {
+    // spatial info
+    SetPosition3D(vec3(5, 0, 5));
+    SetRotation(vec3(75,45,30));
+    SetScale(vec3(1, 1, 1));
+    
     _emitterRenderer = std::make_shared<Renderer>();
     _emitterRenderer->SetupVertexDescVec3();
     _emitterRenderer->SetupShaderProgram("./shader_file/debug_shader.vs", "./shader_file/debug_shader.fs");
@@ -155,22 +160,32 @@ void PS3ShapeModule::ConeEmit(vec3& pos, vec3& dir)
         }
         case EmitLocation::SHELL:
         {
-            vec2 angleUnit = vec2(cos(theta), sin(theta));
-            dir = pos * sin(_angle);
-            dir.z = - cos(_angle) * _radius;
-            dir = normalize(dir);
-            pos = pos * _radius;
-            pos.z = 0;
+            // pos
+            pos = RandomPointBetweenCircleAtFixedAngle(_radius, _radius, theta);
+            
+            // dir
+            float r1 = _radius;
+            float r2 = r1 + _length * tan(radians(_angle));
+            float h = r1 * _length / (r2 - r1);
+            vec3 p = vec3(0, -h, 0);
+            dir = normalize(pos - p);
+
             return;
         }
         case EmitLocation::VOLUME:
         {
-            pos += RandomPointBetweenCircleAtFixedAngle(_radius * (1 - _radiusThickness), _radius, theta);
-            dir = pos * sin(_angle);
-            dir.z = - cos(_angle) * _radius;
-            dir = normalize(dir);
-            pos.z = 0;
-            pos += dir * (_length * Random01() / -dir.z);
+            // pos: 随机选一个高度，在这个高度的圆上随机取一个点
+            float h = _length * Random01();
+            float r1 = _radius;
+            float r2 = r1 + _length * tan(radians(_angle));
+            float r = r1 + h * (r2 - r1) / _length; // 该高度半径
+            pos = RandomPointBetweenCircleAtFixedAngle(r * (1- _radiusThickness), r, theta);
+            pos.y = h;
+            
+            // dir
+            float ph = r1 * _length / (r2 - r1);
+            vec3 p = vec3(0, -ph, 0);
+            dir = normalize(pos - p);
             return;
         }
         default:
@@ -229,7 +244,7 @@ void PS3ShapeModule::HemisphereEmit(vec3 &pos, vec3 &dir)
 void PS3ShapeModule::BoxEmit(vec3& pos, vec3& dir)
 {
     std::vector<float> tmp(3, 0);
-    dir = vec3(0, 1, 0);
+    dir = vec3(0, 1, 0); // 统一沿着y轴正方向发射
     switch (_emitLocation)
     {
         case EmitLocation::VOLUME:
@@ -286,6 +301,7 @@ void PS3ShapeModule::RenderEmitter()
         {
             _emitterRenderer->SetVertexData(cubeVertices);
             _emitterRenderer->SetIndexData(cubeIndices);
+            _emitterRenderer->SetWorldTransform(GetWorldTransform());
             _emitterRenderer->RenderLines();
             
             break;
@@ -338,6 +354,7 @@ void PS3ShapeModule::RenderEmitter()
             
             _emitterRenderer->SetVertexData(coneVertices);
             _emitterRenderer->SetIndexData(coneIndices);
+            _emitterRenderer->SetWorldTransform(GetWorldTransform());
             _emitterRenderer->RenderLines();
             
             break;

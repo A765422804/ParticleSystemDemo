@@ -18,7 +18,9 @@ PS3ParticleSystem::PS3ParticleSystem(int maxParticleCount)
 , _startColor(nullptr)
 , _startDelay(nullptr)
 , _startSpeed(nullptr)
+, _startSize3D(true) // xyz 应用不同的size
 , _startSizeX(nullptr)
+, _startRotation3D(true) // xyz 应用不同的rotation
 , _startRotationZ(nullptr)
 , _rateOverTime(nullptr)
 , _rateOverDistance(nullptr)
@@ -26,25 +28,29 @@ PS3ParticleSystem::PS3ParticleSystem(int maxParticleCount)
 , _shapeModule(nullptr)
 {
     _startLifeTime = CurveRange::CreateCurveByConstant(8);
-    _startColor = GradientRange::CreateByOneColor(vec4(1.0f, 0.0f, 0.0f, 1.0f));
+    _startColor = GradientRange::CreateByOneColor(vec4(0.33, 0.62, 0.67, 1.0f));
     _startDelay = CurveRange::CreateCurveByConstant(0);
-    _startSizeX = CurveRange::CreateCurveByConstant(0.1);
+    _startSizeX = CurveRange::CreateCurveByConstant(0.5);
+    _startSizeY = CurveRange::CreateCurveByConstant(0.5);
+    _startSizeZ = CurveRange::CreateCurveByConstant(0.1);
+    _startRotationX = CurveRange::CreateCurveByConstant(45);
+    _startRotationY = CurveRange::CreateCurveByConstant(45);
     _startRotationZ = CurveRange::CreateCurveByConstant(0);
-    _rateOverTime = CurveRange::CreateCurveByConstant(10);
+    _rateOverTime = CurveRange::CreateCurveByConstant(0);
     _rateOverDistance = CurveRange::CreateCurveByConstant(0);
-    _startSpeed = CurveRange::CreateCurveByConstant(1);
+    _startSpeed = CurveRange::CreateCurveByConstant(5);
     
     _processor = std::make_shared<PS3RendererCPU>(maxParticleCount);
     _processor->_particleSystem = this;
 
-//    _shapeModule = PS3ShapeModule::CreateBoxEmitter(EmitLocation::VOLUME, vec3(0.0f), this);
-    _shapeModule = PS3ShapeModule::CreateConeEmitter(EmitLocation::BASE, ArcMode::RANDOM, 0, 360, 0, 1, 1, 30, 5, this);
+//    _shapeModule = PS3ShapeModule::CreateBoxEmitter(EmitLocation::SHELL, vec3(0.0f), this);
+    _shapeModule = PS3ShapeModule::CreateConeEmitter(EmitLocation::VOLUME, ArcMode::RANDOM, 0, 360, 0, 1, 1, 30, 5, this);
     AddChild(_shapeModule);
     
     // burst
-//    auto burstCount = CurveRange::CreateCurveByConstant(100);
-//    auto burst = std::make_shared<PS3Burst>(3, 2, 1, burstCount);
-//    _bursts.push_back(burst);
+    auto burstCount = CurveRange::CreateCurveByConstant(100);
+    auto burst = std::make_shared<PS3Burst>(2, 2, 2, burstCount);
+    _bursts.push_back(burst);
 }
 
 void PS3ParticleSystem::ToEmit(float dt) // 调用EmitParticles
@@ -240,13 +246,22 @@ void PS3ParticleSystem::Reset()
 
 void PS3ParticleSystem::PrewarmSystem()
 {
-    // TODO: impl
+    float dt = 1.0f;
+    int cnt = _duration / dt;
+    
+    for (int i = 0 ; i < cnt; ++i)
+    {
+        _time += dt;
+        ToEmit(dt);
+        _processor->UpdateParticles(dt);
+    }
 }
 
 void PS3ParticleSystem::Render()
 {
     _processor->UpdateRenderData();
     _processor->Render();
+    _processor->_model->_renderer->SetWorldTransform(_shapeModule->GetWorldTransform()); // TODO: 这是一个非常hack的做法
     
     // 渲染发射器的线框
     if (_shapeModule)

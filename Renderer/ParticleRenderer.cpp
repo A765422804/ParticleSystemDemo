@@ -86,3 +86,9 @@ void ParticleRenderer::Render()
     
     glBindVertexArray(0);
 }
+
+void ParticleRenderer::SetWorldTransform(mat4 worldTransform)
+{
+    _shader->use();
+    _shader->setMat4("WorldTransform", worldTransform);
+}

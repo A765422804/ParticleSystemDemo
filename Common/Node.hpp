@@ -21,17 +21,27 @@ public:
     
 public:
     Node* GetParent();
-    std::vector<std::shared_ptr<Node>> GetChildren();
+    std::vector<Node*> GetChildren();
 
 public:
     mat4 GetWorldTransform();
     mat4 GetLocalTransform();
     
-public:
+public: // position
     vec2 GetPosition2D();
     vec3 GetPosition3D();
     
     void SetPosition3D(vec3);
+    
+public: // Rotation
+    quat GetRotation();
+    
+    void SetRotation(vec3 eulerAngle);
+    
+public: // scale
+    vec3 GetScale();
+    
+    void SetScale(vec3 scale);
     
 public:
     vec3 GetWorldPosition();
@@ -48,7 +58,7 @@ protected:
     quat _rotation;
     vec3 _scale;
     Node* _parent;
-    std::vector<std::shared_ptr<Node>> _children;
+    std::vector<Node*> _children;
 };
 
 using NodePtr = std::shared_ptr<Node>;
@@ -62,7 +72,7 @@ inline Node* Node::GetParent()
     return _parent;
 }
 
-inline std::vector<std::shared_ptr<Node>> Node::GetChildren()
+inline std::vector<Node*> Node::GetChildren()
 {
     return _children;
 }
@@ -80,4 +90,24 @@ inline vec3 Node::GetPosition3D()
 inline void Node::SetPosition3D(vec3 position)
 {
     _position = position;
+}
+
+inline quat Node::GetRotation()
+{
+    return _rotation;
+}
+
+inline void Node::SetRotation(vec3 eulerAngle)
+{
+    _rotation = quat(radians(eulerAngle));
+}
+
+inline vec3 Node::GetScale()
+{
+    return _scale;
+}
+
+inline void Node::SetScale(vec3 scale)
+{
+    _scale = scale;
 }

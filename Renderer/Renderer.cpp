@@ -127,6 +127,24 @@ void Renderer::RenderPoint(float size, vec4 color)
     glBindVertexArray(0);
 }
 
+void Renderer::RenderPoints(float size, size_t vertexCount)
+{
+    _shader->use();
+    
+    // 计算VP矩阵
+    auto view = _camera->GetViewTransform();
+    auto projection = _camera->GetProjTransform();
+
+    _shader->setMat4("view", view);
+    _shader->setMat4("projection", projection);
+    
+    glBindVertexArray(VAO);
+    glPointSize(size);
+    glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(vertexCount));
+    glBindVertexArray(0);
+    
+}
+
 void Renderer::RenderCircle(unsigned int segmentCount)
 {
     _shader->use();
@@ -178,4 +196,10 @@ void Renderer::SetIsWireframeEnable(bool isWireFrameEnable)
 void Renderer::SetCamera(CameraPtr camera)
 {
     _camera = camera;
+}
+
+void Renderer::SetWorldTransform(mat4 worldTransform)
+{
+    _shader->use();
+    _shader->setMat4("model", worldTransform);
 }

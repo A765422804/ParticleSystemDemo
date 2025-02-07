@@ -132,6 +132,7 @@ void main()
     vec4 pos = vec4(Position.xyz, 1.0);
     
     // TODO: 得到世界坐标，即绝对位置
+    pos = WorldTransform * pos;
     
     // TODO: 计算rotate，还要考虑rotate随着时间变化的情况
     vec4 rot = QuaternionFromEuler(Rotation);
@@ -140,8 +141,8 @@ void main()
     vec2 cornerOffset = vec2(TexCoord.xy - 0.5);
     
     // 计算顶点实际位置
-    //ComputeVertPos(pos, cornerOffset, rot, compScale, ViewInverse);
-    pos.xy += cornerOffset * compScale.xy;
+    ComputeVertPos(pos, cornerOffset, rot, compScale, ViewInverse);
+    //pos.xy += cornerOffset * compScale.xy; // 不face camera
     
     // 设置颜色
     FragColor = Color;

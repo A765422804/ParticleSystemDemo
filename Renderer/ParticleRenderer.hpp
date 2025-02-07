@@ -23,6 +23,7 @@ public:
 public:
     void SetVertexData(std::vector<float> vertices); // 设置顶点数据
     void SetIndexData(std::vector<unsigned int> indices); // 设置索引数据
+    void SetWorldTransform(mat4 worldTransform);
     
 public:
     void SetCamera(CameraPtr camera);

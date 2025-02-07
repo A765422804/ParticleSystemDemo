@@ -1,10 +1,8 @@
 #version 330 core
 
-out vec4 color; // 最终输出的颜色
-
-uniform vec4 pointColor;
+out vec4 FragColor;
 
 void main()
 {
-    color = vec4(pointColor);
+    FragColor = vec4(1.0f, 0.0f, 0.0f, 1.0f); // 红色
 }

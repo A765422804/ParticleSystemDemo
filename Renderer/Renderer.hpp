@@ -30,15 +30,18 @@ public:
 public:
     void Render();
     void RenderPoint(float size, vec4 color);
+    void RenderPoints(float size, size_t vertexCount);
     void RenderCircle(unsigned int segmentCount);
     void RenderLines();
     
 public: // shader
+    void SetWorldTransform(mat4 worldTransform);
     void SetUseTexture(bool useTexture);
     void SetWireFrameColor(vec4 wireFrameColor);
     
 public: // camera
     void SetCamera(CameraPtr camera);
+    
     
 public: // gl
     void SetIsWireframeEnable(bool isWireFrameEnable);

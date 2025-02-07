@@ -10,6 +10,7 @@
 #include "Point/Point.hpp"
 #include "ParticleSystem3D/PS3ParticleSystem.hpp"
 #include "Common/Background.hpp"
+#include "Common/KeyPoint.hpp"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -74,6 +75,10 @@ int main()
     BackgroundPtr background = std::make_shared<Background>();
     background->SetCamera(camera);
     
+    // KeyPoint
+    KeyPointPtr keyPoint = std::make_shared<KeyPoint>();
+    keyPoint->SetCamera(camera);
+    
     // ParticleSystem2D
 //    ParticleSystemQuadPtr particleSystem = ParticleSystemQuad::Create();
     
@@ -87,10 +92,7 @@ int main()
     PS3ParticleSystemPtr particleSystem = std::make_shared<PS3ParticleSystem>(150);
     particleSystem->_processor->_model->_renderer->SetCamera(camera);
     particleSystem->_shapeModule->_emitterRenderer->SetCamera(camera);
-    
-    GLfloat range [2];
-
-    glGetFloatv(GL_ALIASED_LINE_WIDTH_RANGE, range);
+    particleSystem->PrewarmSystem();
 
     // render loop
     while (!glfwWindowShouldClose(window))
@@ -122,6 +124,7 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT);
         
         background->Render();
+        keyPoint->Render();
         
 //        particleSystem->Draw();
 //        point->Draw();

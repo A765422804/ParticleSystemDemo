@@ -183,3 +183,14 @@ inline void RandomSortArray(std::vector<float>& vec) {
     // 使用 std::shuffle 打乱 vector
     std::shuffle(vec.begin(), vec.end(), rng);
 }
+
+// 重载 << 运算符以输出 glm::mat4
+inline std::ostream& operator<<(std::ostream& os, const glm::mat4& mat) {
+    for (int i = 0; i < 4; ++i) {
+        for (int j = 0; j < 4; ++j) {
+            os << mat[j][i] << " ";
+        }
+        os << std::endl;
+    }
+    return os;
+}

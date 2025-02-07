@@ -51,9 +51,9 @@ void PS3ParticleBatchModel::AddParticleVertexData(int index, PVData pvdata)
     _vDataF[offset ++] = pvdata.Size.x;
     _vDataF[offset ++] = pvdata.Size.y;
     _vDataF[offset ++] = pvdata.Size.z;
-    _vDataF[offset ++] = pvdata.Rotation.x;
-    _vDataF[offset ++] = pvdata.Rotation.y;
-    _vDataF[offset ++] = pvdata.Rotation.z;
+    _vDataF[offset ++] = radians(pvdata.Rotation.x);
+    _vDataF[offset ++] = radians(pvdata.Rotation.y);
+    _vDataF[offset ++] = radians(pvdata.Rotation.z);
     _vDataF[offset ++] = pvdata.Color.r;
     _vDataF[offset ++] = pvdata.Color.g;
     _vDataF[offset ++] = pvdata.Color.b;
