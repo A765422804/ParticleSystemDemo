@@ -141,7 +141,7 @@ void Renderer::RenderCircle(unsigned int segmentCount)
     glBindVertexArray(0);
 }
 
-void Renderer::RenderBox()
+void Renderer::RenderLines()
 {
     _shader->use();
     
@@ -153,7 +153,7 @@ void Renderer::RenderBox()
     _shader->setMat4("projection", projection);
     
     glBindVertexArray(VAO);
-    glDrawElements(GL_LINES, 24, GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_LINES, _indexCount, GL_UNSIGNED_INT, 0);
     
     glBindVertexArray(0);
 }

@@ -25,7 +25,7 @@ PS3ParticleSystem::PS3ParticleSystem(int maxParticleCount)
 , _processor(nullptr)
 , _shapeModule(nullptr)
 {
-    _startLifeTime = CurveRange::CreateCurveByConstant(5);
+    _startLifeTime = CurveRange::CreateCurveByConstant(8);
     _startColor = GradientRange::CreateByOneColor(vec4(1.0f, 0.0f, 0.0f, 1.0f));
     _startDelay = CurveRange::CreateCurveByConstant(0);
     _startSizeX = CurveRange::CreateCurveByConstant(0.1);
@@ -38,7 +38,8 @@ PS3ParticleSystem::PS3ParticleSystem(int maxParticleCount)
     _processor->_particleSystem = this;
 
 //    _shapeModule = PS3ShapeModule::CreateBoxEmitter(EmitLocation::VOLUME, vec3(0.0f), this);
-    _shapeModule = PS3ShapeModule::CreateConeEmitter(EmitLocation::BASE, ArcMode::RANDOM, 0, 360, 0, 2, 0, 30, 5, this);
+    _shapeModule = PS3ShapeModule::CreateConeEmitter(EmitLocation::BASE, ArcMode::RANDOM, 0, 360, 0, 1, 1, 30, 5, this);
+    AddChild(_shapeModule);
     
     // burst
 //    auto burstCount = CurveRange::CreateCurveByConstant(100);

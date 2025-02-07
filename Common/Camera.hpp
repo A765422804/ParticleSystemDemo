@@ -24,7 +24,7 @@ const float SENSITIVITY = 0.1f;
 class Camera {
 public:
     // 构造函数，初始化相机位置、方向以及投影参数
-    Camera(vec3 position = vec3(0.0f, 0.0f, 7.0f),
+    Camera(vec3 position = vec3(.0f, 10.0f, 15.0f),
            vec3 up = vec3(0.0f, 1.0f, 0.0f),
            float fov = 45.0f,
            float nearClip = 0.1f,

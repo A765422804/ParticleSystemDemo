@@ -31,7 +31,7 @@ public:
     void Render();
     void RenderPoint(float size, vec4 color);
     void RenderCircle(unsigned int segmentCount);
-    void RenderBox();
+    void RenderLines();
     
 public: // shader
     void SetUseTexture(bool useTexture);

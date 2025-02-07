@@ -20,7 +20,7 @@ std::vector<vec3> cubeVertices = {
     vec3(0.5f, 0.5f, 0.5f),     // 6
     vec3(-0.5f, 0.5f, 0.5f)     // 7
 };
-std::vector<unsigned int> edgeIndices = {
+std::vector<unsigned int> cubeIndices = {
     0, 1, 1, 2, 2, 3, 3, 0, // 底面
     4, 5, 5, 6, 6, 7, 7, 4, // 顶面
     0, 4, 1, 5, 2, 6, 3, 7  // 侧面连接
@@ -137,15 +137,20 @@ float PS3ShapeModule::GenerateArcAngle()
 void PS3ShapeModule::ConeEmit(vec3& pos, vec3& dir)
 {
     float theta = GenerateArcAngle();
-    switch (_emitLocation) 
+    switch (_emitLocation)
     {
         case EmitLocation::BASE:
         {
-            pos += RandomPointBetweenCircleAtFixedAngle(_radius * (1 - _radiusThickness), _radius, theta);
-            dir = pos * sin(_angle);
-            dir.z = - cos(_angle) * _radius;
-            dir = normalize(dir);
-            pos.z = 0;
+            // pos
+            pos = RandomPointBetweenCircleAtFixedAngle(_radius * (1 - _radiusThickness), _radius, theta);
+
+            // dir
+            float r1 = _radius;
+            float r2 = r1 + _length * tan(radians(_angle));
+            float h = r1 * _length / (r2 - r1);
+            vec3 p = vec3(0, -h, 0);
+            dir = normalize(pos - p);
+            
             return;
         }
         case EmitLocation::SHELL:
@@ -280,8 +285,60 @@ void PS3ShapeModule::RenderEmitter()
         case ShapeType::BOX:
         {
             _emitterRenderer->SetVertexData(cubeVertices);
-            _emitterRenderer->SetIndexData(edgeIndices);
-            _emitterRenderer->RenderBox();
+            _emitterRenderer->SetIndexData(cubeIndices);
+            _emitterRenderer->RenderLines();
+            
+            break;
+        }
+        case ShapeType::CONE:
+        {
+            float r1 = _radius;
+            float r2 = _radius + _length * tan(radians(_angle));
+            
+            std::vector<vec3> coneVertices;
+            std::vector<unsigned int> coneIndices;
+            unsigned int divideCount = 180;
+            
+            // 填充顶点坐标
+            for (int i = 0; i < divideCount; ++i) // 底面圆
+            {
+                float theta = radians((360.0 / divideCount) * i);
+                float x = r1 * cos(theta);
+                float z = r1 * sin(theta);
+                vec3 point = vec3(x, 0, z);
+                coneVertices.push_back(point);
+            }
+            for (int i = 0 ; i < divideCount ; ++i) // 顶面圆
+            {
+                float theta = radians((360.0 / divideCount) * i);
+                float x = r2 * cos(theta);
+                float z = r2 * sin(theta);
+                vec3 point = vec3(x, _length, z);
+                coneVertices.push_back(point);
+            }
+            
+            // 构建索引
+            for (unsigned int i = 0 ; i < divideCount; ++i) // 底面圆
+            {
+                coneIndices.push_back(i);
+                coneIndices.push_back((i + 1) % divideCount);
+            }
+            for (unsigned int i = 0 ; i < divideCount; ++i) // 顶面圆
+            {
+                coneIndices.push_back(i + divideCount);
+                coneIndices.push_back((i + 1) % divideCount + divideCount);
+            }
+            int lineCount = 8;
+            for (int i = 0 ; i < lineCount; ++i) // 母线索引
+            {
+                int step = divideCount / lineCount * i;
+                coneIndices.push_back(step);
+                coneIndices.push_back(step + divideCount);
+            }
+            
+            _emitterRenderer->SetVertexData(coneVertices);
+            _emitterRenderer->SetIndexData(coneIndices);
+            _emitterRenderer->RenderLines();
             
             break;
         }

@@ -9,6 +9,7 @@
 #include "Common/Node.hpp"
 #include "Point/Point.hpp"
 #include "ParticleSystem3D/PS3ParticleSystem.hpp"
+#include "Common/Background.hpp"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -69,6 +70,10 @@ int main()
     // 启用point_size
     glEnable(GL_PROGRAM_POINT_SIZE);
     
+    // Background
+    BackgroundPtr background = std::make_shared<Background>();
+    background->SetCamera(camera);
+    
     // ParticleSystem2D
 //    ParticleSystemQuadPtr particleSystem = ParticleSystemQuad::Create();
     
@@ -83,6 +88,10 @@ int main()
     particleSystem->_processor->_model->_renderer->SetCamera(camera);
     particleSystem->_shapeModule->_emitterRenderer->SetCamera(camera);
     
+    GLfloat range [2];
+
+    glGetFloatv(GL_ALIASED_LINE_WIDTH_RANGE, range);
+
     // render loop
     while (!glfwWindowShouldClose(window))
     {
@@ -109,8 +118,10 @@ int main()
 
         // render
         // ------
-        glClearColor(0.f, 0.f, 0.f, 1.0f);
+        glClearColor(0.f, 0.f, 0.2f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
+        
+        background->Render();
         
 //        particleSystem->Draw();
 //        point->Draw();

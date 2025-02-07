@@ -131,8 +131,9 @@ inline float RandomRange(float left, float right)
 inline vec3 RandomPointBetweenCircleAtFixedAngle(float minRadius, float maxRadius, float theta)
 {
     vec2 dir = vec2(cos(theta), sin(theta));
-    vec3 res = vec3(1.0f) * minRadius + (maxRadius - minRadius) * Random01();
-    res.z = 0.0f;
+    vec3 res = vec3(dir.x, 0, dir.y);
+    res.x *= minRadius + (maxRadius - minRadius) * Random01();
+    res.z *= minRadius + (maxRadius - minRadius) * Random01();
     return res;
 }
 

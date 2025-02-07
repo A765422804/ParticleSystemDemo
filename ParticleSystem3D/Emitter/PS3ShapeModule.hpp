@@ -11,10 +11,11 @@
 #include "../PS3Particle.hpp"
 #include "../../Tool/CurveRange.hpp"
 #include "../../Renderer/Renderer.hpp"
+#include "../../Common/Node.hpp"
 
 class PS3ParticleSystem;
 
-class PS3ShapeModule
+class PS3ShapeModule : public Node
 {
 public:
     PS3ShapeModule();
@@ -61,7 +62,7 @@ public:
     float _radius; // 半径
     float _radiusThickness; // 半径厚度
     
-    float _angle; // 轴与母线的夹角
+    float _angle; // 轴与母线的夹角，角度制
     float _length; // 顶部截面到底面的长度
     
 public:
