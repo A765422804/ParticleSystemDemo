@@ -20,6 +20,7 @@
 #include "Animator/PS3ForceOvertime.hpp"
 #include "Animator/PS3SizeOvertime.hpp"
 #include "Animator/PS3ColorOvertime.hpp"
+#include "Animator/PS3RotationOvertime.hpp"
 
 class PS3ParticleSystem : public Node
 {
@@ -87,6 +88,7 @@ public: // 属性 - 静
     PS3ForceOvertimePtr _forceOvertimeModule; // 加速度变化模块
     PS3SizeOvertimePtr _sizeOvertimeModule; // 大小变化模块
     PS3ColorOvertimePtr _colorOvertimeModule; // 颜色变化模块
+    PS3RotationOvertimePtr _rotationOvertimeModule; // 随时间的旋转模块
     
 public: // 状态 - 动
     vec3 _oldWorldPos;

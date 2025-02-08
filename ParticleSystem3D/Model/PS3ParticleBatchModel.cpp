@@ -10,7 +10,7 @@
 PS3ParticleBatchModel::PS3ParticleBatchModel(int maxParticleCount)
 : _capacity(maxParticleCount)
 {
-    _vDataF.resize(4 * 16 * maxParticleCount);
+    _vDataF.resize(4 * _vertAttrsFloatCount * maxParticleCount);
     _iDataI.resize(6 * maxParticleCount);
     
     _renderer = std::make_shared<ParticleRenderer>();
@@ -51,9 +51,10 @@ void PS3ParticleBatchModel::AddParticleVertexData(int index, PVData pvdata)
     _vDataF[offset ++] = pvdata.Size.x;
     _vDataF[offset ++] = pvdata.Size.y;
     _vDataF[offset ++] = pvdata.Size.z;
-    _vDataF[offset ++] = radians(pvdata.Rotation.x);
-    _vDataF[offset ++] = radians(pvdata.Rotation.y);
-    _vDataF[offset ++] = radians(pvdata.Rotation.z);
+    _vDataF[offset ++] = pvdata.Rotation.x;
+    _vDataF[offset ++] = pvdata.Rotation.y;
+    _vDataF[offset ++] = pvdata.Rotation.z;
+    _vDataF[offset ++] = pvdata.Rotation.w;
     _vDataF[offset ++] = pvdata.Color.r;
     _vDataF[offset ++] = pvdata.Color.g;
     _vDataF[offset ++] = pvdata.Color.b;
@@ -68,7 +69,7 @@ void PS3ParticleBatchModel::RenderModel(int count)
     // 已知顶点数据和索引数据，可以render了
     // 根据count得到vertex和index的数量
     
-    int vertexCount = 16 * 4 * count;
+    int vertexCount = _vertAttrsFloatCount * 4 * count;
     int indexCount = 6 * count;
     std::vector<float> vertices(_vDataF.begin(), _vDataF.begin() + vertexCount);
     std::vector<unsigned int> indices(_iDataI.begin(), _iDataI.begin() + indexCount);

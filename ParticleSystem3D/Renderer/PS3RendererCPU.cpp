@@ -64,6 +64,7 @@ int PS3RendererCPU::UpdateParticles(float dt)
         _particleSystem->_forceOvertimeModule->Animate(p, dt);
         _particleSystem->_sizeOvertimeModule->Animate(p, dt);
         _particleSystem->_colorOvertimeModule->Animate(p, dt);
+        _particleSystem->_rotationOvertimeModule->Animate(p, dt);
         
         // 更新位置
         p->_position = p->_position + p->_ultimateVelocity * dt;
@@ -98,7 +99,8 @@ void PS3RendererCPU::FillMeshData(PS3ParticlePtr p, int idx, int fi)
         vec3 tempAttribUV = vec3(uvs[2 * j], uvs[2 * j + 1], fi);
         _particleVertexData.Texcoord = tempAttribUV;
         _particleVertexData.Size = p->_size;
-        _particleVertexData.Rotation = p->_rotation;
+        p->_ultimateQuat = normalize(p->_ultimateQuat);
+        _particleVertexData.Rotation = vec4(p->_ultimateQuat.x, p->_ultimateQuat.y, p->_ultimateQuat.z, p->_ultimateQuat.w);
         _particleVertexData.Color = p->_color;
         _model->AddParticleVertexData(idx ++, _particleVertexData);
     }

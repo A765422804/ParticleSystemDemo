@@ -43,7 +43,7 @@ PS3ParticleSystem::PS3ParticleSystem(int maxParticleCount)
     _startSpeed = CurveRange::CreateCurveByConstant(0);
     
     // startRotation
-    _startRotationZ = CurveRange::CreateCurveByConstant(45);
+    _startRotationZ = CurveRange::CreateCurveByConstant(0);
     
     // startColor
 //    ColorKey colorKey1 = {vec3(1.0f, 0.0f, 0.0f), 0.0f};
@@ -99,6 +99,12 @@ PS3ParticleSystem::PS3ParticleSystem(int maxParticleCount)
         GradientPtr gradient = Gradient::CreateByColorKeyAndAlphaKey(colorKeys, alphaKeys);
         GradientRangePtr gradientRange = GradientRange::CreateByOneGradient(gradient);
     _colorOvertimeModule = std::make_shared<PS3ColorOvertime>(gradientRange);
+    
+    // rotate overtime
+    auto xRot = CurveRange::CreateCurveByConstant(0);
+    auto yRot = CurveRange::CreateCurveByConstant(90);
+    auto zRot = CurveRange::CreateCurveByConstant(0);
+    _rotationOvertimeModule = std::make_shared<PS3RotationOvertime>(xRot, yRot, zRot);
     
     // burst
 //    auto burstCount = CurveRange::CreateCurveByConstant(100);
@@ -202,7 +208,9 @@ void PS3ParticleSystem::EmitParticles(int emitNum, float dt)
         {
             particle->_startEuler = vec3(0, 0, _startRotationZ->Evaluate(loopDelta, Random01()));
         }
-        particle->_rotation = particle->_startEuler;
+        particle->_startQuat = quat(radians(particle->_startEuler));
+        particle->_startMat = toMat4(particle->_startQuat);
+        particle->_ultimateQuat = particle->_startQuat;
         
         // 应用起始size
         if (_startSize3D)

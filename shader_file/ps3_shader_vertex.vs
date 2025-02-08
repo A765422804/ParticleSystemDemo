@@ -4,7 +4,7 @@
 layout(location = 0) in vec3 Position;      // 位置
 layout(location = 1) in vec3 TexCoord;     // 纹理坐标
 layout(location = 2) in vec3 Size;         // 大小
-layout(location = 3) in vec3 Rotation;     // 旋转
+layout(location = 3) in vec4 Rotation;     // 旋转
 layout(location = 4) in vec4 Color;        // 颜色
 
 // out
@@ -135,7 +135,7 @@ void main()
     pos = WorldTransform * pos;
     
     // TODO: 计算rotate，还要考虑rotate随着时间变化的情况
-    vec4 rot = QuaternionFromEuler(Rotation);
+    vec4 rot = Rotation;
     
     // 计算顶点在四边形中相对中心点的偏移
     vec2 cornerOffset = vec2(TexCoord.xy - 0.5);

@@ -29,7 +29,7 @@ public:
     
     std::vector<float> _vDataF; // 存储所有的顶点数据
     std::vector<int> _iDataI; // 这是我自己定义的，存储indexdata，对应初始化函数是SetIndexData
-    int _vertAttrsFloatCount = 16;
+    int _vertAttrsFloatCount = 17;
     
     int _capacity; // 最大粒子数量
     int _vertCount;

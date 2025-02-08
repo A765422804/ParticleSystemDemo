@@ -30,7 +30,14 @@ public:
     vec3 _animatedVelocity;
     
     vec3 _startEuler; // 起始三轴的欧拉角
-    vec3 _rotation; // 旋转角度
+    quat _startQuat; // 起始旋转的四元数
+    mat4 _startMat; // 起始旋转的矩阵
+    quat _ultimateQuat; // 最终旋转四元数，传递给shader的值
+    mat4 _ultimateMat = mat4(1.0f); // 最终旋转的矩阵
+    vec3 _deltaEuler; // 变化的欧拉角
+    quat _deltaQuat; // 变化的四元数
+    mat4 _deltaMat; // 变化的矩阵
+    mat4 _accuMat = mat4(1.0f); // 累积rotationOvertime矩阵
     
     vec3 _startSize;
     vec3 _size;

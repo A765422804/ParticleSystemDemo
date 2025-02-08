@@ -12,9 +12,9 @@ struct PVData // 粒子顶点的数据结构
     vec3 Position;
     vec3 Texcoord;
     vec3 Size;
-    vec3 Rotation;
+    vec4 Rotation;
     vec4 Color; // 原版这个是写在了一个u32
-    // 以上总计有16个float
+    // 以上总计有17个float
 };
 
 // 纹理的uv坐标

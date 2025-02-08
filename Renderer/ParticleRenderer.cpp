@@ -39,9 +39,9 @@ void ParticleRenderer::SetupVertexDesc()
     glEnableVertexAttribArray(2);
     glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(PVData), (void*)offsetof(PVData, Size));
 
-    // 旋转属性 (vec3)
+    // 旋转属性 (vec4)
     glEnableVertexAttribArray(3);
-    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(PVData), (void*)offsetof(PVData, Rotation));
+    glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(PVData), (void*)offsetof(PVData, Rotation));
 
     // 颜色属性 (vec4)
     glEnableVertexAttribArray(4);
