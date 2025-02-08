@@ -30,7 +30,7 @@ PS3ShapeModule::PS3ShapeModule()
 {
     // spatial info
     SetPosition3D(vec3(5, 0, 5));
-    SetRotation(vec3(75,45,30));
+    SetRotation(vec3(0,0,90));
     SetScale(vec3(1, 1, 1));
     
     _emitterRenderer = std::make_shared<Renderer>();

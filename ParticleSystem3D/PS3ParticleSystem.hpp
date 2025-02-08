@@ -16,6 +16,10 @@
 #include "Renderer/PS3RendererCPU.hpp"
 #include "Emitter/PS3ShapeModule.hpp"
 #include "Animator/PS3TextureAnimationModule.hpp"
+#include "Animator/PS3VelocityOvertime.hpp"
+#include "Animator/PS3ForceOvertime.hpp"
+#include "Animator/PS3SizeOvertime.hpp"
+#include "Animator/PS3ColorOvertime.hpp"
 
 class PS3ParticleSystem : public Node
 {
@@ -79,6 +83,10 @@ public: // 属性 - 静
     // Modules
     PS3ShapeModulePtr _shapeModule; // 发射器模块
     PS3TextureAnimationModulePtr _textureAnimationModule; // 纹理动画模块
+    PS3VelocityOvertimePtr _velocityOvertimeModule; // 速度变化模块
+    PS3ForceOvertimePtr _forceOvertimeModule; // 加速度变化模块
+    PS3SizeOvertimePtr _sizeOvertimeModule; // 大小变化模块
+    PS3ColorOvertimePtr _colorOvertimeModule; // 颜色变化模块
     
 public: // 状态 - 动
     vec3 _oldWorldPos;

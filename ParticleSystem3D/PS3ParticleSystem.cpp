@@ -12,33 +12,56 @@ PS3ParticleSystem::PS3ParticleSystem(int maxParticleCount)
 , _isPlaying(true)
 , _capacity(maxParticleCount)
 , _loop(true)
-, _duration(6.0f)
+, _duration(5.0f)
 , _simulationSpeed(1)
 , _startLifeTime(nullptr)
 , _startColor(nullptr)
 , _startDelay(nullptr)
 , _startSpeed(nullptr)
-, _startSize3D(true) // xyz 应用不同的size
+, _startSize3D(false) // xyz 应用不同的size
 , _startSizeX(nullptr)
-, _startRotation3D(true) // xyz 应用不同的rotation
+, _startRotation3D(false) // xyz 应用不同的rotation
 , _startRotationZ(nullptr)
 , _rateOverTime(nullptr)
 , _rateOverDistance(nullptr)
 , _processor(nullptr)
 , _shapeModule(nullptr)
+, _velocityOvertimeModule(nullptr)
 {
+    // 定义一个公用的curve和curveRange for debug
+    std::vector<float> time = {0.0f, 1.0f};
+    KeyFrameValue keyFrame1 = {0.0f, 0.0f, 5.0f}; // (0, 0) 点，没有左切线
+    KeyFrameValue keyFrame2 = {5.0f, 5.0f, 0.0f}; // (1, 1) 点，没有右切线
+    std::vector<KeyFrameValue> value = {keyFrame1, keyFrame2};
+    CurvePtr curve = Curve::CreateCurveByTimesAndValues(time, value);
+    CurveRangePtr curveRange = CurveRange::CreateCurveByOneCurve(curve);
+    
+    // startSize
+    _startSizeX = CurveRange::CreateCurveByConstant(0.2);
+    
+    // startSpeed
+    _startSpeed = CurveRange::CreateCurveByConstant(0);
+    
+    // startRotation
+    _startRotationZ = CurveRange::CreateCurveByConstant(45);
+    
+    // startColor
+//    ColorKey colorKey1 = {vec3(1.0f, 0.0f, 0.0f), 0.0f};
+//    ColorKey colorKey2 = {vec3(0.0f, 1.0f, 0.0f), 1.0f};
+//    AlphaKey alphaKey1 = {1.0f, 0.0f};
+//    AlphaKey alphaKey2 = {1.0f, 1.0f};
+//    std::vector<ColorKey> colorKeys = {colorKey1, colorKey2};
+//    std::vector<AlphaKey> alphaKeys = {alphaKey1, alphaKey2};
+//    GradientPtr gradient = Gradient::CreateByColorKeyAndAlphaKey(colorKeys, alphaKeys);
+//    GradientRangePtr gradientRange = GradientRange::CreateByOneGradient(gradient);
+//    _startColor = gradientRange;
+    _startColor = GradientRange::CreateByOneColor(vec4(1.0f));
+    
     _startLifeTime = CurveRange::CreateCurveByConstant(8);
-    _startColor = GradientRange::CreateByOneColor(vec4(0.33, 0.62, 0.67, 1.0f));
     _startDelay = CurveRange::CreateCurveByConstant(0);
-    _startSizeX = CurveRange::CreateCurveByConstant(0.5);
-    _startSizeY = CurveRange::CreateCurveByConstant(0.5);
-    _startSizeZ = CurveRange::CreateCurveByConstant(0.1);
-    _startRotationX = CurveRange::CreateCurveByConstant(45);
-    _startRotationY = CurveRange::CreateCurveByConstant(45);
-    _startRotationZ = CurveRange::CreateCurveByConstant(0);
-    _rateOverTime = CurveRange::CreateCurveByConstant(0);
+
+    _rateOverTime = CurveRange::CreateCurveByConstant(10);
     _rateOverDistance = CurveRange::CreateCurveByConstant(0);
-    _startSpeed = CurveRange::CreateCurveByConstant(5);
     
     _processor = std::make_shared<PS3RendererCPU>(maxParticleCount);
     _processor->_particleSystem = this;
@@ -47,10 +70,40 @@ PS3ParticleSystem::PS3ParticleSystem(int maxParticleCount)
     _shapeModule = PS3ShapeModule::CreateConeEmitter(EmitLocation::VOLUME, ArcMode::RANDOM, 0, 360, 0, 1, 1, 30, 5, this);
     AddChild(_shapeModule);
     
+    // velocity overtime
+    auto xSpeed = CurveRange::CreateCurveByConstant(0.0f);
+    auto ySpeed = CurveRange::CreateCurveByConstant(0.0f);
+    auto zSpeed = CurveRange::CreateCurveByConstant(0.0f);
+    _velocityOvertimeModule = std::make_shared<PS3VelocityOvertime>(xSpeed, ySpeed, zSpeed);
+    
+    // force overtime
+    auto xForce = CurveRange::CreateCurveByConstant(0.0f);
+    auto yForce = CurveRange::CreateCurveByConstant(1.0f);
+    auto zForce = CurveRange::CreateCurveByConstant(0.0f);
+    _forceOvertimeModule = std::make_shared<PS3ForceOvertime>(xForce, yForce, zForce);
+    
+    // size overtime
+    auto allSize = curveRange;
+    auto xSize = CurveRange::CreateCurveByConstant(0.1f);
+    auto ySize = curveRange;
+    auto zSize = CurveRange::CreateCurveByConstant(0.1f);
+    _sizeOvertimeModule = std::make_shared<PS3SizeOvertime>(curveRange);
+    
+    // color overtime
+        ColorKey colorKey1 = {vec3(1.0f, 0.0f, 0.0f), 0.0f};
+        ColorKey colorKey2 = {vec3(0.0f, 1.0f, 0.0f), 1.0f};
+        AlphaKey alphaKey1 = {1.0f, 0.0f};
+        AlphaKey alphaKey2 = {1.0f, 1.0f};
+        std::vector<ColorKey> colorKeys = {colorKey1, colorKey2};
+        std::vector<AlphaKey> alphaKeys = {alphaKey1, alphaKey2};
+        GradientPtr gradient = Gradient::CreateByColorKeyAndAlphaKey(colorKeys, alphaKeys);
+        GradientRangePtr gradientRange = GradientRange::CreateByOneGradient(gradient);
+    _colorOvertimeModule = std::make_shared<PS3ColorOvertime>(gradientRange);
+    
     // burst
-    auto burstCount = CurveRange::CreateCurveByConstant(100);
-    auto burst = std::make_shared<PS3Burst>(2, 2, 2, burstCount);
-    _bursts.push_back(burst);
+//    auto burstCount = CurveRange::CreateCurveByConstant(100);
+//    auto burst = std::make_shared<PS3Burst>(2, 2, 2, burstCount);
+//    _bursts.push_back(burst);
 }
 
 void PS3ParticleSystem::ToEmit(float dt) // 调用EmitParticles

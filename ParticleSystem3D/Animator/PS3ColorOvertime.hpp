@@ -5,9 +5,23 @@
 //  Created by evanbfeng on 2025/2/8.
 //
 
-#ifndef PS3ColorOvertime_hpp
-#define PS3ColorOvertime_hpp
+#pragma once
+#include "../PS3Common.h"
+#include "../../Tool/GradientRange.hpp"
+#include "../PS3Particle.hpp"
 
-#include <stdio.h>
+class PS3ColorOvertime
+{
+public:
+    PS3ColorOvertime(GradientRangePtr color);
+    ~PS3ColorOvertime() = default;
+    
+public:
+    void Animate(PS3ParticlePtr p, float dt);
+    
+public:
+    bool _enable;
+    GradientRangePtr _color;
+};
 
-#endif /* PS3ColorOvertime_hpp */
+using PS3ColorOvertimePtr = std::shared_ptr<PS3ColorOvertime>;

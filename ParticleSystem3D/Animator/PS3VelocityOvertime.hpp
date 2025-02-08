@@ -5,9 +5,26 @@
 //  Created by evanbfeng on 2025/2/8.
 //
 
-#ifndef PS3VelocityOvertime_hpp
-#define PS3VelocityOvertime_hpp
+#pragma once
+#include "../PS3Common.h"
+#include "../../Tool/CurveRange.hpp"
+#include "../PS3Particle.hpp"
 
-#include <stdio.h>
+class PS3VelocityOvertime
+{
+public:
+    PS3VelocityOvertime(CurveRangePtr x, CurveRangePtr y, CurveRangePtr z);
+    ~PS3VelocityOvertime() = default;
+    
+public:
+    void Animate(PS3ParticlePtr p, float dt);
+    
+public:
+    bool _enable;
+    
+    CurveRangePtr _xVelocity;
+    CurveRangePtr _yVelocity;
+    CurveRangePtr _zVelocity;
+};
 
-#endif /* PS3VelocityOvertime_hpp */
+using PS3VelocityOvertimePtr = std::shared_ptr<PS3VelocityOvertime>;

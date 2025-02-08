@@ -22,6 +22,16 @@ std::shared_ptr<CurveRange> CurveRange::CreateCurveByConstant(float constant)
     return ret;
 }
 
+std::shared_ptr<CurveRange> CurveRange::CreateCurveByOneCurve(CurvePtr curve)
+{
+    std::shared_ptr<CurveRange> ret = std::make_shared<CurveRange>();
+    
+    ret->_spline = curve;
+    ret->_mode = RangeMode::Curve;
+    
+    return ret;
+}
+
 float CurveRange::Evaluate(float time, float rndRatio)
 {
     switch (_mode) {

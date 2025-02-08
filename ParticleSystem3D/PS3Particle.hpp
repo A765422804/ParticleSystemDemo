@@ -26,7 +26,8 @@ public:
     vec3 _position;
     vec3 _velocity;
     vec3 _angularVelocity;
-    vec3 _ultimateVelocity; // TODO: ???
+    vec3 _ultimateVelocity;
+    vec3 _animatedVelocity;
     
     vec3 _startEuler; // 起始三轴的欧拉角
     vec3 _rotation; // 旋转角度

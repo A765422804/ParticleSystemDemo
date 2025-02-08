@@ -89,7 +89,7 @@ int main()
 //    particleSystem->SetPosition3D(vec3(-4.0, -4.0f,0.0f));
     
     // ParticleSystem3D
-    PS3ParticleSystemPtr particleSystem = std::make_shared<PS3ParticleSystem>(150);
+    PS3ParticleSystemPtr particleSystem = std::make_shared<PS3ParticleSystem>(100);
     particleSystem->_processor->_model->_renderer->SetCamera(camera);
     particleSystem->_shapeModule->_emitterRenderer->SetCamera(camera);
     particleSystem->PrewarmSystem();

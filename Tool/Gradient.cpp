@@ -7,6 +7,22 @@
 
 #include "Gradient.hpp"
 
+Gradient::Gradient()
+{
+    
+}
+
+std::shared_ptr<Gradient> Gradient::CreateByColorKeyAndAlphaKey(std::vector<ColorKey> colorKeys, std::vector<AlphaKey> alphaKeys, Mode mode)
+{
+    auto ret = std::make_shared<Gradient>();
+    
+    ret->_colorKeys = colorKeys;
+    ret->_alphaKeys = alphaKeys;
+    ret->_mode = mode;
+    
+    return ret;
+}
+
 void Gradient::SortKeys()
 {
     std::sort(_colorKeys.begin(), _colorKeys.end(),

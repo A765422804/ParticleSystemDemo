@@ -7,6 +7,23 @@
 
 #include "Curve.hpp"
 
+Curve::Curve()
+{
+    
+}
+
+CurvePtr Curve::CreateCurveByTimesAndValues(std::vector<float> times, std::vector<KeyFrameValue> values, ExtrapolationMode preExtrapolation, ExtrapolationMode postExtrapolation, InterpolationMode interpolationMode)
+{
+    CurvePtr ret = std::make_shared<Curve>();
+    ret->_times = times;
+    ret->_values = values;
+    ret->_preExtrapolation = preExtrapolation;
+    ret->_postExtrapolation = postExtrapolation;
+    ret->_interpolationMode = interpolationMode;
+    
+    return ret;
+}
+
 float Curve::Evaluate(float time)
 {
     int nFrames = int(_times.size());

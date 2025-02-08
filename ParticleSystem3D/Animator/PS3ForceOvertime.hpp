@@ -5,9 +5,26 @@
 //  Created by evanbfeng on 2025/2/8.
 //
 
-#ifndef PS3ForceOvertime_hpp
-#define PS3ForceOvertime_hpp
+#pragma once
+#include "../PS3Common.h"
+#include "../../Tool/CurveRange.hpp"
+#include "../PS3Particle.hpp"
 
-#include <stdio.h>
+class PS3ForceOvertime
+{
+public:
+    PS3ForceOvertime(CurveRangePtr x, CurveRangePtr y, CurveRangePtr z);
+    ~PS3ForceOvertime() = default;
+    
+public:
+    void Animate(PS3ParticlePtr p, float dt);
+    
+public:
+    bool _enable;
+    
+    CurveRangePtr _xForce;
+    CurveRangePtr _yForce;
+    CurveRangePtr _zForce;
+};
 
-#endif /* PS3ForceOvertime_hpp */
+using PS3ForceOvertimePtr = std::shared_ptr<PS3ForceOvertime>;

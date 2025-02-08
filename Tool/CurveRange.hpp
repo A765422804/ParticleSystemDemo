@@ -26,6 +26,7 @@ public:
     
 public:
     static std::shared_ptr<CurveRange> CreateCurveByConstant(float constant);
+    static std::shared_ptr<CurveRange> CreateCurveByOneCurve(CurvePtr curve);
     
 public:
     float Evaluate(float time, float rndRatio);

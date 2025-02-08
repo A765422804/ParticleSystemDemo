@@ -30,6 +30,13 @@ struct AlphaKey
 class Gradient
 {
 public:
+    Gradient();
+    ~Gradient() = default;
+    
+public:
+    static std::shared_ptr<Gradient> CreateByColorKeyAndAlphaKey(std::vector<ColorKey> colorKeys, std::vector<AlphaKey> alphaKeys, Mode mode = Mode::BLEND);
+    
+public:
     void SortKeys(); // 对关键帧进行time升序排列
     vec4 Evaluate(float time);
     

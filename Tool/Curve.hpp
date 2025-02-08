@@ -38,6 +38,11 @@ struct KeyFrameValue
 class Curve
 {
 public:
+    Curve();
+    ~Curve() = default;
+    
+public:
+    static std::shared_ptr<Curve> CreateCurveByTimesAndValues(std::vector<float> times, std::vector<KeyFrameValue> values, ExtrapolationMode preExtrapolation = ExtrapolationMode::LINEAR, ExtrapolationMode postExtrapolation = ExtrapolationMode::LINEAR, InterpolationMode interpolationMode = InterpolationMode::LINEAR);
     
 public:
     float Evaluate(float time);

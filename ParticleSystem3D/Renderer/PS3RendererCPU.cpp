@@ -60,6 +60,10 @@ int PS3RendererCPU::UpdateParticles(float dt)
         p->_ultimateVelocity = p->_velocity;
         
         // 应用动画
+        _particleSystem->_velocityOvertimeModule->Animate(p, dt);
+        _particleSystem->_forceOvertimeModule->Animate(p, dt);
+        _particleSystem->_sizeOvertimeModule->Animate(p, dt);
+        _particleSystem->_colorOvertimeModule->Animate(p, dt);
         
         // 更新位置
         p->_position = p->_position + p->_ultimateVelocity * dt;
