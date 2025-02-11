@@ -89,10 +89,10 @@ int main()
 //    particleSystem->SetPosition3D(vec3(-4.0, -4.0f,0.0f));
     
     // ParticleSystem3D
-    PS3ParticleSystemPtr particleSystem = std::make_shared<PS3ParticleSystem>(100);
+    PS3ParticleSystemPtr particleSystem = std::make_shared<PS3ParticleSystem>(2000);
     particleSystem->_processor->_model->_renderer->SetCamera(camera);
     particleSystem->_shapeModule->_emitterRenderer->SetCamera(camera);
-    particleSystem->PrewarmSystem();
+    //particleSystem->PrewarmSystem();
 
     // render loop
     while (!glfwWindowShouldClose(window))
@@ -116,6 +116,7 @@ int main()
 //        particleSystem->Update(deltaTime);
 //        point->Move(vec3(1.0f,0.0f,0.0f), deltaTime);
 //        particleSystem->Move(vec3(-1.0f, 0.0f ,0.0f), deltaTime);
+        //particleSystem->Move(vec3(1.0f,0.0f,0.0f), deltaTime * 0.5);
         particleSystem->Update(deltaTime);
 
         // render

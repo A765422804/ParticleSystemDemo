@@ -50,7 +50,8 @@ public:
     float _remainingLifeTime;
     float _startLifeTime;
     
-    int _frameIndex; // 帧序列
+    float _frameIndex; // 帧序列
+    int _startRow; // 随机初始化的使用纹理动画的行号
 };
 
 using PS3ParticlePtr = std::shared_ptr<PS3Particle>;

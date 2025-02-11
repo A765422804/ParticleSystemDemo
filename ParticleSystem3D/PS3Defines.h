@@ -11,7 +11,6 @@ enum class SpaceMode
 {
     WORLD,
     LOCAL,
-    // TODO: CUSTOM
 };
 
 enum class ShapeType
@@ -45,4 +44,10 @@ enum class RenderMode
     HORIZONTAL_BILLBOARD, // 始终与xz平面平行
     VERTICAL_BILLBOARD, // 始终与y轴平行并面向相机
     MESH, // 保持模型本身状态
+};
+
+enum class AnimationMode
+{
+    WHOLE_SHEET, // 所有帧
+    SINGLE_ROW, // 其中一行
 };

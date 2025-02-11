@@ -12,7 +12,7 @@ PS3ParticleSystem::PS3ParticleSystem(int maxParticleCount)
 , _isPlaying(true)
 , _capacity(maxParticleCount)
 , _loop(true)
-, _duration(5.0f)
+, _duration(6.0f)
 , _simulationSpeed(1)
 , _startLifeTime(nullptr)
 , _startColor(nullptr)
@@ -27,23 +27,29 @@ PS3ParticleSystem::PS3ParticleSystem(int maxParticleCount)
 , _processor(nullptr)
 , _shapeModule(nullptr)
 , _velocityOvertimeModule(nullptr)
+, _textureAnimationModule(nullptr)
+, _texture(nullptr)
+, _spaceMode(SpaceMode::WORLD)
 {
     // 定义一个公用的curve和curveRange for debug
     std::vector<float> time = {0.0f, 1.0f};
-    KeyFrameValue keyFrame1 = {0.0f, 0.0f, 5.0f}; // (0, 0) 点，没有左切线
-    KeyFrameValue keyFrame2 = {5.0f, 5.0f, 0.0f}; // (1, 1) 点，没有右切线
+    KeyFrameValue keyFrame1 = {0.0f, 0.0f, 1.0f}; // (0, 0) 点，没有左切线
+    KeyFrameValue keyFrame2 = {1.0f, 1.0f, 0.0f}; // (1, 1) 点，没有右切线
     std::vector<KeyFrameValue> value = {keyFrame1, keyFrame2};
     CurvePtr curve = Curve::CreateCurveByTimesAndValues(time, value);
     CurveRangePtr curveRange = CurveRange::CreateCurveByOneCurve(curve);
     
     // startSize
-    _startSizeX = CurveRange::CreateCurveByConstant(0.2);
+    _startSizeX = CurveRange::CreateCurveByConstant(1.0);
     
     // startSpeed
     _startSpeed = CurveRange::CreateCurveByConstant(0);
     
     // startRotation
     _startRotationZ = CurveRange::CreateCurveByConstant(0);
+    
+    // gravity
+    _gravity = CurveRange::CreateCurveByConstant(0);
     
     // startColor
 //    ColorKey colorKey1 = {vec3(1.0f, 0.0f, 0.0f), 0.0f};
@@ -55,19 +61,22 @@ PS3ParticleSystem::PS3ParticleSystem(int maxParticleCount)
 //    GradientPtr gradient = Gradient::CreateByColorKeyAndAlphaKey(colorKeys, alphaKeys);
 //    GradientRangePtr gradientRange = GradientRange::CreateByOneGradient(gradient);
 //    _startColor = gradientRange;
-    _startColor = GradientRange::CreateByOneColor(vec4(1.0f));
+    _startColor = GradientRange::CreateByOneColor(vec4(vec3(1.0f), 0.5));
     
-    _startLifeTime = CurveRange::CreateCurveByConstant(8);
+    _startLifeTime = CurveRange::CreateCurveByConstant(1);
     _startDelay = CurveRange::CreateCurveByConstant(0);
 
-    _rateOverTime = CurveRange::CreateCurveByConstant(10);
+    _rateOverTime = CurveRange::CreateCurveByConstant(100);
     _rateOverDistance = CurveRange::CreateCurveByConstant(0);
     
     _processor = std::make_shared<PS3RendererCPU>(maxParticleCount);
     _processor->_particleSystem = this;
 
-//    _shapeModule = PS3ShapeModule::CreateBoxEmitter(EmitLocation::SHELL, vec3(0.0f), this);
-    _shapeModule = PS3ShapeModule::CreateConeEmitter(EmitLocation::VOLUME, ArcMode::RANDOM, 0, 360, 0, 1, 1, 30, 5, this);
+    _shapeModule = PS3ShapeModule::CreateBoxEmitter(EmitLocation::SHELL, vec3(0.0f), this);
+//    _shapeModule = PS3ShapeModule::CreateConeEmitter(EmitLocation::VOLUME, ArcMode::RANDOM, 0, 360, 0, 0.5, 1, 30, 2, this);
+//    _shapeModule = PS3ShapeModule::CreateCircleEmitter(ArcMode::RANDOM, 0, 360, 0, 1, 1, this);
+    //_shapeModule = PS3ShapeModule::CreateSphereEmitter(EmitLocation::VOLUME, 1, 1, this);
+    //_shapeModule = PS3ShapeModule::CreateHemisphereEmitter(EmitLocation::VOLUME, 1, 1, this);
     AddChild(_shapeModule);
     
     // velocity overtime
@@ -78,38 +87,47 @@ PS3ParticleSystem::PS3ParticleSystem(int maxParticleCount)
     
     // force overtime
     auto xForce = CurveRange::CreateCurveByConstant(0.0f);
-    auto yForce = CurveRange::CreateCurveByConstant(1.0f);
+    auto yForce = CurveRange::CreateCurveByConstant(0.0f);
     auto zForce = CurveRange::CreateCurveByConstant(0.0f);
     _forceOvertimeModule = std::make_shared<PS3ForceOvertime>(xForce, yForce, zForce);
     
     // size overtime
-    auto allSize = curveRange;
-    auto xSize = CurveRange::CreateCurveByConstant(0.1f);
-    auto ySize = curveRange;
-    auto zSize = CurveRange::CreateCurveByConstant(0.1f);
-    _sizeOvertimeModule = std::make_shared<PS3SizeOvertime>(curveRange);
+//    auto allSize = curveRange;
+//    auto xSize = CurveRange::CreateCurveByConstant(0.1f);
+//    auto ySize = curveRange;
+//    auto zSize = CurveRange::CreateCurveByConstant(0.1f);
+//    _sizeOvertimeModule = std::make_shared<PS3SizeOvertime>(curveRange);
     
     // color overtime
-        ColorKey colorKey1 = {vec3(1.0f, 0.0f, 0.0f), 0.0f};
-        ColorKey colorKey2 = {vec3(0.0f, 1.0f, 0.0f), 1.0f};
-        AlphaKey alphaKey1 = {1.0f, 0.0f};
-        AlphaKey alphaKey2 = {1.0f, 1.0f};
-        std::vector<ColorKey> colorKeys = {colorKey1, colorKey2};
-        std::vector<AlphaKey> alphaKeys = {alphaKey1, alphaKey2};
-        GradientPtr gradient = Gradient::CreateByColorKeyAndAlphaKey(colorKeys, alphaKeys);
-        GradientRangePtr gradientRange = GradientRange::CreateByOneGradient(gradient);
-    _colorOvertimeModule = std::make_shared<PS3ColorOvertime>(gradientRange);
+//        ColorKey colorKey1 = {vec3(1.0f, 0.0f, 0.0f), 0.0f};
+//        ColorKey colorKey2 = {vec3(0.0f, 0.0f, 1.0f), 1.0f};
+//        AlphaKey alphaKey1 = {1.0f, 0.0f};
+//        AlphaKey alphaKey2 = {1.0f, 1.0f};
+//        std::vector<ColorKey> colorKeys = {colorKey1, colorKey2};
+//        std::vector<AlphaKey> alphaKeys = {alphaKey1, alphaKey2};
+//        GradientPtr gradient = Gradient::CreateByColorKeyAndAlphaKey(colorKeys, alphaKeys);
+//        GradientRangePtr gradientRange = GradientRange::CreateByOneGradient(gradient);
+//    _colorOvertimeModule = std::make_shared<PS3ColorOvertime>(gradientRange);
     
     // rotate overtime
     auto xRot = CurveRange::CreateCurveByConstant(0);
-    auto yRot = CurveRange::CreateCurveByConstant(90);
+    auto yRot = CurveRange::CreateCurveByConstant(0);
     auto zRot = CurveRange::CreateCurveByConstant(0);
     _rotationOvertimeModule = std::make_shared<PS3RotationOvertime>(xRot, yRot, zRot);
     
     // burst
-//    auto burstCount = CurveRange::CreateCurveByConstant(100);
+//    auto burstCount = CurveRange::CreateCurveByConstant(30);
 //    auto burst = std::make_shared<PS3Burst>(2, 2, 2, burstCount);
 //    _bursts.push_back(burst);
+    
+    // texture animation
+    
+    auto startFrame = CurveRange::CreateCurveByConstant(0);
+    _textureAnimationModule = std::make_shared<PS3TextureAnimationModule>(2, 2, AnimationMode::WHOLE_SHEET, curveRange, startFrame, 1, true, 0);
+    
+    // texture
+    _texture = std::make_shared<Texture2D>("/Users/evanbfeng/work/resource/textures/sequence_boom.png");
+    _texture->Bind();
 }
 
 void PS3ParticleSystem::ToEmit(float dt) // 调用EmitParticles
@@ -162,12 +180,6 @@ void PS3ParticleSystem::EmitParticles(int emitNum, float dt)
     
     // TODO: 这里有一个_needRefresh
     
-    // 坐标变换
-    if (_spaceMode == SpaceMode::WORLD)
-    {
-        // TODO: 得到世界坐标下的矩阵和旋转
-    }
-    
     // 发射粒子
     for (int i = 0; i < emitNum ; ++i)
     {
@@ -195,7 +207,14 @@ void PS3ParticleSystem::EmitParticles(int emitNum, float dt)
         
         if (_spaceMode == SpaceMode::WORLD)
         {
-            // TODO: 根据坐标系更正位置和速度
+            // 根据坐标系更新位置
+            auto worldMat = _shapeModule->GetWorldTransform();
+            particle->_position = vec3(worldMat * vec4(particle->_position, 1.0f));
+            
+            // 根据坐标系更新速度方向
+            auto rotationMat = toMat4(_shapeModule->GetRotation());
+            particle->_velocity = vec3(rotationMat * vec4(particle->_velocity, 1.0f));
+            
         }
         particle->_ultimateVelocity = particle->_velocity;
         
@@ -232,6 +251,12 @@ void PS3ParticleSystem::EmitParticles(int emitNum, float dt)
         particle->_remainingLifeTime = particle->_startLifeTime;
         
         // TODO: 设置particle的随机数种子和loopCount，但是我不知道意义何在
+        
+        // 我自己写的，源码是写在TextureOvertime里
+        if (_textureAnimationModule)
+        {
+            particle->_startRow = floor(Random01() * _textureAnimationModule->_numTilesY);
+        }
         
         _processor->SetNewParticle(particle);
     }

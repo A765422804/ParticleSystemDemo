@@ -30,7 +30,7 @@ PS3ShapeModule::PS3ShapeModule()
 {
     // spatial info
     SetPosition3D(vec3(5, 0, 5));
-    SetRotation(vec3(0,0,90));
+    SetRotation(vec3(0,0,0));
     SetScale(vec3(1, 1, 1));
     
     _emitterRenderer = std::make_shared<Renderer>();
@@ -67,6 +67,54 @@ std::shared_ptr<PS3ShapeModule> PS3ShapeModule::CreateConeEmitter(EmitLocation e
     ret->_radiusThickness = radiusThickness;
     ret->_angle = angle;
     ret->_length = length;
+    
+    ret->_enable = true;
+    ret->_ps = ps;
+    
+    return ret;
+}
+
+std::shared_ptr<PS3ShapeModule> PS3ShapeModule::CreateCircleEmitter(ArcMode arcMode, float arcSpread, float arc, CurveRangePtr arcSpeed, float radius, float radiusThickness, PS3ParticleSystem* ps)
+{
+    PS3ShapeModulePtr ret = std::make_shared<PS3ShapeModule>();
+    
+    ret->_shapeType = ShapeType::CIRCLE;
+    ret->_arcMode = arcMode;
+    ret->_arcSpread = arcSpread;
+    ret->_arc = arc;
+    ret->_arcSpeed = arcSpeed;
+    ret->_radius = radius;
+    ret->_radiusThickness = radiusThickness;
+    
+    ret->_enable = true;
+    ret->_ps = ps;
+    
+    return ret;
+}
+
+std::shared_ptr<PS3ShapeModule> PS3ShapeModule::CreateSphereEmitter(EmitLocation emitLocation, float radius, float radiusThickness, PS3ParticleSystem* ps)
+{
+    PS3ShapeModulePtr ret = std::make_shared<PS3ShapeModule>();
+    
+    ret->_shapeType = ShapeType::SPHERE;
+    ret->_emitLocation = emitLocation;
+    ret->_radius = radius;
+    ret->_radiusThickness = radiusThickness;
+    
+    ret->_enable = true;
+    ret->_ps = ps;
+    
+    return ret;
+}
+
+std::shared_ptr<PS3ShapeModule> PS3ShapeModule::CreateHemisphereEmitter(EmitLocation emitLocation, float radius, float radiusThickness, PS3ParticleSystem* ps)
+{
+    PS3ShapeModulePtr ret = std::make_shared<PS3ShapeModule>();
+    
+    ret->_shapeType = ShapeType::HEMISPHERE;
+    ret->_emitLocation = emitLocation;
+    ret->_radius = radius;
+    ret->_radiusThickness = radiusThickness;
     
     ret->_enable = true;
     ret->_ps = ps;
@@ -111,9 +159,8 @@ void PS3ShapeModule::Emit(PS3ParticlePtr particle)
 
 void PS3ShapeModule::CircleEmit(vec3& pos, vec3& dir)
 {
-    // TODO: 确认是否正确
     float theta = GenerateArcAngle();
-    pos += RandomPointBetweenCircleAtFixedAngle(_radius * (1 - _radiusThickness), _radius, theta);
+    pos = RandomPointBetweenCircleAtFixedAngle(_radius * (1 - _radiusThickness), _radius, theta);
     dir = normalize(pos);
 }
 
@@ -222,8 +269,8 @@ void PS3ShapeModule::HemisphereEmit(vec3 &pos, vec3 &dir)
         case EmitLocation::VOLUME:
         {
             pos = RandomPointBetweenSphere(_radius * (1 - _radiusThickness), _radius);
-            if (pos.z > 0)
-                pos.z *= -1;
+            if (pos.y < 0)
+                pos.y *= -1;
             dir = normalize(pos);
             return;
         }
@@ -231,8 +278,8 @@ void PS3ShapeModule::HemisphereEmit(vec3 &pos, vec3 &dir)
         {
             pos = RandomUnitVector();
             pos *= _radius;
-            if (pos.z > 0)
-                pos.z *= -1;
+            if (pos.y > 0)
+                pos.y *= -1;
             dir = normalize(pos);
             return;
         }
@@ -357,6 +404,126 @@ void PS3ShapeModule::RenderEmitter()
             _emitterRenderer->SetWorldTransform(GetWorldTransform());
             _emitterRenderer->RenderLines();
             
+            break;
+        }
+        case ShapeType::CIRCLE:
+        {
+            std::vector<vec3> circleVertices;
+            std::vector<unsigned int> circleIndices;
+            unsigned int divideCount = 180;
+            for (int i = 0; i < divideCount; ++i) // 圆顶点坐标
+            {
+                float theta = radians((360.0 / divideCount) * i);
+                float x = _radius * cos(theta);
+                float z = _radius * sin(theta);
+                vec3 point = vec3(x, 0, z);
+                circleVertices.push_back(point);
+            }
+            for (unsigned int i = 0 ; i < divideCount; ++i) // 构建索引
+            {
+                circleIndices.push_back(i);
+                circleIndices.push_back((i + 1) % divideCount);
+            }
+            
+            _emitterRenderer->SetVertexData(circleVertices);
+            _emitterRenderer->SetIndexData(circleIndices);
+            _emitterRenderer->SetWorldTransform(GetWorldTransform());
+            _emitterRenderer->RenderLines();
+            
+            break;
+        }
+        case ShapeType::SPHERE:
+        {
+            std::vector<vec3> sphereVertices;
+            std::vector<unsigned int> sphereIndices;
+            unsigned int divideCount = 180;
+            
+            // 生成XOY平面的圆
+            unsigned int baseIndex = 0;
+            for (unsigned int i = 0; i < divideCount; ++i) {
+                float theta = radians((360.0f / divideCount) * i);
+                float x = _radius * cos(theta);
+                float y = _radius * sin(theta);
+                sphereVertices.push_back(vec3(x, y, 0.0f));
+                sphereIndices.push_back(baseIndex + i);
+                sphereIndices.push_back(baseIndex + (i + 1) % divideCount);
+            }
+
+            // 生成YOZ平面的圆
+            baseIndex = int(sphereIndices.size() / 2);
+            for (unsigned int i = 0; i < divideCount; ++i) {
+                float theta = radians((360.0f / divideCount) * i);
+                float y = _radius * cos(theta);
+                float z = _radius * sin(theta);
+                sphereVertices.push_back(vec3(0.0f, y, z));
+                sphereIndices.push_back(baseIndex + i);
+                sphereIndices.push_back(baseIndex + (i + 1) % divideCount);
+            }
+
+            // 生成XOZ平面的圆
+            baseIndex = int(sphereIndices.size() / 2);
+            for (unsigned int i = 0; i < divideCount; ++i) {
+                float theta = radians((360.0f / divideCount) * i);
+                float x = _radius * cos(theta);
+                float z = _radius * sin(theta);
+                sphereVertices.push_back(vec3(x, 0.0f, z));
+                sphereIndices.push_back(baseIndex + i);
+                sphereIndices.push_back(baseIndex + (i + 1) % divideCount);
+            }
+            
+            _emitterRenderer->SetVertexData(sphereVertices);
+            _emitterRenderer->SetIndexData(sphereIndices);
+            _emitterRenderer->SetWorldTransform(GetWorldTransform());
+            _emitterRenderer->RenderLines();
+            break;
+        }
+        case ShapeType::HEMISPHERE:
+        {
+            std::vector<vec3> hemisphereVertices;
+            std::vector<unsigned int> hemisphereIndices;
+            unsigned int divideCount = 180;
+            
+            // 生成XOZ平面的整个圆
+            unsigned int baseIndex = 0;
+            for (unsigned int i = 0; i < divideCount; ++i) {
+                float theta = radians((360.0f / divideCount) * i);
+                float x = _radius * cos(theta);
+                float z = _radius * sin(theta);
+                hemisphereVertices.push_back(vec3(x, 0.0f, z));
+                hemisphereIndices.push_back(baseIndex + i);
+                hemisphereIndices.push_back(baseIndex + (i + 1) % divideCount);
+            }
+
+            // 生成XOY平面的半圆 (y > 0)
+            baseIndex = unsigned(hemisphereVertices.size());
+            for (unsigned int i = 0; i <= divideCount / 2; ++i) {
+                float theta = radians((180.0f / (divideCount / 2)) * i);
+                float x = _radius * cos(theta);
+                float y = _radius * sin(theta);
+                hemisphereVertices.push_back(vec3(x, y, 0.0f));
+                if (i > 0) {
+                    hemisphereIndices.push_back(baseIndex + i - 1);
+                    hemisphereIndices.push_back(baseIndex + i);
+                }
+            }
+
+            // 生成YOZ平面的半圆 (y > 0)
+            baseIndex = unsigned(hemisphereVertices.size());
+            for (unsigned int i = 0; i <= divideCount / 2; ++i) {
+                float theta = radians((180.0f / (divideCount / 2)) * i);
+                float z = _radius * cos(theta);
+                float y = _radius * sin(theta);
+                hemisphereVertices.push_back(vec3(0.0f, y, z));
+                if (i > 0) {
+                    hemisphereIndices.push_back(baseIndex + i - 1);
+                    hemisphereIndices.push_back(baseIndex + i);
+                }
+            }
+            
+            _emitterRenderer->SetVertexData(hemisphereVertices);
+            _emitterRenderer->SetIndexData(hemisphereIndices);
+            _emitterRenderer->SetWorldTransform(GetWorldTransform());
+            _emitterRenderer->RenderLines();
             break;
         }
         default:

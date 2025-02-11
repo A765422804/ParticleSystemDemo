@@ -55,16 +55,35 @@ int PS3RendererCPU::UpdateParticles(float dt)
             continue;
         }
         
-        // 更新粒子速度
-        // TODO: 根据是否使用重力更新速度
+        // 重力使用
+        if (_particleSystem->_gravity != nullptr)
+        {
+            float normalizedTime = 1 - p->_remainingLifeTime / p->_startLifeTime;
+            float gravityEffect = -_particleSystem->_gravity->Evaluate(normalizedTime, Random01()) * 9.8 * dt;
+            if (_particleSystem->_spaceMode == SpaceMode::LOCAL)
+            {
+                vec4 gravity = vec4(0, gravityEffect, 0, 1);
+                gravity = transpose(toMat4(_particleSystem->_shapeModule->GetRotation()))  * gravity;
+                p->_velocity.x += gravity.x;
+                p->_velocity.y += gravity.y;
+                p->_velocity.z += gravity.z;
+            }
+            else
+            {
+                p->_velocity.y += gravityEffect;
+            }
+        }
+        
+        // 更新粒子最终速度
         p->_ultimateVelocity = p->_velocity;
         
         // 应用动画
         _particleSystem->_velocityOvertimeModule->Animate(p, dt);
         _particleSystem->_forceOvertimeModule->Animate(p, dt);
-        _particleSystem->_sizeOvertimeModule->Animate(p, dt);
-        _particleSystem->_colorOvertimeModule->Animate(p, dt);
+        //_particleSystem->_sizeOvertimeModule->Animate(p, dt);
+        //_particleSystem->_colorOvertimeModule->Animate(p, dt);
         _particleSystem->_rotationOvertimeModule->Animate(p, dt);
+        _particleSystem->_textureAnimationModule->Animate(p, dt);
         
         // 更新位置
         p->_position = p->_position + p->_ultimateVelocity * dt;
@@ -82,16 +101,16 @@ void PS3RendererCPU::UpdateRenderData()
     for (int i = 0; i < _particles.size(); ++i)
     {
         auto p = _particles[i];
-        int fi = 0;
-//        auto textureModule = _particleSystem->_textureAnimationModule;
-//        if (textureModule && textureModule->_enable)
-//            fi = p->_frameIndex;
+        float fi = 0;
+        auto textureModule = _particleSystem->_textureAnimationModule;
+        if (textureModule && textureModule->_enable)
+            fi = p->_frameIndex;
         idx = i * 4;
         FillMeshData(p, idx, fi);
     }
 }
 
-void PS3RendererCPU::FillMeshData(PS3ParticlePtr p, int idx, int fi)
+void PS3RendererCPU::FillMeshData(PS3ParticlePtr p, int idx, float fi)
 {
     for (int j = 0; j < 4; ++ j)
     {
@@ -108,5 +127,10 @@ void PS3RendererCPU::FillMeshData(PS3ParticlePtr p, int idx, int fi)
 
 void PS3RendererCPU::Render()
 {
+    auto shader = _model->_renderer->_shader;
+    shader->use();
+    shader->setBool("IsLocalSpace", _particleSystem->_spaceMode == SpaceMode::LOCAL);
+    shader->setVec2("FrameTile", vec2(_particleSystem->_textureAnimationModule->_numTilesX, _particleSystem->_textureAnimationModule->_numTilesY));
+    
     _model->RenderModel(int(_particles.size()));
 }

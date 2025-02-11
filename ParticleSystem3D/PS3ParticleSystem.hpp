@@ -21,6 +21,7 @@
 #include "Animator/PS3SizeOvertime.hpp"
 #include "Animator/PS3ColorOvertime.hpp"
 #include "Animator/PS3RotationOvertime.hpp"
+#include "../Function/Texture2D.hpp"
 
 class PS3ParticleSystem : public Node
 {
@@ -78,6 +79,9 @@ public: // 属性 - 静
     // color
     GradientRangePtr _startColor;
     
+    // gravity
+    CurveRangePtr _gravity;
+    
     // lifeTime
     CurveRangePtr _startLifeTime;
     
@@ -89,6 +93,9 @@ public: // 属性 - 静
     PS3SizeOvertimePtr _sizeOvertimeModule; // 大小变化模块
     PS3ColorOvertimePtr _colorOvertimeModule; // 颜色变化模块
     PS3RotationOvertimePtr _rotationOvertimeModule; // 随时间的旋转模块
+    
+    // 我自定的属性，更好的做法是用material
+    Texture2DPtr _texture;
     
 public: // 状态 - 动
     vec3 _oldWorldPos;

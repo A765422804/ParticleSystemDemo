@@ -15,9 +15,10 @@ out vec2 FragUV;
 uniform mat4 WorldTransform;
 uniform mat4 VPTransform;
 uniform mat4 ViewInverse;
+uniform bool IsLocalSpace;
+uniform vec2 FrameTile;
 
 // function
-
 vec4 QuaternionFromAxis (vec3 xAxis,vec3 yAxis,vec3 zAxis)
 {
     mat3 m = mat3(xAxis,yAxis,zAxis);
@@ -116,11 +117,29 @@ void ComputeVertPos(inout vec4 pos, vec2 vertOffset, vec4 q, vec3 s
     pos.xyz += RotateInLocalSpace(viewSpaceVert, camX, camY, camZ, q);
 }
 
-vec2 ComputeUV() // 计算实际纹理坐标
+vec2 ComputeUV(float frameIndex, vec2 vertIndex, vec2 frameTile) // 计算实际纹理坐标
 {
-    // TODO: impl
-    // 暂时不考虑sprite，因此纹理只是单张图
-    return TexCoord.xy;
+    // 计算当前图片的索引
+    float totalFrames = frameTile.x * frameTile.y;
+    float currentFrame = floor(frameIndex * totalFrames);
+    
+    // 计算当前图片在行列索引中的位置
+    float colIndex = mod(currentFrame, frameTile.x);
+    float rowIndex = floor(currentFrame/ frameTile.x);
+    
+    // 修改原点在左下角
+    rowIndex = frameTile.y - rowIndex - 1;
+    
+    // 计算每个图片在UV空间的大小
+    vec2 tileSize = 1.0 / frameTile;
+    
+    // 计算当前图片的uv偏移
+    vec2 uvOffset = vec2(colIndex, rowIndex) * tileSize;
+    
+    // 调整原始UV坐标到当前图片的UV空间
+    vec2 adjustedUV = uvOffset + vertIndex * tileSize;
+    
+    return adjustedUV;
 }
 
 // main
@@ -131,10 +150,9 @@ void main()
     
     vec4 pos = vec4(Position.xyz, 1.0);
     
-    // TODO: 得到世界坐标，即绝对位置
-    pos = WorldTransform * pos;
+    if (IsLocalSpace == true)
+        pos = WorldTransform * pos;
     
-    // TODO: 计算rotate，还要考虑rotate随着时间变化的情况
     vec4 rot = Rotation;
     
     // 计算顶点在四边形中相对中心点的偏移
@@ -148,7 +166,8 @@ void main()
     FragColor = Color;
     
     // 设置uv
-    FragUV = ComputeUV();
+    FragUV = ComputeUV(TexCoord.z, TexCoord.xy, FrameTile);
+    //FragUV = TexCoord.xy;
     
     // 使用VP矩阵
     pos = VPTransform * pos;

@@ -2,20 +2,20 @@
 
 // in
 in vec4 FragColor;
-in vec3 FragUV;
+in vec2 FragUV;
 
 // out
 out vec4 FinalColor;
 
 // uniform
-//uniform sampler2D MainTexture;
+uniform sampler2D MainTexture;
 
 // function
 vec4 Add()
 {
     // TODO: 源码还有一个tintColor作为底色，暂略
-    //vec4 color = 2.0 * FragColor * texture(MainTexture, FragUV);
-    vec4 color = FragColor;
+    vec4 color = 2.0 * FragColor * texture(MainTexture, FragUV);
+    //vec4 color = FragColor;
     return color;
 }
 
