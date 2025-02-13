@@ -15,7 +15,7 @@
 
 class PS3ParticleSystem;
 
-class PS3ShapeModule : public Node
+class PS3ShapeModule
 {
 public:
     PS3ShapeModule();

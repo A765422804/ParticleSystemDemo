@@ -23,8 +23,19 @@
 #include "Animator/PS3RotationOvertime.hpp"
 #include "../Function/Texture2D.hpp"
 
+
+
 class PS3ParticleSystem : public Node
 {
+public:
+    struct SubEmitterConfig // 子发射器的配置
+    {
+        EventType TriggerType;
+        std::shared_ptr<PS3ParticleSystem> TargetEmitter;
+        
+        // TODO: 继承父粒子系统的哪些属性
+    };
+    
 public:
     PS3ParticleSystem(int maxParticleCount);
     ~PS3ParticleSystem() = default;
@@ -45,6 +56,16 @@ public:
     
 public:
     int GetParticleCount();
+
+public: // 子粒子系统
+    void NotifySubEmitters(PS3ParticlePtr p, EventType event);
+    void EmitSubParticles(PS3ParticlePtr p, std::shared_ptr<PS3ParticleSystem> ps);
+    
+    void AddSubEmitter(SubEmitterConfig config)
+    {
+        config.TargetEmitter->_mainEmitter = this;
+        _subEmitters.push_back(config);
+    }
     
 public: // 属性 - 静
     int _capacity;
@@ -96,6 +117,11 @@ public: // 属性 - 静
     
     // 我自定的属性，更好的做法是用material
     Texture2DPtr _texture;
+    
+    // 子发射器
+    std::vector<SubEmitterConfig> _subEmitters;
+    bool _isSubEmitter;
+    PS3ParticleSystem* _mainEmitter;
     
 public: // 状态 - 动
     vec3 _oldWorldPos;

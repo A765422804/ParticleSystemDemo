@@ -89,10 +89,19 @@ int main()
 //    particleSystem->SetPosition3D(vec3(-4.0, -4.0f,0.0f));
     
     // ParticleSystem3D
-    PS3ParticleSystemPtr particleSystem = std::make_shared<PS3ParticleSystem>(2000);
+    PS3ParticleSystemPtr particleSystem = std::make_shared<PS3ParticleSystem>(1000);
     particleSystem->_processor->_model->_renderer->SetCamera(camera);
     particleSystem->_shapeModule->_emitterRenderer->SetCamera(camera);
     //particleSystem->PrewarmSystem();
+    PS3ParticleSystemPtr subSystem = std::make_shared<PS3ParticleSystem>(500);
+    subSystem->_processor->_model->_renderer->SetCamera(camera);
+    subSystem->_shapeModule = PS3ShapeModule::CreateSphereEmitter(EmitLocation::VOLUME, 0.001, 0, subSystem.get()); // hack TODO: 把构造放到ParticleSystem之外后，删掉这里
+    subSystem->_isEmitting = false;
+    subSystem->_isSubEmitter = true;
+    particleSystem->AddSubEmitter({
+        EventType::DEATH,
+        subSystem
+    });
 
     // render loop
     while (!glfwWindowShouldClose(window))
@@ -116,7 +125,7 @@ int main()
 //        particleSystem->Update(deltaTime);
 //        point->Move(vec3(1.0f,0.0f,0.0f), deltaTime);
 //        particleSystem->Move(vec3(-1.0f, 0.0f ,0.0f), deltaTime);
-        //particleSystem->Move(vec3(1.0f,0.0f,0.0f), deltaTime * 0.5);
+        particleSystem->Move(vec3(1.0f,0.0f,0.0f), deltaTime * 0.5);
         particleSystem->Update(deltaTime);
 
         // render

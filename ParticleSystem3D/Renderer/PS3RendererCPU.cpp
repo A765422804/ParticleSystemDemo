@@ -49,6 +49,9 @@ int PS3RendererCPU::UpdateParticles(float dt)
         
         if (p->_remainingLifeTime < 0.0)
         {
+            // Trigger了死亡事件
+            _particleSystem->NotifySubEmitters(p, EventType::DEATH);
+            
             // 移除死亡粒子
             _particles.erase(_particles.begin() + i);
             -- i;
@@ -63,7 +66,7 @@ int PS3RendererCPU::UpdateParticles(float dt)
             if (_particleSystem->_spaceMode == SpaceMode::LOCAL)
             {
                 vec4 gravity = vec4(0, gravityEffect, 0, 1);
-                gravity = transpose(toMat4(_particleSystem->_shapeModule->GetRotation()))  * gravity;
+                gravity = transpose(toMat4(_particleSystem->GetRotation()))  * gravity;
                 p->_velocity.x += gravity.x;
                 p->_velocity.y += gravity.y;
                 p->_velocity.z += gravity.z;

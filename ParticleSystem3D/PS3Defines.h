@@ -51,3 +51,10 @@ enum class AnimationMode
     WHOLE_SHEET, // 所有帧
     SINGLE_ROW, // 其中一行
 };
+
+enum class EventType
+{
+    SPAWN, // 出生
+    DEATH, // 死亡
+    COLLISION, // 碰撞
+};

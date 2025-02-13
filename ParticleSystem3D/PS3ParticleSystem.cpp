@@ -10,6 +10,7 @@
 PS3ParticleSystem::PS3ParticleSystem(int maxParticleCount)
 : _isEmitting(true)
 , _isPlaying(true)
+, _isSubEmitter(false)
 , _capacity(maxParticleCount)
 , _loop(true)
 , _duration(6.0f)
@@ -29,8 +30,13 @@ PS3ParticleSystem::PS3ParticleSystem(int maxParticleCount)
 , _velocityOvertimeModule(nullptr)
 , _textureAnimationModule(nullptr)
 , _texture(nullptr)
-, _spaceMode(SpaceMode::WORLD)
+, _spaceMode(SpaceMode::LOCAL)
 {
+    // spatial info
+    SetPosition3D(vec3(5, 0, 5));
+    SetRotation(vec3(0,0,0));
+    SetScale(vec3(1, 1, 1));
+    
     // 定义一个公用的curve和curveRange for debug
     std::vector<float> time = {0.0f, 1.0f};
     KeyFrameValue keyFrame1 = {0.0f, 0.0f, 1.0f}; // (0, 0) 点，没有左切线
@@ -40,10 +46,10 @@ PS3ParticleSystem::PS3ParticleSystem(int maxParticleCount)
     CurveRangePtr curveRange = CurveRange::CreateCurveByOneCurve(curve);
     
     // startSize
-    _startSizeX = CurveRange::CreateCurveByConstant(1.0);
+    _startSizeX = CurveRange::CreateCurveByConstant(0.5);
     
     // startSpeed
-    _startSpeed = CurveRange::CreateCurveByConstant(0);
+    _startSpeed = CurveRange::CreateCurveByConstant(1);
     
     // startRotation
     _startRotationZ = CurveRange::CreateCurveByConstant(0);
@@ -63,10 +69,10 @@ PS3ParticleSystem::PS3ParticleSystem(int maxParticleCount)
 //    _startColor = gradientRange;
     _startColor = GradientRange::CreateByOneColor(vec4(vec3(1.0f), 0.5));
     
-    _startLifeTime = CurveRange::CreateCurveByConstant(1);
+    _startLifeTime = CurveRange::CreateCurveByConstant(10);
     _startDelay = CurveRange::CreateCurveByConstant(0);
 
-    _rateOverTime = CurveRange::CreateCurveByConstant(100);
+    _rateOverTime = CurveRange::CreateCurveByConstant(10);
     _rateOverDistance = CurveRange::CreateCurveByConstant(0);
     
     _processor = std::make_shared<PS3RendererCPU>(maxParticleCount);
@@ -77,7 +83,6 @@ PS3ParticleSystem::PS3ParticleSystem(int maxParticleCount)
 //    _shapeModule = PS3ShapeModule::CreateCircleEmitter(ArcMode::RANDOM, 0, 360, 0, 1, 1, this);
     //_shapeModule = PS3ShapeModule::CreateSphereEmitter(EmitLocation::VOLUME, 1, 1, this);
     //_shapeModule = PS3ShapeModule::CreateHemisphereEmitter(EmitLocation::VOLUME, 1, 1, this);
-    AddChild(_shapeModule);
     
     // velocity overtime
     auto xSpeed = CurveRange::CreateCurveByConstant(0.0f);
@@ -123,10 +128,10 @@ PS3ParticleSystem::PS3ParticleSystem(int maxParticleCount)
     // texture animation
     
     auto startFrame = CurveRange::CreateCurveByConstant(0);
-    _textureAnimationModule = std::make_shared<PS3TextureAnimationModule>(2, 2, AnimationMode::WHOLE_SHEET, curveRange, startFrame, 1, true, 0);
+    _textureAnimationModule = std::make_shared<PS3TextureAnimationModule>(1, 1, AnimationMode::WHOLE_SHEET, curveRange, startFrame, 1, true, 0);
     
     // texture
-    _texture = std::make_shared<Texture2D>("/Users/evanbfeng/work/resource/textures/sequence_boom.png");
+    _texture = std::make_shared<Texture2D>("/Users/evanbfeng/work/resource/textures/white_effect.png");
     _texture->Bind();
 }
 
@@ -199,6 +204,13 @@ void PS3ParticleSystem::EmitParticles(int emitNum, float dt)
             particle->_velocity = vec3(0.0, 0.0, 0.0);
         }
         
+        if (_isSubEmitter && _spaceMode == SpaceMode::LOCAL)
+        {
+            // 如果是子发射器且使用相对位置，更新位置为子发射器的位置
+            particle->_position = GetPosition3D();
+        }
+            
+        
         // TODO: textureAnimationModule
         
         // velocity
@@ -208,11 +220,14 @@ void PS3ParticleSystem::EmitParticles(int emitNum, float dt)
         if (_spaceMode == SpaceMode::WORLD)
         {
             // 根据坐标系更新位置
-            auto worldMat = _shapeModule->GetWorldTransform();
+            mat4 worldMat;
+            quat rotationQuat;
+            worldMat = GetWorldTransform();
+            rotationQuat = GetRotation();
             particle->_position = vec3(worldMat * vec4(particle->_position, 1.0f));
             
             // 根据坐标系更新速度方向
-            auto rotationMat = toMat4(_shapeModule->GetRotation());
+            auto rotationMat = toMat4(rotationQuat);
             particle->_velocity = vec3(rotationMat * vec4(particle->_velocity, 1.0f));
             
         }
@@ -259,6 +274,9 @@ void PS3ParticleSystem::EmitParticles(int emitNum, float dt)
         }
         
         _processor->SetNewParticle(particle);
+        
+        // 通知子发射器发生了粒子出生事件
+        NotifySubEmitters(particle, EventType::SPAWN);
     }
 }
 
@@ -274,7 +292,7 @@ void PS3ParticleSystem::Update(float dt)
         ToEmit(scaledDeltaTime);
         
         // 更新粒子
-        if (_processor->UpdateParticles(scaledDeltaTime) == 0 && ! _isEmitting)
+        if (_processor->UpdateParticles(scaledDeltaTime) == 0 && ! _isEmitting && ! _isSubEmitter)
         {
             // 停止播放粒子
             Stop();
@@ -288,6 +306,12 @@ void PS3ParticleSystem::Update(float dt)
     // TODO: attach model to scene
     
     // TODO: GPU和Trail的相关逻辑
+    
+    // 更新子发射系统
+    for (auto& sub : _subEmitters)
+    {
+        sub.TargetEmitter->Update(dt);
+    }
 }
 
 void PS3ParticleSystem::Stop()
@@ -347,11 +371,20 @@ void PS3ParticleSystem::Render()
 {
     _processor->UpdateRenderData();
     _processor->Render();
-    _processor->_model->_renderer->SetWorldTransform(_shapeModule->GetWorldTransform()); // TODO: 这是一个非常hack的做法
+    if (!_isSubEmitter)
+        _processor->_model->_renderer->SetWorldTransform(GetWorldTransform()); // TODO: 这是一个非常hack的做法
+    else
+    {
+        _processor->_model->_renderer->SetWorldTransform(_mainEmitter->GetWorldTransform());
+    }
     
     // 渲染发射器的线框
-    if (_shapeModule)
+    if (_shapeModule && !_isSubEmitter)
         _shapeModule->RenderEmitter();
+    
+    // 渲染子系统
+    for (auto& sub : _subEmitters)
+        sub.TargetEmitter->Render();
 }
 
 int PS3ParticleSystem::GetParticleCount()
@@ -362,4 +395,21 @@ int PS3ParticleSystem::GetParticleCount()
         return 0;
 }
 
+void PS3ParticleSystem::NotifySubEmitters(PS3ParticlePtr p, EventType event)
+{
+    for (auto& sub : _subEmitters)
+    {
+        if (sub.TriggerType == event)
+        {
+            EmitSubParticles(p, sub.TargetEmitter);
+        }
+    }
+}
 
+void PS3ParticleSystem::EmitSubParticles(PS3ParticlePtr p, std::shared_ptr<PS3ParticleSystem> ps)
+{
+    // 得到子发射器的位置
+    ps->SetPosition3D(p->_position); // 如果是worldSpace，此处获得worldPos，否则获得localPos
+    
+    ps->EmitParticles(5, 0);
+}

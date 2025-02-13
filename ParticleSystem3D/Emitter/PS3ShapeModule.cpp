@@ -28,11 +28,6 @@ std::vector<unsigned int> cubeIndices = {
 
 PS3ShapeModule::PS3ShapeModule()
 {
-    // spatial info
-    SetPosition3D(vec3(5, 0, 5));
-    SetRotation(vec3(0,0,0));
-    SetScale(vec3(1, 1, 1));
-    
     _emitterRenderer = std::make_shared<Renderer>();
     _emitterRenderer->SetupVertexDescVec3();
     _emitterRenderer->SetupShaderProgram("./shader_file/debug_shader.vs", "./shader_file/debug_shader.fs");
@@ -348,7 +343,7 @@ void PS3ShapeModule::RenderEmitter()
         {
             _emitterRenderer->SetVertexData(cubeVertices);
             _emitterRenderer->SetIndexData(cubeIndices);
-            _emitterRenderer->SetWorldTransform(GetWorldTransform());
+            _emitterRenderer->SetWorldTransform(_ps->GetWorldTransform());
             _emitterRenderer->RenderLines();
             
             break;
@@ -401,7 +396,7 @@ void PS3ShapeModule::RenderEmitter()
             
             _emitterRenderer->SetVertexData(coneVertices);
             _emitterRenderer->SetIndexData(coneIndices);
-            _emitterRenderer->SetWorldTransform(GetWorldTransform());
+            _emitterRenderer->SetWorldTransform(_ps->GetWorldTransform());
             _emitterRenderer->RenderLines();
             
             break;
@@ -427,7 +422,7 @@ void PS3ShapeModule::RenderEmitter()
             
             _emitterRenderer->SetVertexData(circleVertices);
             _emitterRenderer->SetIndexData(circleIndices);
-            _emitterRenderer->SetWorldTransform(GetWorldTransform());
+            _emitterRenderer->SetWorldTransform(_ps->GetWorldTransform());
             _emitterRenderer->RenderLines();
             
             break;
@@ -473,7 +468,7 @@ void PS3ShapeModule::RenderEmitter()
             
             _emitterRenderer->SetVertexData(sphereVertices);
             _emitterRenderer->SetIndexData(sphereIndices);
-            _emitterRenderer->SetWorldTransform(GetWorldTransform());
+            _emitterRenderer->SetWorldTransform(_ps->GetWorldTransform());
             _emitterRenderer->RenderLines();
             break;
         }
@@ -522,7 +517,7 @@ void PS3ShapeModule::RenderEmitter()
             
             _emitterRenderer->SetVertexData(hemisphereVertices);
             _emitterRenderer->SetIndexData(hemisphereIndices);
-            _emitterRenderer->SetWorldTransform(GetWorldTransform());
+            _emitterRenderer->SetWorldTransform(_ps->GetWorldTransform());
             _emitterRenderer->RenderLines();
             break;
         }
