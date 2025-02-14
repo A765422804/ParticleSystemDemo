@@ -69,7 +69,7 @@ public:
     
 public:
     void UpdateRenderData(); // 更新渲染数据
-    void FillVertexBuffer(); // 填充顶点数据
+    void FillVertexBuffer(TrailElementPtr trailSeg, vec4 ColorModifer, int indexOffset, float xTexCoord, int trailElementIdx, int indexSet); // 填充顶点数据
     void Render(); // 把渲染数据传递给Renderer告诉Renderer进行渲染
     
 public:
@@ -77,6 +77,7 @@ public:
     
     bool _colorFromParticle; // 颜色随着粒子
     GradientRangePtr _colorOvertime; // 随时间变化的颜色
+    GradientRangePtr _colorOverTrail; // 随拖尾长度变化的颜色
     
     bool _widthFromParticle;
     CurveRangePtr _widthRatio; // 宽度比例
@@ -87,7 +88,7 @@ public:
     std::vector<TrailSegmentPtr> _trailSegments; // 所有的轨迹
     
 public: // buffer
-    std::vector<float> _vBuffer;
+    std::vector<float> _vBuffer; // TODO: 初始化它的size
     std::vector<unsigned int> _iBuffer;
     
     int _vBufferOffset;

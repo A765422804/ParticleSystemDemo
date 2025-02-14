@@ -8,6 +8,8 @@
 #include "PS3Trail.hpp"
 
 const float DIRECTION_THRESHOLD = cos(radians(100));
+const int PRE_TRIANGLE_INDEX = 1;
+const int NEXT_TRIANGLE_INDEX = 1 << 2;
 
 TrailSegment::TrailSegment(int maxTrailElementNum)
 : _trailElements(maxTrailElementNum)
@@ -239,13 +241,73 @@ void PS3Trail::UpdateRenderData()
     {
         if (t->_start == -1)
             continue;
-        // TODO: 明天早点来好好写！！！！！
+        // TODO: 计算indexOffset
+        auto indexOffset = 0;
+        auto end = t->_start >= t->_end ? t->_end + t->_trailElements.size() : t->_end;
+        auto trailNum = end - t->_start;
+        auto textCoordSeg = 1.0f / trailNum;
+        auto startSegEle = t->_trailElements[t->_start];
+        FillVertexBuffer(startSegEle, _colorOverTrail->Evaluate(1, Random01()), indexOffset, 1, 0, NEXT_TRIANGLE_INDEX);
+        
+        for (auto i = t->_start + 1; i < end ; ++i)
+        {
+            auto segEle = t->_trailElements[i % t->_trailElements.size()];
+            auto j = i - t->_start;
+            FillVertexBuffer(segEle, _colorOverTrail->Evaluate(1 - j / trailNum, Random01()), indexOffset, 1 - j * textCoordSeg, j, PRE_TRIANGLE_INDEX | NEXT_TRIANGLE_INDEX);
+        }
+        
+        // TODO: 接下来是把粒子的位置作为一个临时的元素的情况
     }
 }
 
-void PS3Trail::FillVertexBuffer()
+void PS3Trail::FillVertexBuffer(TrailElementPtr trailSeg, vec4 ColorModifer, int indexOffset, float xTexCoord, int trailElementIdx, int indexSet)
 {
+    // 一个顶点
+    _vBuffer[_vBufferOffset ++] = trailSeg->Position.x;
+    _vBuffer[_vBufferOffset ++] = trailSeg->Position.y;
+    _vBuffer[_vBufferOffset ++] = trailSeg->Position.z;
+    _vBuffer[_vBufferOffset ++] = trailSeg->Direction;
+    _vBuffer[_vBufferOffset ++] = trailSeg->Width;
+    _vBuffer[_vBufferOffset ++] = xTexCoord;
+    _vBuffer[_vBufferOffset ++] = 0;
+    _vBuffer[_vBufferOffset ++] = trailSeg->Velocity.x;
+    _vBuffer[_vBufferOffset ++] = trailSeg->Velocity.y;
+    _vBuffer[_vBufferOffset ++] = trailSeg->Velocity.z;
+    auto color = ColorModifer * trailSeg->Color;
+    _vBuffer[_vBufferOffset ++] = color.r;
+    _vBuffer[_vBufferOffset ++] = color.g;
+    _vBuffer[_vBufferOffset ++] = color.b;
+    _vBuffer[_vBufferOffset ++] = color.a;
     
+    // 另一个顶点
+    _vBuffer[_vBufferOffset ++] = trailSeg->Position.x;
+    _vBuffer[_vBufferOffset ++] = trailSeg->Position.y;
+    _vBuffer[_vBufferOffset ++] = trailSeg->Position.z;
+    _vBuffer[_vBufferOffset ++] = 1 - trailSeg->Direction;
+    _vBuffer[_vBufferOffset ++] = trailSeg->Width;
+    _vBuffer[_vBufferOffset ++] = xTexCoord;
+    _vBuffer[_vBufferOffset ++] = 1;
+    _vBuffer[_vBufferOffset ++] = trailSeg->Velocity.x;
+    _vBuffer[_vBufferOffset ++] = trailSeg->Velocity.y;
+    _vBuffer[_vBufferOffset ++] = trailSeg->Velocity.z;
+    _vBuffer[_vBufferOffset ++] = color.r;
+    _vBuffer[_vBufferOffset ++] = color.g;
+    _vBuffer[_vBufferOffset ++] = color.b;
+    _vBuffer[_vBufferOffset ++] = color.a;
+    
+    // 索引数据
+    if (indexSet & PRE_TRIANGLE_INDEX) // 与前一个构建索引
+    {
+        _iBuffer[_iBufferOffset ++] = indexOffset + 2 * trailElementIdx;
+        _iBuffer[_iBufferOffset ++] = indexOffset + 2 * trailElementIdx - 1;
+        _iBuffer[_iBufferOffset ++] = indexOffset + 2 * trailElementIdx + 1;
+    }
+    if (indexSet & NEXT_TRIANGLE_INDEX) // 与后一个构建索引
+    {
+        _iBuffer[_iBufferOffset ++] = indexOffset + 2 * trailElementIdx;
+        _iBuffer[_iBufferOffset ++] = indexOffset + 2 * trailElementIdx + 1;
+        _iBuffer[_iBufferOffset ++] = indexOffset + 2 * trailElementIdx + 2;
+    }
 }
 
 void PS3Trail::Render()
