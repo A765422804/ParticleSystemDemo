@@ -14,14 +14,14 @@ class PS3ParticleSystem;
 class PS3Particle
 {
 public:
-    PS3Particle();
+    PS3Particle(PS3ParticleSystem* ps);
     ~PS3Particle() = default;
     
 public:
     void Reset();
     
 public:
-    PS3ParticleSystem* _particleSystem;
+    PS3ParticleSystem* _ps;
     
     vec3 _position;
     vec3 _velocity;
@@ -29,6 +29,7 @@ public:
     vec3 _ultimateVelocity;
     vec3 _animatedVelocity;
     
+    // TODO: 验证这个地方是否需要用到旋转矩阵
     vec3 _startEuler; // 起始三轴的欧拉角
     quat _startQuat; // 起始旋转的四元数
     mat4 _startMat; // 起始旋转的矩阵

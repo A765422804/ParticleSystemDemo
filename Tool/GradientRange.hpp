@@ -9,6 +9,7 @@
 
 #include "../Head.h"
 #include "Gradient.hpp"
+#include "../Function/Texture2D.hpp"
 
 enum class ColorMode
 {
@@ -21,6 +22,7 @@ enum class ColorMode
 
 class GradientRange
 {
+    using GradientRangePtr = std::shared_ptr<GradientRange>;
 public:
     GradientRange();
     ~GradientRange() = default;
@@ -31,6 +33,10 @@ public:
     
 public:
     vec4 Evaluate(float time,float rndRatio);
+    int EvaluateHeight();
+    
+public:
+    static Texture2DPtr PackGradientRange(int samples, GradientRangePtr gr);
     
 private:
     ColorMode _mode;

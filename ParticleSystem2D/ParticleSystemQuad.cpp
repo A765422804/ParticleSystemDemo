@@ -170,7 +170,7 @@ void ParticleSystemQuad::Draw()
     if (_texture != nullptr)
     {
         _renderer->SetUseTexture(true);
-        _texture->Bind();
+        //_texture->Bind();
     }
     else
     {

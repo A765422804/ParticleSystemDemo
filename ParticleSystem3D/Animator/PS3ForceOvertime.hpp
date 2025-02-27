@@ -9,19 +9,18 @@
 #include "../PS3Common.h"
 #include "../../Tool/CurveRange.hpp"
 #include "../PS3Particle.hpp"
+#include "PS3OvertimeModule.hpp"
 
-class PS3ForceOvertime
+class PS3ForceOvertime : public PS3OvertimeModule
 {
 public:
     PS3ForceOvertime(CurveRangePtr x, CurveRangePtr y, CurveRangePtr z);
     ~PS3ForceOvertime() = default;
     
 public:
-    void Animate(PS3ParticlePtr p, float dt);
+    void Animate(PS3ParticlePtr p, float dt) override;
     
 public:
-    bool _enable;
-    
     CurveRangePtr _xForce;
     CurveRangePtr _yForce;
     CurveRangePtr _zForce;

@@ -49,3 +49,41 @@ vec4 GradientRange::Evaluate(float time, float rndRatio)
             AssertShouldNotReachHere();
     }
 }
+
+int GradientRange::EvaluateHeight()
+{
+    switch (_mode) {
+        case ColorMode::TWO_COLORS:
+            return 2;
+        case ColorMode::TWO_GRADIENTS:
+            return 2;
+        default:
+            return 1;
+    }
+}
+
+Texture2DPtr GradientRange::PackGradientRange(int samples, GradientRangePtr gr)
+{
+    int height = gr->EvaluateHeight();
+    int len = samples * height * 4;
+    std::vector<float> newData(len, 0.0f);
+    
+    float interval = 1.0f / (samples - 1);
+    int offset = 0;
+    
+    for (int h = 0 ; h < height ; h++)
+    {
+        for (int i = 0 ; i < samples ; i++)
+        {
+            vec4 color = gr->Evaluate(i * interval, 0);
+            newData[offset++] = color.r;
+            newData[offset++] = color.g;
+            newData[offset++] = color.b;
+            newData[offset++] = color.a;
+        }
+    }
+    
+    // 生成纹理
+    Texture2DPtr newTex = std::make_shared<Texture2D>(std::move(newData), samples, height, GL_RGBA, GL_RGBA);
+    return newTex;
+}

@@ -16,23 +16,30 @@ class PS3ParticleSystem;
 class PS3ParticleSystemRendererBase
 {
 public:
-    // TODO: 这是个temp，方便写ParticleSystem类中的Emit方法
-    virtual PS3ParticlePtr GetFreeParticle() = 0;
+    PS3ParticleSystemRendererBase(PS3ParticleSystem* ps, int maxParticleCount, bool useGPU);
+    virtual ~PS3ParticleSystemRendererBase() = default;
+
+public:
+    virtual void UpdateRenderData(std::vector<PS3ParticlePtr> particles) = 0;
+    virtual void Render() = 0;
+    
     virtual void SetNewParticle(PS3ParticlePtr particle) = 0;
     
 public:
-    virtual int UpdateParticles(float dt) = 0;
-    virtual int GetParticleCount() = 0;
+    virtual void InitUniform() = 0;
+    virtual void UpdateUniform() = 0;
     
 public:
-    virtual void UpdateRenderData() = 0;
-    virtual void Render() = 0;
+    GLuint GetShaderID()
+    {
+        return _model->_renderer->_shader->ID;
+    }
     
 public:
-    void Clear();
+    virtual void Clear();
     
 public:
-    PS3ParticleSystem* _particleSystem;
+    PS3ParticleSystem* _ps;
     PS3ParticleBatchModelPtr _model;
 };
 

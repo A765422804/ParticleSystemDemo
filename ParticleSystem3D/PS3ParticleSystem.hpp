@@ -14,6 +14,7 @@
 #include "PS3Burst.hpp"
 #include "Renderer/PS3ParticleSystemRendererBase.hpp"
 #include "Renderer/PS3RendererCPU.hpp"
+#include "Renderer/PS3RendererGPU.hpp"
 #include "Emitter/PS3ShapeModule.hpp"
 #include "Animator/PS3TextureAnimationModule.hpp"
 #include "Animator/PS3VelocityOvertime.hpp"
@@ -22,8 +23,16 @@
 #include "Animator/PS3ColorOvertime.hpp"
 #include "Animator/PS3RotationOvertime.hpp"
 #include "../Function/Texture2D.hpp"
-
-
+#include "Renderer/PS3Trail.hpp"
+#include "Emitter/PS3BoxEmitter.hpp"
+#include "Emitter/PS3CircleEmitter.hpp"
+#include "Emitter/PS3ConeEmitter.hpp"
+#include "Emitter/PS3SphereEmitter.hpp"
+#include "Emitter/PS3HemisphereEmitter.hpp"
+#include "Processor/PS3ParticleProcessorBase.hpp"
+#include "Processor/PS3ParticleProcessorCPU.hpp"
+#include "Processor/PS3ParticleProcessorGPU.hpp"
+#include "Initializer/PS3ParticleInitializer.hpp"
 
 class PS3ParticleSystem : public Node
 {
@@ -50,9 +59,13 @@ public:
     
 public:
     void PrewarmSystem(); // 系统预热
+    void Play();
+    void Pause();
     void Stop();
     void Clear(); // 将所有粒子清除
-    void Reset(); // 重置
+    void Reset(); // 重置粒子系统运行时的累积数据
+    void ResetPosition(); // 重置position，将oldPosition和newPostion都重置为当前粒子系统的位置
+    void Restart(); // 重新开始，MARK: 我自己添加的函数
     
 public:
     int GetParticleCount();
@@ -67,9 +80,18 @@ public: // 子粒子系统
         _subEmitters.push_back(config);
     }
     
+public: // trail module
+    void SetTrailModule(PS3TrailPtr trail);
+    
 public: // 属性 - 静
+    // TODO: 对于一些初始属性，思考如何添加随机性
+    
+    // 粒子池
+    std::vector<PS3ParticlePtr> _particles;
+    
     int _capacity;
-    PS3ParticleSystemRendererBasePtr _processor;
+    PS3ParticleSystemRendererBasePtr _renderer;
+    PS3ParticleProcessorBasePtr _processor;
     
     CurveRangePtr _startDelay;
     float _duration; // 粒子系统运行时间
@@ -79,41 +101,44 @@ public: // 属性 - 静
     CurveRangePtr _rateOverTime; // 随时间的发射率
     CurveRangePtr _rateOverDistance; // 随距离的发射率
     
-    CurveRangePtr _startSpeed; // 起始速度
+//    CurveRangePtr _startSpeed; // 起始速度
     
     std::vector<std::shared_ptr<PS3Burst>> _bursts;
     
     SpaceMode _spaceMode; // 坐标系
     
-    // rotation
-    bool _startRotation3D; // 是否要修改粒子在三轴上的旋转
-    CurveRangePtr _startRotationX;
-    CurveRangePtr _startRotationY;
-    CurveRangePtr _startRotationZ;
+//    // rotation
+//    bool _startRotation3D; // 是否要修改粒子在三轴上的旋转
+//    CurveRangePtr _startRotationX;
+//    CurveRangePtr _startRotationY;
+//    CurveRangePtr _startRotationZ;
     
-    // size
-    bool _startSize3D;
-    CurveRangePtr _startSizeX;
-    CurveRangePtr _startSizeY;
-    CurveRangePtr _startSizeZ;
+//    // size
+//    bool _startSize3D;
+//    CurveRangePtr _startSizeX;
+//    CurveRangePtr _startSizeY;
+//    CurveRangePtr _startSizeZ;
     
-    // color
-    GradientRangePtr _startColor;
+//    // color
+//    GradientRangePtr _startColor;
     
     // gravity
     CurveRangePtr _gravity;
     
-    // lifeTime
-    CurveRangePtr _startLifeTime;
+//    // lifeTime
+//    CurveRangePtr _startLifeTime;
     
     // Modules
     PS3ShapeModulePtr _shapeModule; // 发射器模块
-    PS3TextureAnimationModulePtr _textureAnimationModule; // 纹理动画模块
-    PS3VelocityOvertimePtr _velocityOvertimeModule; // 速度变化模块
-    PS3ForceOvertimePtr _forceOvertimeModule; // 加速度变化模块
-    PS3SizeOvertimePtr _sizeOvertimeModule; // 大小变化模块
-    PS3ColorOvertimePtr _colorOvertimeModule; // 颜色变化模块
-    PS3RotationOvertimePtr _rotationOvertimeModule; // 随时间的旋转模块
+    
+    // overtime module
+    std::unordered_map<std::string, PS3OvertimeModulePtr> _overtimeModules;
+    
+    // initializer module
+    PS3ParticleInitializerPtr _inilizer;
+    
+    // trail 模块
+    PS3TrailPtr _trailModule;
     
     // 我自定的属性，更好的做法是用material
     Texture2DPtr _texture;
@@ -122,6 +147,12 @@ public: // 属性 - 静
     std::vector<SubEmitterConfig> _subEmitters;
     bool _isSubEmitter;
     PS3ParticleSystem* _mainEmitter;
+    
+    // 是否需要预热
+    bool _prewarm;
+    
+    // 是否使用GPU粒子
+    bool _useGPU;
     
 public: // 状态 - 动
     vec3 _oldWorldPos;
@@ -134,9 +165,13 @@ public: // 状态 - 动
     bool _isStopped; // 是否停止播放
     bool _isEmitting; // 是否正在发射
     bool _needRefresh; // 需要刷新
+    bool _needToRestart; // 是否需要重新开始
     
     float _emitRateTimeCounter; // 随时间的发射数量
     float _emitRateDistanceCounter; // 随距离的发射数量
+    
+    // 当前帧时间
+    float _dt;
 };
 
 using PS3ParticleSystemPtr = std::shared_ptr<PS3ParticleSystem>;

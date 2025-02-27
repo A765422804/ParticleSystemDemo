@@ -10,4 +10,3 @@ void main()
     // 计算最终的顶点位置
     gl_Position = projection * view * vec4(aPos, 1.0);
 }
-

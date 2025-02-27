@@ -11,11 +11,12 @@
 #include "ParticleSystem3D/PS3ParticleSystem.hpp"
 #include "Common/Background.hpp"
 #include "Common/KeyPoint.hpp"
+#include "ParticleSystem3D/Renderer/PS3Trail.hpp"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
-void processInput(GLFWwindow *window);
+void processInput(GLFWwindow *window, PS3ParticleSystemPtr ps);
 
 float deltaTime = 0.0f; // 当前帧与上一帧的时间差
 float lastFrame = 0.0f; // 上一帧的时间
@@ -25,6 +26,8 @@ CameraPtr camera = std::make_shared<Camera>();
 float lastX = (float)SCR_WIDTH / 2.0;
 float lastY = (float)SCR_HEIGHT / 2.0;
 bool firstMouse = true;
+
+
 
 int main()
 {
@@ -90,25 +93,113 @@ int main()
     
     // ParticleSystem3D
     PS3ParticleSystemPtr particleSystem = std::make_shared<PS3ParticleSystem>(1000);
-    particleSystem->_processor->_model->_renderer->SetCamera(camera);
+    particleSystem->_renderer->_model->_renderer->SetCamera(camera);
     particleSystem->_shapeModule->_emitterRenderer->SetCamera(camera);
+    //particleSystem->SetRotation(vec3(45, 0, 0));
     //particleSystem->PrewarmSystem();
-    PS3ParticleSystemPtr subSystem = std::make_shared<PS3ParticleSystem>(500);
-    subSystem->_processor->_model->_renderer->SetCamera(camera);
-    subSystem->_shapeModule = PS3ShapeModule::CreateSphereEmitter(EmitLocation::VOLUME, 0.001, 0, subSystem.get()); // hack TODO: 把构造放到ParticleSystem之外后，删掉这里
-    subSystem->_isEmitting = false;
-    subSystem->_isSubEmitter = true;
-    particleSystem->AddSubEmitter({
-        EventType::DEATH,
-        subSystem
-    });
+//    PS3ParticleSystemPtr subSystem = std::make_shared<PS3ParticleSystem>(500);
+//    subSystem->_renderer->_model->_renderer->SetCamera(camera);
+////    subSystem->_shapeModule = PS3ShapeModule::CreateSphereEmitter(EmitLocation::VOLUME, 0.001, 0, subSystem.get()); // hack TODO: 把构造放到ParticleSystem之外后，删掉这里
+//    subSystem->_shapeModule = PS3CircleEmitter::CreateCircleEmitter(ArcMode::EVEN, 0, 360, CurveRange::CreateCurveByConstant(90), 0.1, 0, 5, subSystem.get());
+//    subSystem->_isEmitting = false;
+//    subSystem->SetRotation(vec3(90, 0, 0));
+//    subSystem->_isSubEmitter = true;
+//        ColorKey colorKey1 = {vec3(1.0f, 0.0f, 0.0f), 0.0f};
+//        ColorKey colorKey2 = {vec3(0.0f, 0.0f, 1.0f), 1.0f};
+//        AlphaKey alphaKey1 = {1.0f, 0.0f};
+//        AlphaKey alphaKey2 = {1.0f, 1.0f};
+//        std::vector<ColorKey> colorKeys = {colorKey1, colorKey2};
+//        std::vector<AlphaKey> alphaKeys = {alphaKey1, alphaKey2};
+//        GradientPtr gradient = Gradient::CreateByColorKeyAndAlphaKey(colorKeys, alphaKeys);
+//        GradientRangePtr gradientRange = GradientRange::CreateByOneGradient(gradient);
+//    // subSystem->_colorOvertimeModule = std::make_shared<PS3ColorOvertime>(gradientRange);
+//    particleSystem->AddSubEmitter({
+//        EventType::DEATH,
+//        subSystem
+//    });
+    
+    // particleSystem->Play();
+    
+    // trail
+//    PS3TrailPtr trail = std::make_shared<PS3Trail>();
+//    trail->_renderer->SetCamera(camera);
+//    particleSystem->SetTrailModule(trail);
+//    
+//    PS3TrailPtr trail2 = std::make_shared<PS3Trail>();
+//    trail2->_renderer->SetCamera(camera);
+//    subSystem->SetTrailModule(trail2);
+    
+//    float vertices[] = {
+//        // 位置              // 颜色              // 纹理坐标
+//        -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, // 左下角
+//         0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // 右下角
+//         0.0f,  0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.5f, 1.0f  // 顶部
+//    };
+//    Texture2DPtr texture1 = std::make_shared<Texture2D>("/Users/evanbfeng/work/resource/textures/grass.png");
+//    CurveRangePtr cr = CurveRange::CreateCurveByConstant(1.0);
+//    Texture2DPtr texture2 = CurveRange::PackCurveRangeN(32, cr);
+//    if (texture1->textureID == 0 || texture2->textureID == 0) {
+//        std::cerr << "Error: Failed to load texture!" << std::endl;
+//    }
+//    
+//    // 创建 VBO 和 VAO
+//    unsigned int VBO, VAO;
+//    glGenVertexArrays(1, &VAO);
+//    glGenBuffers(1, &VBO);
+//
+//    // 绑定 VAO
+//    glBindVertexArray(VAO);
+//
+//    // 绑定 VBO 并传递数据
+//    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+//    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+//
+//    // 设置顶点属性指针
+//    // 位置属性
+//    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+//    glEnableVertexAttribArray(0);
+//    // 颜色属性
+//    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+//    glEnableVertexAttribArray(1);
+//    // 纹理坐标属性
+//    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+//    glEnableVertexAttribArray(2);
+//
+//    // 解绑 VBO 和 VAO
+//    glBindBuffer(GL_ARRAY_BUFFER, 0);
+//    glBindVertexArray(0);
+//    auto shader = std::make_shared<Shader>("./shader_file/shader.vs", "./shader_file/shader.fs");
+//    
+//    GLint loc1 = glGetUniformLocation(shader->ID, "texture1");
+//    if (loc1 == -1) {
+//        std::cerr << "Error: Uniform 'texture1' not found!" << std::endl;
+//    }
+//    GLint loc2 = glGetUniformLocation(shader->ID, "texture2");
+//    if (loc2 == -1) {
+//        std::cerr << "Error: Uniform 'texture2' not found!" << std::endl;
+//    }
+//    // 绑定纹理到纹理单元
+//
+//    shader->use();
+//    glActiveTexture(GL_TEXTURE0);
+//    glBindTexture(GL_TEXTURE_2D, texture1->textureID);
+//    glUniform1i(loc1, 0);
+//
+//    glActiveTexture(GL_TEXTURE1);
+//    glBindTexture(GL_TEXTURE_2D, texture2->textureID);
+//    glUniform1i(loc2, 1);
+//                  
+//    GLenum err;
+//    while ((err = glGetError()) != GL_NO_ERROR) {
+//        std::cerr << "OpenGL error: " << err << std::endl;
+//    }
 
     // render loop
     while (!glfwWindowShouldClose(window))
     {
         // input
         // -----
-        processInput(window);
+        processInput(window, particleSystem);
 
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
@@ -136,6 +227,16 @@ int main()
         background->Render();
         keyPoint->Render();
         
+//        shader->use();
+//        // 绑定 VAO
+//        glBindVertexArray(VAO);
+//
+//        // 绘制三角形
+//        glDrawArrays(GL_TRIANGLES, 0, 3);
+//
+//        // 解绑 VAO
+//        glBindVertexArray(0);
+        
 //        particleSystem->Draw();
 //        point->Draw();
         particleSystem->Render();
@@ -148,7 +249,7 @@ int main()
     return 0;
 }
 
-void processInput(GLFWwindow *window)
+void processInput(GLFWwindow *window, PS3ParticleSystemPtr ps)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
@@ -161,6 +262,15 @@ void processInput(GLFWwindow *window)
         camera->ProcessKeyboardMovement(LEFT, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         camera->ProcessKeyboardMovement(RIGHT, deltaTime);
+    
+    if (glfwGetKey(window, GLFW_KEY_V) == GLFW_PRESS)
+        ps->Play();
+    if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS)
+        ps->Pause();
+    if (glfwGetKey(window, GLFW_KEY_N) == GLFW_PRESS)
+        ps->Restart();
+    if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS)
+        ps->Stop();
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes

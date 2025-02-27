@@ -9,6 +9,7 @@
 
 #include "../Head.h"
 #include "Curve.hpp"
+#include "../Function/Texture2D.hpp"
 
 enum RangeMode
 {
@@ -20,6 +21,7 @@ enum RangeMode
 
 class CurveRange
 {
+    using CurveRangePtr = std::shared_ptr<CurveRange>;
 public:
     CurveRange();
     ~CurveRange() = default;
@@ -30,6 +32,14 @@ public:
     
 public:
     float Evaluate(float time, float rndRatio);
+    int EvaluateHeight();
+    int EvaluateCurve(float time, int index);
+    
+public: // 生成纹理
+    static Texture2DPtr PackCurveRangeXYZ(int samples, CurveRangePtr x, CurveRangePtr y, CurveRangePtr z, bool discrete = false);
+    static Texture2DPtr PackCurveRangeXY(int samples, CurveRangePtr x, CurveRangePtr y, bool discrete = false);
+    static Texture2DPtr PackCurveRangeN(int samples, CurveRangePtr cr, bool discrete = false);
+    static Texture2DPtr PackCurveRangeZ(int samples, CurveRangePtr cr, bool discrete = false);
     
 private:
     // Constant

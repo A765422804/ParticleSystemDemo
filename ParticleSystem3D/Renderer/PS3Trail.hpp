@@ -10,6 +10,7 @@
 #include "../PS3Particle.hpp"
 #include "../../Tool/GradientRange.hpp"
 #include "../../Tool/CurveRange.hpp"
+#include "../../Renderer/TrailRenderer.hpp"
 
 struct TrailElement
 {
@@ -51,6 +52,8 @@ public:
 
 using TrailSegmentPtr = std::shared_ptr<TrailSegment>;
 
+class PS3ParticleSystem;
+
 class PS3Trail : public std::enable_shared_from_this<PS3Trail>
 {
 public:
@@ -66,6 +69,8 @@ public:
     void CheckDirectionReverse(TrailElementPtr currElement, TrailElementPtr prevElement); // 判断是否反向
     
     void RemoveParticle(PS3ParticlePtr p); // 粒子消亡时对于particle的处理
+    
+    void Clear();
     
 public:
     void UpdateRenderData(); // 更新渲染数据
@@ -87,12 +92,20 @@ public:
     std::unordered_map<PS3ParticlePtr, TrailSegmentPtr> _particleTrail; // 每个粒子对应的轨迹
     std::vector<TrailSegmentPtr> _trailSegments; // 所有的轨迹
     
+    TrailRendererPtr _renderer;
+    
+    PS3ParticleSystem* _ps;
+    
 public: // buffer
-    std::vector<float> _vBuffer; // TODO: 初始化它的size
+    std::vector<float> _vBuffer; // TODO: 初始化它的size，但是如果是vector来存储其实不需要
     std::vector<unsigned int> _iBuffer;
     
+    // 改用push_back这些属性似乎无意义
     int _vBufferOffset;
     int _iBufferOffset;
+    
+    int _trailVertSize = 14; // 每个顶点有14个float的数据
 };
 
 using PS3TrailPtr = std::shared_ptr<PS3Trail>;
+

@@ -194,3 +194,9 @@ inline std::ostream& operator<<(std::ostream& os, const glm::mat4& mat) {
     }
     return os;
 }
+
+// 重载 << 运算符以输出 glm::vec3
+inline std::ostream& operator<<(std::ostream& os, const glm::vec3& vec) {
+    os << "(" << vec.x << ", " << vec.y << ", " << vec.z << ")";
+    return os;
+}

@@ -7,7 +7,8 @@
 
 #include "PS3Particle.hpp"
 
-PS3Particle::PS3Particle()
+PS3Particle::PS3Particle(PS3ParticleSystem* ps)
+: _ps(ps)
 {
     // TODO: implement
 }

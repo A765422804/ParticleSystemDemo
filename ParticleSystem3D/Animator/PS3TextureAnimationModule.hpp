@@ -9,19 +9,20 @@
 #include "../PS3Common.h"
 #include "../../Tool/CurveRange.hpp"
 #include "../PS3Particle.hpp"
+#include "PS3OvertimeModule.hpp"
 
-class PS3TextureAnimationModule
+class PS3TextureAnimationModule : public PS3OvertimeModule
 {
 public:
     PS3TextureAnimationModule(int numTilesX, int numTilesY, AnimationMode animationMode, CurveRangePtr frameOvertime, CurveRangePtr startFrame, float cycleCount, bool randomRow, int rowIndex);
     ~PS3TextureAnimationModule() = default;
     
 public:
-    void Animate(PS3ParticlePtr p, float dt);
+    void Animate(PS3ParticlePtr p, float dt) override;
+    void SetUniform();
     
 public:
-    bool _enable;
-    
+    bool _isInitStartRow;
     // x和y方向图片数量，x方向朝右，y方向朝下
     int _numTilesX;
     int _numTilesY;
@@ -43,4 +44,4 @@ public:
 
 using PS3TextureAnimationModulePtr = std::shared_ptr<PS3TextureAnimationModule>;
 
-// TODO: 源码中仅支持grid mode
+// TODO: 仅支持grid mode

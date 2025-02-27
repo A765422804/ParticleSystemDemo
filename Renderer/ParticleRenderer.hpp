@@ -11,10 +11,16 @@
 #include "../ParticleSystem3D/PS3Common.h"
 #include "../Common/Camera.hpp"
 
+enum ParticleType
+{
+    CPU,
+    GPU,
+};
+
 class ParticleRenderer
 {
 public:
-    ParticleRenderer();
+    ParticleRenderer(bool useGPU);
     ~ParticleRenderer() = default;
     
 public:
@@ -32,11 +38,18 @@ public:
     void Render();
     
 public:
+    GLuint GetTextureUnit(const std::string& uniformName);
+    
+public:
     unsigned int VAO, VBO, EBO;
     unsigned int _indexCount;
     
     ShaderPtr _shader;
     CameraPtr _camera;
+    ParticleType _type;
+    
+    std::unordered_map<std::string, GLuint> _uniforms;
+    GLuint _nextTextureUnit = 0;
 };
 
 using ParticleRendererPtr = std::shared_ptr<ParticleRenderer>;

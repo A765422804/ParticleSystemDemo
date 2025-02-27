@@ -35,6 +35,7 @@ enum class ArcMode
     RANDOM, // 随机
     LOOP, // 顺序循环
     PINGPONG, // 反弹循环
+    EVEN, // 均匀，这是我自己加的，希望发射多个粒子时，围绕圆环均匀分布
 };
 
 enum class RenderMode

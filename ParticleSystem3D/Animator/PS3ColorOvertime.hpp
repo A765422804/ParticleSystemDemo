@@ -9,18 +9,18 @@
 #include "../PS3Common.h"
 #include "../../Tool/GradientRange.hpp"
 #include "../PS3Particle.hpp"
+#include "PS3OvertimeModule.hpp"
 
-class PS3ColorOvertime
+class PS3ColorOvertime : public PS3OvertimeModule
 {
 public:
     PS3ColorOvertime(GradientRangePtr color);
     ~PS3ColorOvertime() = default;
     
 public:
-    void Animate(PS3ParticlePtr p, float dt);
+    void Animate(PS3ParticlePtr p, float dt) override;
     
 public:
-    bool _enable;
     GradientRangePtr _color;
 };
 

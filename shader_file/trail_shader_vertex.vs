@@ -14,22 +14,25 @@ out vec2 FragUV;
 // uniform
 uniform mat4 WorldTransform;
 uniform mat4 VPTransform;
-uniform mat4 ViewInverse;
-uniform bool IsLocalSpace;
 uniform vec3 CameraPos;
+uniform bool IsLocalSpace;
 
 void main()
 {
     vec4 pos = vec4(Position, 1.0);
     vec4 velocity = vec4(Velocity, 0);
     
-    // TODO: 坐标系的转换
-    
+    if (IsLocalSpace)
+    {
+        pos = WorldTransform * pos;
+        velocity = WorldTransform * velocity;
+    }
+        
     float vertOffset = (IndexAndSize.x - 0.5) * IndexAndSize.y; // 得到一个原始点的两个分点
     vec3 camUp = normalize(cross(pos.xyz - CameraPos.xyz, velocity.xyz));
     pos.xyz += camUp * vertOffset;
     pos = VPTransform * pos;
-    
+
     FragUV = TexCoord;
     FragColor = Color;
     

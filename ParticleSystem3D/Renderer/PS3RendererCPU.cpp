@@ -8,105 +8,26 @@
 #include "PS3RendererCPU.hpp"
 #include "../PS3ParticleSystem.hpp"
 
-PS3RendererCPU::PS3RendererCPU(int maxParticleCount)
+PS3RendererCPU::PS3RendererCPU(PS3ParticleSystem* ps, int maxParticleCount)
+: SuperType(ps, maxParticleCount, false)
 {
-    _model = std::make_shared<PS3ParticleBatchModel>(maxParticleCount);
+    
 }
 
-void PS3RendererCPU::SetNewParticle(PS3ParticlePtr particle)
+void PS3RendererCPU::Clear()
 {
-    _particles.push_back(particle);
+    SuperType::Clear();
 }
 
-PS3ParticlePtr PS3RendererCPU::GetFreeParticle()
-{
-    if (_particles.size() >= _particleSystem->_capacity)
-        return nullptr;
-    
-    return std::make_shared<PS3Particle>();
-}
-
-int PS3RendererCPU::GetParticleCount()
-{
-    return int(_particles.size());
-}
-
-int PS3RendererCPU::UpdateParticles(float dt)
-{
-    // 更新scale和rotation
-    // 注意，scale和rotation是要传给shader的uniform变量
-    
-    // TODO: 更新拖尾模块
-    
-    // 处理重力
-    
-    // 更新每个粒子
-    for (int i = 0 ; i < _particles.size(); ++i)
-    {
-        // 生命周期衰减
-        auto &p = _particles[i];
-        p->_remainingLifeTime -= dt;
-        
-        if (p->_remainingLifeTime < 0.0)
-        {
-            // Trigger了死亡事件
-            _particleSystem->NotifySubEmitters(p, EventType::DEATH);
-            
-            // 移除死亡粒子
-            _particles.erase(_particles.begin() + i);
-            -- i;
-            continue;
-        }
-        
-        // 重力使用
-        if (_particleSystem->_gravity != nullptr)
-        {
-            float normalizedTime = 1 - p->_remainingLifeTime / p->_startLifeTime;
-            float gravityEffect = -_particleSystem->_gravity->Evaluate(normalizedTime, Random01()) * 9.8 * dt;
-            if (_particleSystem->_spaceMode == SpaceMode::LOCAL)
-            {
-                vec4 gravity = vec4(0, gravityEffect, 0, 1);
-                gravity = transpose(toMat4(_particleSystem->GetRotation()))  * gravity;
-                p->_velocity.x += gravity.x;
-                p->_velocity.y += gravity.y;
-                p->_velocity.z += gravity.z;
-            }
-            else
-            {
-                p->_velocity.y += gravityEffect;
-            }
-        }
-        
-        // 更新粒子最终速度
-        p->_ultimateVelocity = p->_velocity;
-        
-        // 应用动画
-        _particleSystem->_velocityOvertimeModule->Animate(p, dt);
-        _particleSystem->_forceOvertimeModule->Animate(p, dt);
-        //_particleSystem->_sizeOvertimeModule->Animate(p, dt);
-        //_particleSystem->_colorOvertimeModule->Animate(p, dt);
-        _particleSystem->_rotationOvertimeModule->Animate(p, dt);
-        _particleSystem->_textureAnimationModule->Animate(p, dt);
-        
-        // 更新位置
-        p->_position = p->_position + p->_ultimateVelocity * dt;
-        
-        // 更新粒子的拖尾
-    }
-    
-    
-    return int(_particles.size());
-}
-
-void PS3RendererCPU::UpdateRenderData()
+void PS3RendererCPU::UpdateRenderData(std::vector<PS3ParticlePtr> particles)
 {
     int idx = 0;
-    for (int i = 0; i < _particles.size(); ++i)
+    for (int i = 0; i < particles.size(); ++i)
     {
-        auto p = _particles[i];
+        auto p = particles[i];
         float fi = 0;
-        auto textureModule = _particleSystem->_textureAnimationModule;
-        if (textureModule && textureModule->_enable)
+        auto textureAnimation = std::dynamic_pointer_cast<PS3TextureAnimationModule>(_ps->_overtimeModules["textureAnimationOvertime"]);
+        if (textureAnimation && textureAnimation->_enable)
             fi = p->_frameIndex;
         idx = i * 4;
         FillMeshData(p, idx, fi);
@@ -128,12 +49,37 @@ void PS3RendererCPU::FillMeshData(PS3ParticlePtr p, int idx, float fi)
     }
 }
 
-void PS3RendererCPU::Render()
+void PS3RendererCPU::SetNewParticle(PS3ParticlePtr particle)
+{
+    // do nothing
+}
+
+void PS3RendererCPU::InitUniform()
 {
     auto shader = _model->_renderer->_shader;
     shader->use();
-    shader->setBool("IsLocalSpace", _particleSystem->_spaceMode == SpaceMode::LOCAL);
-    shader->setVec2("FrameTile", vec2(_particleSystem->_textureAnimationModule->_numTilesX, _particleSystem->_textureAnimationModule->_numTilesY));
     
-    _model->RenderModel(int(_particles.size()));
+    // space mode
+    shader->setBool("IsLocalSpace", _ps->_spaceMode == SpaceMode::LOCAL);
+    
+    // texture animation
+    auto textureAnimation = std::dynamic_pointer_cast<PS3TextureAnimationModule>(_ps->_overtimeModules["textureAnimationOvertime"]);
+    shader->setVec2("FrameTile", vec2(textureAnimation->_numTilesX, textureAnimation->_numTilesY));
+}
+
+void PS3RendererCPU::UpdateUniform()
+{
+    if (!_ps->_isSubEmitter)
+        _model->_renderer->SetWorldTransform(_ps->GetWorldTransform());
+    else
+    {
+        // 子发射器的粒子的世界矩阵，使用的是父发射器
+        _model->_renderer->SetWorldTransform(_ps->_mainEmitter->GetWorldTransform());
+    }
+}
+
+void PS3RendererCPU::Render()
+{
+    UpdateUniform();
+    _model->RenderModelCPU(_ps->GetParticleCount());
 }

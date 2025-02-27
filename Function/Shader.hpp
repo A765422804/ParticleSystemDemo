@@ -15,6 +15,10 @@ public:
     unsigned int ID;
     
     Shader(const char* vertexPath, const char* fragmentPath);
+    ~Shader()
+    {
+        glDeleteProgram(ID);
+    }
     void use();
     
     // utility uniform functions

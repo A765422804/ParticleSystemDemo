@@ -9,8 +9,9 @@
 #include "../PS3Common.h"
 #include "../../Tool/CurveRange.hpp"
 #include "../PS3Particle.hpp"
+#include "PS3OvertimeModule.hpp"
 
-class PS3SizeOvertime
+class PS3SizeOvertime : public PS3OvertimeModule
 {
 public:
     PS3SizeOvertime(CurveRangePtr size);
@@ -18,10 +19,9 @@ public:
     ~PS3SizeOvertime() = default;
     
 public:
-    void Animate(PS3ParticlePtr p, float dt);
+    void Animate(PS3ParticlePtr p, float dt) override;
     
 public:
-    bool _enable;
     bool _separateAxes; // 是否在每个轴上独立控制粒子大小
     
     CurveRangePtr _size; // 非独立控制时，size随时间变化

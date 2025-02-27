@@ -29,6 +29,8 @@ public:
            float fov = 45.0f,
            float nearClip = 0.1f,
            float farClip = 100.0f);
+    
+    vec3 GetPosition() {return position;}
 
     // 返回视图矩阵
     mat4 GetViewTransform() const;

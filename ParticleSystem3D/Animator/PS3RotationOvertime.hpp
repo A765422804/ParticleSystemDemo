@@ -9,8 +9,9 @@
 #include "../PS3Common.h"
 #include "../../Tool/CurveRange.hpp"
 #include "../PS3Particle.hpp"
+#include "PS3OvertimeModule.hpp"
 
-class PS3RotationOvertime
+class PS3RotationOvertime : public PS3OvertimeModule
 {
 public:
     PS3RotationOvertime(CurveRangePtr rotate);
@@ -18,10 +19,9 @@ public:
     ~PS3RotationOvertime() = default;
     
 public:
-    void Animate(PS3ParticlePtr p, float dt);
+    void Animate(PS3ParticlePtr p, float dt) override;
     
 public:
-    bool _enable;
     bool _separateAxes; // 是否在三个轴分开计算旋转
     
     CurveRangePtr _xRotate;

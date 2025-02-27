@@ -8,9 +8,7 @@
 #include "PS3TextureAnimationModule.hpp"
 
 PS3TextureAnimationModule::PS3TextureAnimationModule(int numTilesX, int numTilesY, AnimationMode animationMode, CurveRangePtr frameOvertime, CurveRangePtr startFrame, float cycleCount, bool randomRow, int rowIndex)
-    : _enable(true)
-    , // 可以根据实际情况初始化 _enable 的值，这里假设默认启用
-    _numTilesX(numTilesX)
+    : _numTilesX(numTilesX)
     , _numTilesY(numTilesY)
     , _animationMode(animationMode)
     , _frameOvertime(frameOvertime)
@@ -18,11 +16,15 @@ PS3TextureAnimationModule::PS3TextureAnimationModule(int numTilesX, int numTiles
     , _cycleCount(cycleCount)
     , _randomRow(randomRow)
     , _rowIndex(rowIndex)
+    , _isInitStartRow(false)
 {
 }
 
 void PS3TextureAnimationModule::Animate(PS3ParticlePtr p, float dt)
 {
+    if (!_isInitStartRow)
+        p->_startRow = floor(Random01() * _numTilesY);
+    
     float normalizedTime = 1 - p->_remainingLifeTime / p->_startLifeTime;
     float startFrame = _startFrame->Evaluate(normalizedTime, Random01()) / (_numTilesX * _numTilesY);
     float frameOvertime = _frameOvertime->Evaluate(normalizedTime, Random01());
