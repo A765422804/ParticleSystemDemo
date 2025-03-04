@@ -70,7 +70,8 @@ bool PS3ParticleProcessorCPU::UpdateParticle(PS3ParticlePtr p, float dt)
     // 应用动画
     for (auto [key, value] : _ps->_overtimeModules)
     {
-        value->Animate(p, dt);
+        if (value)
+            value->Animate(p, dt);
     }
     
     // 更新位置

@@ -34,14 +34,16 @@ Texture2D::Texture2D(std::string path)
             }
 
             // 设置纹理参数
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
             // 加载纹理数据
             glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
             glGenerateMipmap(GL_TEXTURE_2D);
+            
+            //glBindTexture(GL_TEXTURE_2D, 0);
 
             // 释放图像数据
             stbi_image_free(data);
@@ -53,7 +55,7 @@ Texture2D::Texture2D(std::string path)
 }
 
 Texture2D::Texture2D(const std::vector<float>& data, int width, int height,GLenum internalFormat, GLenum format)
-: textureID(0), width(width), height(height)
+: textureID(0), width(width), height(height), dataFloat(data)
 {
     glGenTextures(1, &textureID);
     glBindTexture(GL_TEXTURE_2D, textureID);
@@ -73,11 +75,13 @@ Texture2D::Texture2D(const std::vector<float>& data, int width, int height,GLenu
     
     // 生成mipmap
     glGenerateMipmap(GL_TEXTURE_2D);
+    
+    //glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void Texture2D::BindToUniform(const std::string& uniformName, ShaderPtr shader, GLuint textureUnit) const
 {
-    // shader->use();
+    shader->use();
     // 获取 uniform 位置
     GLint loc = glGetUniformLocation(shader->ID, uniformName.c_str());
     if (loc == -1)
@@ -86,7 +90,7 @@ void Texture2D::BindToUniform(const std::string& uniformName, ShaderPtr shader, 
     }
 
     glActiveTexture(GL_TEXTURE0 + textureUnit);
-    std::cout<<"Texture2D::BindToUniform: " << textureUnit << " textureID: " << textureID <<" loc: " << loc << std::endl;
+    std::cout<< " Texture2D::BindToUniform:" << textureUnit << " textureID: " << textureID <<" loc: " << loc << std::endl;
     
     // 绑定纹理
     glBindTexture(GL_TEXTURE_2D, textureID);

@@ -25,7 +25,7 @@ void PS3RendererCPU::UpdateRenderData(std::vector<PS3ParticlePtr> particles)
     for (int i = 0; i < particles.size(); ++i)
     {
         auto p = particles[i];
-        float fi = 0;
+        float fi = -1;
         auto textureAnimation = std::dynamic_pointer_cast<PS3TextureAnimationModule>(_ps->_overtimeModules["textureAnimationOvertime"]);
         if (textureAnimation && textureAnimation->_enable)
             fi = p->_frameIndex;
@@ -64,7 +64,13 @@ void PS3RendererCPU::InitUniform()
     
     // texture animation
     auto textureAnimation = std::dynamic_pointer_cast<PS3TextureAnimationModule>(_ps->_overtimeModules["textureAnimationOvertime"]);
-    shader->setVec2("FrameTile", vec2(textureAnimation->_numTilesX, textureAnimation->_numTilesY));
+    if (textureAnimation)
+    {
+        shader->setVec2("FrameTile", vec2(textureAnimation->_numTilesX, textureAnimation->_numTilesY));
+    }
+    
+    // texture
+    _ps->_texture->BindToUniform("MainTexture", _model->_renderer->_shader, _model->_renderer->GetTextureUnit("MainTexture"));
 }
 
 void PS3RendererCPU::UpdateUniform()

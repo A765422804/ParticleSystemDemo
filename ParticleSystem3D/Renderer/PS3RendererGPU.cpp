@@ -8,7 +8,7 @@
 #include "PS3RendererGPU.hpp"
 #include "../PS3ParticleSystem.hpp"
 
-const int SampleNum = 32;
+const int SampleNum = 128;
 const float SampleInterval = 1.0f / (SampleNum - 1);
 
 PS3RendererGPU::PS3RendererGPU(PS3ParticleSystem* ps, int maxParticleCount)
@@ -35,7 +35,6 @@ void PS3RendererGPU::InitUniform()
     // space mode
     shader->setBool("IsLocalSpace", _ps->_spaceMode == SpaceMode::LOCAL);
     
-    
     // texture animation
     auto textureAnimation = std::dynamic_pointer_cast<PS3TextureAnimationModule>(_ps->_overtimeModules["textureAnimationOvertime"]);
     if (textureAnimation)
@@ -50,19 +49,17 @@ void PS3RendererGPU::InitUniform()
     enable = textureOvertime ? textureOvertime->_enable : false;
     if (enable)
     {
-        shader->setBool("UseAnimationTexture", true);
+        shader->setBool("UseAnimationOvertime", true);
         
         _animationTexture = CurveRange::PackCurveRangeXY(SampleNum, textureOvertime->_startFrame, textureOvertime->_frameOvertime, true);
-        // 启用这个texture
-        //_animationTexture->BindToUniform("texture_animation_tex0", GetShaderID(),_renderer->_model->_renderer->GetTextureUnit("texture_animation_tex0"));
-        
+
         // 传递其他info
         vec3 animInfo = vec3(_animationTexture->GetHeight(), textureOvertime->_numTilesX * textureOvertime->_numTilesY, textureOvertime->_cycleCount);
         shader->setVec3("AnimInfo", animInfo);
     }
     else
     {
-        shader->setBool("UseAnimationTexture", false);
+        shader->setBool("UseAnimationOvertime", false);
     }
     
     // velocity overtime
@@ -73,9 +70,7 @@ void PS3RendererGPU::InitUniform()
         shader->setBool("UseVelocityOvertime", true);
         
         _velocityTexture = CurveRange::PackCurveRangeXYZ(SampleNum, velocityOvertime->_xVelocity, velocityOvertime->_yVelocity, velocityOvertime->_zVelocity);
-        // 启用这个texture
-        //_velocityTexture->BindToUniform("texture_velocity_tex0", GetShaderID());
-        
+
         // TODO: velocity有两个参数，分别是space和mode
     }
     else
@@ -91,8 +86,6 @@ void PS3RendererGPU::InitUniform()
         shader->setBool("UseForceOvertime", true);
         
         _forceTexture = CurveRange::PackCurveRangeXYZ(SampleNum, forceOvertime->_xForce, forceOvertime->_yForce, forceOvertime->_zForce);
-        // 启用这个texture
-       // _forceTexture->BindToUniform("texture_force_tex0", GetShaderID());
         
         // TODO: force有两个参数，分别是space和mode
     }
@@ -101,13 +94,15 @@ void PS3RendererGPU::InitUniform()
         shader->setBool("UseForceOvertime", false);
     }
     
-
     // size overtime
     auto sizeOvertime = std::dynamic_pointer_cast<PS3SizeOvertime>(_ps->_overtimeModules["sizeOvertime"]);
     enable = sizeOvertime ? sizeOvertime->_enable : false;
+
     if (enable)
     {
         shader->setBool("UseSizeOvertime", true);
+        
+
         
         if (sizeOvertime->_separateAxes)
         {
@@ -118,17 +113,12 @@ void PS3RendererGPU::InitUniform()
             _sizeTexture = CurveRange::PackCurveRangeN(SampleNum, sizeOvertime->_size, true);
         }
         
-        // 启用这个texture
-        _sizeTexture->BindToUniform("texture_size_tex0", _model->_renderer->_shader,_model->_renderer->GetTextureUnit("texture_size_tex0"));
-
-        
         // TODO: size有一个参数mode
     }
     else
     {
         shader->setBool("UseSizeOvertime", false);
     }
-
     
     // color overtime
     auto colorOvertime = std::dynamic_pointer_cast<PS3ColorOvertime>(_ps->_overtimeModules["colorOvertime"]);
@@ -138,9 +128,6 @@ void PS3RendererGPU::InitUniform()
         shader->setBool("UseColorOvertime", true);
         
         _colorTexture = GradientRange::PackGradientRange(SampleNum, colorOvertime->_color);
-        // 启用这个texture
-        //_colorTexture->BindToUniform("texture_color_tex0", GetShaderID(), _model->_renderer->GetTextureUnit("texture_color_tex0"));
-        
         // TODO: color有一个参数mode
     }
     else
@@ -155,7 +142,7 @@ void PS3RendererGPU::InitUniform()
     {
         shader->setBool("UseRotationOvertime", true);
         
-        if (!rotationOvertime->_separateAxes)
+        if (rotationOvertime->_separateAxes)
         {
             _rotationTexture = CurveRange::PackCurveRangeXYZ(SampleNum, rotationOvertime->_xRotate, rotationOvertime->_yRotate, rotationOvertime->_zRotate, true);
         }
@@ -163,9 +150,7 @@ void PS3RendererGPU::InitUniform()
         {
             _rotationTexture = CurveRange::PackCurveRangeZ(SampleNum, rotationOvertime->_zRotate, true);
         }
-        // 启用这个texture
-        //_rotationTexture->BindToUniform("texture_rotation_tex0", GetShaderID());
-        
+
         // TODO: rotation有一个参数mode
     }
     else
@@ -176,6 +161,20 @@ void PS3RendererGPU::InitUniform()
     // sampleInfo
     vec2 sampleInfo = vec2(SampleNum, SampleInterval);
     shader->setVec2("SampleInfo", sampleInfo);
+    
+    // 启用overtime 的texture
+    if (_velocityTexture)
+        _velocityTexture->BindToUniform("texture_velocity_tex0", _model->_renderer->_shader,_model->_renderer->GetTextureUnit("texture_velocity_tex0"));
+    if (_sizeTexture)
+        _sizeTexture->BindToUniform("texture_size_tex0", _model->_renderer->_shader,_model->_renderer->GetTextureUnit("texture_size_tex0"));
+    if (_colorTexture)
+        _colorTexture->BindToUniform("texture_color_tex0", _model->_renderer->_shader, _model->_renderer->GetTextureUnit("texture_color_tex0"));
+    if (_forceTexture)
+        _forceTexture->BindToUniform("texture_force_tex0",_model->_renderer->_shader, _model->_renderer->GetTextureUnit("texture_force_tex0"));
+    if (_rotationTexture)
+        _rotationTexture->BindToUniform("texture_rotation_tex0", _model->_renderer->_shader, _model->_renderer->GetTextureUnit("texture_rotation_tex0"));
+    if (_animationTexture)
+        _animationTexture->BindToUniform("texture_animation_tex0", _model->_renderer->_shader,_model->_renderer->GetTextureUnit("texture_animation_tex0"));
     
     // mainTexture
     _ps->_texture->BindToUniform("MainTexture", _model->_renderer->_shader, _model->_renderer->GetTextureUnit("MainTexture"));

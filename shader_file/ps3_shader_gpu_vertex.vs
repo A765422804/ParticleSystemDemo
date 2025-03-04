@@ -203,10 +203,27 @@ vec3 RotateInLocalSpace (vec3 pos, vec3 xAxis, vec3 yAxis, vec3 zAxis, vec4 q){
 
 vec2 ComputeUV (float frameIndex, vec2 vertIndex, vec2 frameTile)
 {
- vec2 aniUV = vec2(0, floor(frameIndex * frameTile.y));
- aniUV.x = floor(frameIndex * frameTile.x * frameTile.y - aniUV.y * frameTile.x);
- vertIndex.y = 1. - vertIndex.y;
- return (aniUV.xy + vertIndex) / vec2(frameTile.x, frameTile.y);
+    // 计算当前图片的索引
+    float totalFrames = frameTile.x * frameTile.y;
+    float currentFrame = floor(frameIndex * totalFrames);
+    
+    // 计算当前图片在行列索引中的位置
+    float colIndex = mod(currentFrame, frameTile.x);
+    float rowIndex = floor(currentFrame/ frameTile.x);
+    
+    // 修改原点在左下角
+    rowIndex = frameTile.y - rowIndex - 1;
+    
+    // 计算每个图片在UV空间的大小
+    vec2 tileSize = 1.0 / frameTile;
+    
+    // 计算当前图片的uv偏移
+    vec2 uvOffset = vec2(colIndex, rowIndex) * tileSize;
+    
+    // 调整原始UV坐标到当前图片的UV空间
+    vec2 adjustedUV = uvOffset + vertIndex * tileSize;
+    
+    return adjustedUV;
 }
 
 void ComputeVertPos (inout vec4 pos, vec2 vertOffset, vec4 q, vec3 s, mat4 viewInv) 
@@ -224,7 +241,7 @@ void main()
     float activeTime = Time_Delta.x - Position_StartTime.w; // 粒子已存活时间
     float normalizedTime = clamp(activeTime / Dir_Life.w, 0.0, 1.0); // 粒子存活时间归一化
     vec2 timeCoord0 = vec2(normalizedTime, 0.0); // 粒子存活时间归一化后的坐标(height = 0)
-    vec2 timeCoord1 = vec2(normalizedTime, 1.0); // 粒子存活时间归一化后的坐标(height = 1)
+    //vec2 timeCoord1 = vec2(normalizedTime, 1.0); // 粒子存活时间归一化后的坐标(height = 1)
     
     vec2 vertIdx = Texcoord;
     vec4 velocity = vec4(Dir_Life.xyz, 0.0);
@@ -249,23 +266,27 @@ void main()
         vec4 forceTrack = vec4(forceAnim, 0.0);
         // TODO: 根据force的space执行坐标变换
         
-        velocity.xyz += forceTrack.xyz;
+        velocity.xyz += forceTrack.xyz * normalizedTime * Dir_Life.w;
     }
     
     // 3. velocity overtime
     if (UseVelocityOvertime == true)
     {
-        float speedModifier = 1.0f;
         vec3 velocityAnim = vec3(0.0);
-        velocityAnim = UnpackCurveData(texture_velocity_tex0, timeCoord0, speedModifier);
+        velocityAnim = UnpackCurveData(texture_velocity_tex0, timeCoord0);
         
         vec4 velocityTrack = vec4(velocityAnim, 0.0);
         // TODO: 根据velocity的space执行坐标变换
         velocity.xyz += velocityTrack.xyz;
-        velocity.xyz *= speedModifier;
+        //velocity.xyz = velocity.xyz * speedModifier;
     }
     
     pos.xyz += velocity.xyz * normalizedTime * Dir_Life.w;
+    
+    if (IsLocalSpace)
+    {
+        pos = WorldTransform * pos;
+    }
     
     // TODO: 对粒子执行坐标变换
     
@@ -302,17 +323,21 @@ void main()
     {
         float startFrame = 0.0;
         vec3 frameInfo = vec3(0.0);
-        // 高度信息，同样我们只考虑为0的情况
+        // 高度信息，同样只考虑为0的情况
         frameInfo = UnpackCurveData(texture_animation_tex0, timeCoord0);
         startFrame = frameInfo.x / AnimInfo.y;
         float EPSILON = 1e-6;
         frameIndex = Repeat(AnimInfo.z * (frameInfo.y + startFrame), 1. + EPSILON);
     }
     
-    //FragUV = ComputeUV(frameIndex, vertIdx, FrameTile.xy);
-    FragUV = Texcoord;
+    if (UseAnimationOvertime == true)
+    {
+        FragUV = ComputeUV(frameIndex, vertIdx, FrameTile);
+    }
+    else
+    {
+        FragUV = Texcoord;
+    }
     
     gl_Position = pos;
 }
-
-

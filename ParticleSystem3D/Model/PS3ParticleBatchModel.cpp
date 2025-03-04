@@ -121,6 +121,8 @@ void PS3ParticleBatchModel::RenderModelGPU()
     if (_particleCountGPU <= 0)
         return;
     
+    std::cout<<"particle count:"<<_particleCountGPU<<std::endl;
+    
     // 已知顶点数据和索引数据，可以render了
     // 根据count得到vertex和index的数量
     

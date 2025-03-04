@@ -18,7 +18,7 @@ PS3ParticleSystem::PS3ParticleSystem(int maxParticleCount)
 , _isSubEmitter(false)
 , _capacity(maxParticleCount)
 , _loop(true)
-, _duration(6.0f)
+, _duration(3.0f)
 , _simulationSpeed(1)
 , _startDelay(nullptr)
 , _rateOverTime(nullptr)
@@ -30,7 +30,7 @@ PS3ParticleSystem::PS3ParticleSystem(int maxParticleCount)
 , _trailModule(nullptr)
 , _processor(nullptr)
 , _inilizer(nullptr)
-, _useGPU(true)
+, _useGPU(false)
 {
     // processor
     if (_useGPU)
@@ -60,7 +60,7 @@ PS3ParticleSystem::PS3ParticleSystem(int maxParticleCount)
     
     _startDelay = CurveRange::CreateCurveByConstant(0);
 
-    _rateOverTime = CurveRange::CreateCurveByConstant(4);
+    _rateOverTime = CurveRange::CreateCurveByConstant(30);
     _rateOverDistance = CurveRange::CreateCurveByConstant(0);
     
     // renderer
@@ -75,48 +75,48 @@ PS3ParticleSystem::PS3ParticleSystem(int maxParticleCount)
 
     //_shapeModule = PS3BoxEmitter::CreateBoxEmitter(EmitLocation::VOLUME, this);
     //_shapeModule = PS3ConeEmitter::CreateConeEmitter(EmitLocation::VOLUME, ArcMode::RANDOM, 0, 360, 0, 0.5, 1, 10, 30, 2, this);
-    //_shapeModule = PS3CircleEmitter::CreateCircleEmitter(ArcMode::LOOP, 0, 360, CurveRange::CreateCurveByConstant(1), 1, 1,10, this);
+    _shapeModule = PS3CircleEmitter::CreateCircleEmitter(ArcMode::LOOP, 0, 360, CurveRange::CreateCurveByConstant(1), 2, 1,10, this);
     //_shapeModule = PS3SphereEmitter::CreateSphereEmitter(EmitLocation::VOLUME, 1, 1, this);
-    _shapeModule = PS3HemisphereEmitter::CreateHemisphereEmitter(EmitLocation::VOLUME, 1, 1, this);
+    //_shapeModule = PS3HemisphereEmitter::CreateHemisphereEmitter(EmitLocation::VOLUME, 1, 1, this);
     
     // velocity overtime
-//    auto xSpeed = CurveRange::CreateCurveByConstant(1.0f);
-//    auto ySpeed = CurveRange::CreateCurveByConstant(1.0f);
-//    auto zSpeed = CurveRange::CreateCurveByConstant(10.0f);
-//    auto velocityOvertimeModule = std::make_shared<PS3VelocityOvertime>(xSpeed, ySpeed, zSpeed);
-//    _overtimeModules["velocityOvertime"] = velocityOvertimeModule;
+    auto xSpeed = CurveRange::CreateCurveByConstant(0.0f);
+    auto ySpeed = CurveRange::CreateCurveByConstant(5.0f);
+    auto zSpeed = CurveRange::CreateCurveByConstant(0.0f);
+    auto velocityOvertimeModule = std::make_shared<PS3VelocityOvertime>(xSpeed, ySpeed, zSpeed);
+    _overtimeModules["velocityOvertime"] = velocityOvertimeModule;
     
     // force overtime
-//    auto xForce = CurveRange::CreateCurveByConstant(0.0f);
-//    auto yForce = CurveRange::CreateCurveByConstant(0.0f);
-//    auto zForce = CurveRange::CreateCurveByConstant(0.0f);
-//    auto forceOvertimeModule = std::make_shared<PS3ForceOvertime>(xForce, yForce, zForce);
-//    _overtimeModules["forceOvertime"] = forceOvertimeModule;
+    auto xForce = CurveRange::CreateCurveByConstant(0.0f);
+    auto yForce = CurveRange::CreateCurveByConstant(0.0f);
+    auto zForce = CurveRange::CreateCurveByConstant(0.0f);
+    auto forceOvertimeModule = std::make_shared<PS3ForceOvertime>(xForce, yForce, zForce);
+    _overtimeModules["forceOvertime"] = forceOvertimeModule;
     
     // size overtime
-    auto allSize = curveRange;
+    auto allSize = CurveRange::CreateCurveByConstant(3.0f);
 //    auto xSize = CurveRange::CreateCurveByConstant(0.1f);
 //    auto ySize = curveRange;
 //    auto zSize = CurveRange::CreateCurveByConstant(0.1f);
     _overtimeModules["sizeOvertime"] = std::make_shared<PS3SizeOvertime>(allSize);
     
     // color overtime
-//        ColorKey colorKey1 = {vec3(1.0f, 0.0f, 0.0f), 0.0f};
-//        ColorKey colorKey2 = {vec3(0.0f, 0.0f, 1.0f), 1.0f};
-//        AlphaKey alphaKey1 = {1.0f, 0.0f};
-//        AlphaKey alphaKey2 = {0.0f, 1.0f};
-//        std::vector<ColorKey> colorKeys = {colorKey1, colorKey2};
-//        std::vector<AlphaKey> alphaKeys = {alphaKey1, alphaKey2};
-//        GradientPtr gradient = Gradient::CreateByColorKeyAndAlphaKey(colorKeys, alphaKeys);
-//        GradientRangePtr gradientRange = GradientRange::CreateByOneGradient(gradient);
-//    _overtimeModules["colorOvertime"] = std::make_shared<PS3ColorOvertime>(gradientRange);
+        ColorKey colorKey1 = {vec3(1.0f, 0.0f, 0.0f), 0.0f};
+        ColorKey colorKey2 = {vec3(0.0f, 1.0f, 0.0f), 1.0f};
+        AlphaKey alphaKey1 = {1.0f, 0.0f};
+        AlphaKey alphaKey2 = {1.0f, 1.0f};
+        std::vector<ColorKey> colorKeys = {colorKey1, colorKey2};
+        std::vector<AlphaKey> alphaKeys = {alphaKey1, alphaKey2};
+        GradientPtr gradient = Gradient::CreateByColorKeyAndAlphaKey(colorKeys, alphaKeys);
+        GradientRangePtr gradientRange = GradientRange::CreateByOneGradient(gradient);
+    _overtimeModules["colorOvertime"] = std::make_shared<PS3ColorOvertime>(gradientRange);
     
     // rotate overtime
-//    auto xRot = CurveRange::CreateCurveByConstant(0);
-//    auto yRot = CurveRange::CreateCurveByConstant(0);
-//    auto zRot = CurveRange::CreateCurveByConstant(0);
-//    auto rotationOvertimeModule = std::make_shared<PS3RotationOvertime>(xRot, yRot, zRot);
-//    _overtimeModules["rotationOvertime"] = rotationOvertimeModule;
+    auto xRot = CurveRange::CreateCurveByConstant(radians(0.0));
+    auto yRot = CurveRange::CreateCurveByConstant(radians(0.0));
+    auto zRot = CurveRange::CreateCurveByConstant(radians(0.0));
+    auto rotationOvertimeModule = std::make_shared<PS3RotationOvertime>(xRot, yRot, zRot);
+    _overtimeModules["rotationOvertime"] = rotationOvertimeModule;
     
     // burst
 //    auto burstCount = CurveRange::CreateCurveByConstant(30);
@@ -128,8 +128,9 @@ PS3ParticleSystem::PS3ParticleSystem(int maxParticleCount)
     
     // texture animation
 //    auto startFrame = CurveRange::CreateCurveByConstant(0);
-//    auto textureAnimationModule = std::make_shared<PS3TextureAnimationModule>(1, 1, AnimationMode::WHOLE_SHEET, curveRange, startFrame, 1, true, 0);
+//    auto textureAnimationModule = std::make_shared<PS3TextureAnimationModule>(4, 4, AnimationMode::WHOLE_SHEET, curveRange, startFrame, 1, true, 0);
 //    _overtimeModules["textureAnimationOvertime"] = textureAnimationModule;
+//    _overtimeModules["textureAnimationOvertime"]->_enable = false;
     
     // texture
     _texture = std::make_shared<Texture2D>("/Users/evanbfeng/work/resource/textures/white_effect.png");

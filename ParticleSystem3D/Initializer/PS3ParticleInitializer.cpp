@@ -12,10 +12,10 @@ PS3ParticleInitializer::PS3ParticleInitializer(PS3ParticleSystem * ps)
 : _ps(ps)
 {
     // startSize
-    _startSizeX = CurveRange::CreateCurveByConstant(0.5);
+    _startSizeX = CurveRange::CreateCurveByConstant(0.2);
     
     // startSpeed
-    _startSpeed = CurveRange::CreateCurveByConstant(1.5);
+    _startSpeed = CurveRange::CreateCurveByConstant(0);
     
     // startRotation
     _startRotationZ = CurveRange::CreateCurveByConstant(0);
@@ -32,7 +32,7 @@ PS3ParticleInitializer::PS3ParticleInitializer(PS3ParticleSystem * ps)
 //    _startColor = gradientRange;
     _startColor = GradientRange::CreateByOneColor(vec4(vec3(1.0f), 0.5f));
     
-    _startLifeTime = CurveRange::CreateCurveByConstant(5);
+    _startLifeTime = CurveRange::CreateCurveByConstant(2);
 }
 
 void PS3ParticleInitializer::InitializeParticle(PS3ParticlePtr p, float dt)

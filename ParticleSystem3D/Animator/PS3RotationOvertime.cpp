@@ -31,12 +31,12 @@ void PS3RotationOvertime::Animate(PS3ParticlePtr p, float dt)
     if (!_separateAxes) // 只考虑z方向的旋转
     {
         p->_deltaEuler = vec3(0, 0, _zRotate->Evaluate(normalizeTime, Random01())) * dt;
-        p->_deltaQuat = quat(radians(p->_deltaEuler));
+        p->_deltaQuat = quat(p->_deltaEuler);
     }
     else
     {
         p->_deltaEuler = vec3(_xRotate->Evaluate(normalizeTime, Random01()), _yRotate->Evaluate(normalizeTime, Random01()), _zRotate->Evaluate(normalizeTime, Random01())) * dt;
-        p->_deltaQuat = quat(radians(p->_deltaEuler));
+        p->_deltaQuat = quat(p->_deltaEuler);
     }
     
     // 得到本次旋转的矩阵，并得到累积旋转overtime矩阵

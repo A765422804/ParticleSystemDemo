@@ -32,6 +32,7 @@ public:
     unsigned int textureID;
     std::string path;
     unsigned char* data;
+    std::vector<float> dataFloat;
     int width, height, nrComponents;
 };
 

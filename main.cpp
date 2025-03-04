@@ -92,17 +92,17 @@ int main()
 //    particleSystem->SetPosition3D(vec3(-4.0, -4.0f,0.0f));
     
     // ParticleSystem3D
-    PS3ParticleSystemPtr particleSystem = std::make_shared<PS3ParticleSystem>(1000);
+    PS3ParticleSystemPtr particleSystem = std::make_shared<PS3ParticleSystem>(10000);
     particleSystem->_renderer->_model->_renderer->SetCamera(camera);
     particleSystem->_shapeModule->_emitterRenderer->SetCamera(camera);
-    //particleSystem->SetRotation(vec3(45, 0, 0));
+    particleSystem->SetRotation(vec3(0, 0, 0));
     //particleSystem->PrewarmSystem();
 //    PS3ParticleSystemPtr subSystem = std::make_shared<PS3ParticleSystem>(500);
 //    subSystem->_renderer->_model->_renderer->SetCamera(camera);
-////    subSystem->_shapeModule = PS3ShapeModule::CreateSphereEmitter(EmitLocation::VOLUME, 0.001, 0, subSystem.get()); // hack TODO: 把构造放到ParticleSystem之外后，删掉这里
+//////    subSystem->_shapeModule = PS3ShapeModule::CreateSphereEmitter(EmitLocation::VOLUME, 0.001, 0, subSystem.get()); // hack TODO: 把构造放到ParticleSystem之外后，删掉这里
 //    subSystem->_shapeModule = PS3CircleEmitter::CreateCircleEmitter(ArcMode::EVEN, 0, 360, CurveRange::CreateCurveByConstant(90), 0.1, 0, 5, subSystem.get());
 //    subSystem->_isEmitting = false;
-//    subSystem->SetRotation(vec3(90, 0, 0));
+//    subSystem->SetRotation(vec3(0, 0, 0));
 //    subSystem->_isSubEmitter = true;
 //        ColorKey colorKey1 = {vec3(1.0f, 0.0f, 0.0f), 0.0f};
 //        ColorKey colorKey2 = {vec3(0.0f, 0.0f, 1.0f), 1.0f};
@@ -112,7 +112,7 @@ int main()
 //        std::vector<AlphaKey> alphaKeys = {alphaKey1, alphaKey2};
 //        GradientPtr gradient = Gradient::CreateByColorKeyAndAlphaKey(colorKeys, alphaKeys);
 //        GradientRangePtr gradientRange = GradientRange::CreateByOneGradient(gradient);
-//    // subSystem->_colorOvertimeModule = std::make_shared<PS3ColorOvertime>(gradientRange);
+//     subSystem->_overtimeModules["colorOvertime"] = std::make_shared<PS3ColorOvertime>(gradientRange);
 //    particleSystem->AddSubEmitter({
 //        EventType::DEATH,
 //        subSystem
@@ -193,6 +193,35 @@ int main()
 //    while ((err = glGetError()) != GL_NO_ERROR) {
 //        std::cerr << "OpenGL error: " << err << std::endl;
 //    }
+    
+    // 再来三个ps
+    PS3ParticleSystemPtr particleSystem2 = std::make_shared<PS3ParticleSystem>(10000);
+    particleSystem2->_renderer->_model->_renderer->SetCamera(camera);
+    particleSystem2->_shapeModule->_emitterRenderer->SetCamera(camera);
+    particleSystem2->SetRotation(vec3(0, 0, 0));
+    particleSystem2->SetPosition3D(vec3(0, 0, 0));
+    
+    PS3ParticleSystemPtr particleSystem3 = std::make_shared<PS3ParticleSystem>(10000);
+    particleSystem3->_renderer->_model->_renderer->SetCamera(camera);
+    particleSystem3->_shapeModule->_emitterRenderer->SetCamera(camera);
+    particleSystem3->SetRotation(vec3(0, 0, 0));
+    particleSystem3->SetPosition3D(vec3(5, 0, 0));
+    
+    PS3ParticleSystemPtr particleSystem4 = std::make_shared<PS3ParticleSystem>(10000);
+    particleSystem4->_renderer->_model->_renderer->SetCamera(camera);
+    particleSystem4->_shapeModule->_emitterRenderer->SetCamera(camera);
+    particleSystem4->SetRotation(vec3(0, 0, 0));
+    particleSystem4->SetPosition3D(vec3(0, 0, 5));
+    
+    particleSystem->Play();
+    particleSystem2->Play();
+    particleSystem3->Play();
+    particleSystem4->Play();
+    //subSystem->Play();
+    
+    // 帧率计算变量
+    float lastFrame = glfwGetTime();
+    int frameCount = 0;
 
     // render loop
     while (!glfwWindowShouldClose(window))
@@ -216,8 +245,11 @@ int main()
 //        particleSystem->Update(deltaTime);
 //        point->Move(vec3(1.0f,0.0f,0.0f), deltaTime);
 //        particleSystem->Move(vec3(-1.0f, 0.0f ,0.0f), deltaTime);
-        particleSystem->Move(vec3(1.0f,0.0f,0.0f), deltaTime * 0.5);
+        //particleSystem->Move(vec3(1.0f,0.0f,0.0f), deltaTime * 0.5);
         particleSystem->Update(deltaTime);
+        particleSystem2->Update(deltaTime);
+        particleSystem3->Update(deltaTime);
+        particleSystem4->Update(deltaTime);
 
         // render
         // ------
@@ -240,6 +272,9 @@ int main()
 //        particleSystem->Draw();
 //        point->Draw();
         particleSystem->Render();
+        particleSystem2->Render();
+        particleSystem3->Render();
+        particleSystem4->Render();
         
         glfwSwapBuffers(window);
         glfwPollEvents();

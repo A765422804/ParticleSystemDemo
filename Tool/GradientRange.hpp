@@ -54,8 +54,6 @@ private:
     // two gradient
     GradientPtr _gradientMin;
     GradientPtr _gradientMax;
-    
-    
 };
 
 using GradientRangePtr = std::shared_ptr<GradientRange>;

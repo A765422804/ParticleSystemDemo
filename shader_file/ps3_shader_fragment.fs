@@ -15,7 +15,6 @@ vec4 Add()
 {
     // TODO: 源码还有一个tintColor作为底色，暂略
     vec4 color = 2.0 * FragColor * texture(MainTexture, FragUV);
-    //vec4 color = FragColor;
     return color;
 }
 

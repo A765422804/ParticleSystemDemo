@@ -42,7 +42,6 @@ public:
     int _lifeTimeOffset = 18;
     
     int _capacity; // 最大粒子数量
-    int _indexCount;
     
     int _particleCountGPU; // TODO: 这是一个hack的做法，把gpu的粒子数量存在这个地方，在emit的时候+1，在kill的时候-1
     

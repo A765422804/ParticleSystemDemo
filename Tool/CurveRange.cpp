@@ -64,7 +64,7 @@ int CurveRange::EvaluateHeight()
     }
 }
 
-int CurveRange::EvaluateCurve(float time, int index)
+float CurveRange::EvaluateCurve(float time, int index)
 {
     switch (_mode) {
         case RangeMode::Constant:
@@ -110,6 +110,7 @@ Texture2DPtr CurveRange::PackCurveRangeXYZ(int samples, CurveRangePtr x, CurveRa
                 }
                 int index = (h * samples + j) * 4 + i;
                 newData[index] = average;
+                //newData[index] = sum;
             }
         }
     }

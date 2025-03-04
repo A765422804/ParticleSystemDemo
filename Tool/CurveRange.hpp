@@ -33,7 +33,7 @@ public:
 public:
     float Evaluate(float time, float rndRatio);
     int EvaluateHeight();
-    int EvaluateCurve(float time, int index);
+    float EvaluateCurve(float time, int index);
     
 public: // 生成纹理
     static Texture2DPtr PackCurveRangeXYZ(int samples, CurveRangePtr x, CurveRangePtr y, CurveRangePtr z, bool discrete = false);
