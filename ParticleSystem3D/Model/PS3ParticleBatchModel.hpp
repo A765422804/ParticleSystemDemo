@@ -11,10 +11,12 @@
 #include "../../Renderer/ParticleRenderer.hpp"
 #include "../PS3Particle.hpp"
 
+class PS3ParticleSystem;
+
 class PS3ParticleBatchModel
 {
 public:
-    PS3ParticleBatchModel(int maxParticleCount, bool useGPU);
+    PS3ParticleBatchModel(int maxParticleCount, bool useGPU, PS3ParticleSystem* ps);
     ~PS3ParticleBatchModel() = default;
     
 public:
@@ -24,12 +26,18 @@ public:
     void AddParticleVertexData(int index, PVData pvdata); // 写入粒子数据
     void AddGPUParticleVertexData(PS3ParticlePtr p, int num, float time); // 写入gpu粒子数据
     
+    void ClearGPUParticles();
+    
     void RenderModelCPU(int count); // 原版叫updateIA
     void RenderModelGPU();
     
     void UpdateGPUParticles(float time, float dt);
     
+    vec3 CalculateDeathPos(int index, float interval);
+    
 public:
+    PS3ParticleSystem *_ps;
+    
     ParticleRendererPtr _renderer; // 真正的renderer，不是PS3中的Renderer
     
     std::vector<float> _vDataF; // 存储所有的顶点数据
@@ -40,6 +48,7 @@ public:
     
     int _startTimeOffset = 3;
     int _lifeTimeOffset = 18;
+    int _positionOffset = 0;
     
     int _capacity; // 最大粒子数量
     

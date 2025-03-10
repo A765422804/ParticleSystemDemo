@@ -8,10 +8,10 @@
 #pragma once
 
 #include "PS3Common.h"
-#include "../Tool/GradientRange.hpp"
-#include "../Tool/CurveRange.hpp"
+#include "../Tool/GradientRange.hpp" // 可以删了
+#include "../Tool/CurveRange.hpp" // 可以删了
 #include "../Common/Node.hpp"
-#include "PS3Burst.hpp"
+#include "PS3Burst.hpp" // 可以删了
 #include "Renderer/PS3ParticleSystemRendererBase.hpp"
 #include "Renderer/PS3RendererCPU.hpp"
 #include "Renderer/PS3RendererGPU.hpp"
@@ -33,6 +33,7 @@
 #include "Processor/PS3ParticleProcessorCPU.hpp"
 #include "Processor/PS3ParticleProcessorGPU.hpp"
 #include "Initializer/PS3ParticleInitializer.hpp"
+#include "PS3ParticleGenerator.hpp"
 
 class PS3ParticleSystem : public Node
 {
@@ -51,28 +52,36 @@ public:
     
 public:
     void ToEmit(float dt); // 调用EmitParticles
-    void EmitParticles(int emitNum, float dt);
+    //void EmitParticles(int emitNum, float dt);
+    virtual void InitializeParticles(std::vector<PS3ParticlePtr> &particles); // 初始化粒子池
     
 public:
     void Update(float dt);
-    void Render(); // 在原版里是beforeRender
+    virtual void Render(); // 在原版里是beforeRender
+    
+public: // updateParticle
+    virtual void UpdateParticles(float dt);
+    bool UpdateParticle(PS3ParticlePtr p, float dt); // CPU特有
     
 public:
     void PrewarmSystem(); // 系统预热
     void Play();
     void Pause();
     void Stop();
-    void Clear(); // 将所有粒子清除
+    virtual void Clear(); // 将所有粒子清除
     void Reset(); // 重置粒子系统运行时的累积数据
     void ResetPosition(); // 重置position，将oldPosition和newPostion都重置为当前粒子系统的位置
     void Restart(); // 重新开始，MARK: 我自己添加的函数
     
 public:
-    int GetParticleCount();
+    virtual int GetParticleCount();
 
 public: // 子粒子系统
+    // 在子类中分为CPU和GPU两种实现
     void NotifySubEmitters(PS3ParticlePtr p, EventType event);
     void EmitSubParticles(PS3ParticlePtr p, std::shared_ptr<PS3ParticleSystem> ps);
+    void NotifySubEmitters(vec3 position, EventType event);
+    void EmitSubParticles(vec3 position, std::shared_ptr<PS3ParticleSystem> ps);
     
     void AddSubEmitter(SubEmitterConfig config)
     {
@@ -81,29 +90,32 @@ public: // 子粒子系统
     }
     
 public: // trail module
+    // CPU特有
     void SetTrailModule(PS3TrailPtr trail);
     
 public: // 属性 - 静
     // TODO: 对于一些初始属性，思考如何添加随机性
     
     // 粒子池
-    std::vector<PS3ParticlePtr> _particles;
+    std::vector<PS3ParticlePtr> _particles; // CPU 特有
     
     int _capacity;
-    PS3ParticleSystemRendererBasePtr _renderer;
-    PS3ParticleProcessorBasePtr _processor;
+    PS3ParticleSystemRendererBasePtr _renderer; // 分开来写
+    //PS3ParticleProcessorBasePtr _processor;
     
     CurveRangePtr _startDelay;
     float _duration; // 粒子系统运行时间
     bool _loop; // 是否循环运行
     float _simulationSpeed; // 粒子系统更新速度
     
-    CurveRangePtr _rateOverTime; // 随时间的发射率
-    CurveRangePtr _rateOverDistance; // 随距离的发射率
+    PS3ParticleGeneratorPtr _generator; // 粒子生成器
+    
+//    CurveRangePtr _rateOverTime; // 随时间的发射率
+//    CurveRangePtr _rateOverDistance; // 随距离的发射率
     
 //    CurveRangePtr _startSpeed; // 起始速度
     
-    std::vector<std::shared_ptr<PS3Burst>> _bursts;
+    //std::vector<std::shared_ptr<PS3Burst>> _bursts;
     
     SpaceMode _spaceMode; // 坐标系
     
@@ -138,7 +150,7 @@ public: // 属性 - 静
     PS3ParticleInitializerPtr _inilizer;
     
     // trail 模块
-    PS3TrailPtr _trailModule;
+    PS3TrailPtr _trailModule; // CPU 特有
     
     // 我自定的属性，更好的做法是用material
     Texture2DPtr _texture;
@@ -152,7 +164,7 @@ public: // 属性 - 静
     bool _prewarm;
     
     // 是否使用GPU粒子
-    bool _useGPU;
+    bool _useGPU; // 不需要了
     
 public: // 状态 - 动
     vec3 _oldWorldPos;
@@ -167,8 +179,8 @@ public: // 状态 - 动
     bool _needRefresh; // 需要刷新
     bool _needToRestart; // 是否需要重新开始
     
-    float _emitRateTimeCounter; // 随时间的发射数量
-    float _emitRateDistanceCounter; // 随距离的发射数量
+//    float _emitRateTimeCounter; // 随时间的发射数量
+//    float _emitRateDistanceCounter; // 随距离的发射数量
     
     // 当前帧时间
     float _dt;

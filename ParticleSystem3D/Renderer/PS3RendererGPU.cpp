@@ -182,6 +182,8 @@ void PS3RendererGPU::InitUniform()
 
 void PS3RendererGPU::UpdateUniform()
 {
+    InitUniform();
+    
     auto shader = _model->_renderer->_shader;
     shader->use();
     

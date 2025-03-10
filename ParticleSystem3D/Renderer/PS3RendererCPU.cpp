@@ -75,6 +75,22 @@ void PS3RendererCPU::InitUniform()
 
 void PS3RendererCPU::UpdateUniform()
 {
+    auto shader = _model->_renderer->_shader;
+    shader->use();
+    
+    // space mode
+    shader->setBool("IsLocalSpace", _ps->_spaceMode == SpaceMode::LOCAL);
+    
+    // texture animation
+    auto textureAnimation = std::dynamic_pointer_cast<PS3TextureAnimationModule>(_ps->_overtimeModules["textureAnimationOvertime"]);
+    if (textureAnimation)
+    {
+        shader->setVec2("FrameTile", vec2(textureAnimation->_numTilesX, textureAnimation->_numTilesY));
+    }
+    
+    // texture
+    _ps->_texture->BindToUniform("MainTexture", _model->_renderer->_shader, _model->_renderer->GetTextureUnit("MainTexture"));
+    
     if (!_ps->_isSubEmitter)
         _model->_renderer->SetWorldTransform(_ps->GetWorldTransform());
     else

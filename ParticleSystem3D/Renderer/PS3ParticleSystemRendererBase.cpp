@@ -9,7 +9,7 @@
 
 PS3ParticleSystemRendererBase::PS3ParticleSystemRendererBase(PS3ParticleSystem* ps, int maxParticleCount, bool useGPU)
 : _ps(ps)
-, _model(std::make_shared<PS3ParticleBatchModel>(maxParticleCount, useGPU))
+, _model(std::make_shared<PS3ParticleBatchModel>(maxParticleCount, useGPU, ps))
 {
     
 }

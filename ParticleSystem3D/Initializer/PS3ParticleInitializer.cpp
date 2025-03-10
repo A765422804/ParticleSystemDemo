@@ -15,7 +15,7 @@ PS3ParticleInitializer::PS3ParticleInitializer(PS3ParticleSystem * ps)
     _startSizeX = CurveRange::CreateCurveByConstant(0.2);
     
     // startSpeed
-    _startSpeed = CurveRange::CreateCurveByConstant(0);
+    _startSpeed = CurveRange::CreateCurveByConstant(1);
     
     // startRotation
     _startRotationZ = CurveRange::CreateCurveByConstant(0);

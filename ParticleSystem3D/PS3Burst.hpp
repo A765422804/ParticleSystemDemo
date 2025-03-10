@@ -19,7 +19,7 @@ public:
     ~PS3Burst() = default;
     
 public:
-    void Update(PS3ParticleSystem* ps, float dt);
+    int Update(PS3ParticleSystem* ps, float dt);
     void Reset();
     
 private: // 属性

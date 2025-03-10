@@ -24,8 +24,9 @@ void PS3Burst::Reset()
     _curTime = 0.0f;
 }
 
-void PS3Burst::Update(PS3ParticleSystem* ps, float dt)
+int PS3Burst::Update(PS3ParticleSystem* ps, float dt)
 {
+    int emitCount = 0;
     if (_remainingCount == 0)
     {
         _remainingCount = _repeatCount;
@@ -41,9 +42,12 @@ void PS3Burst::Update(PS3ParticleSystem* ps, float dt)
         // 如果curTime在这之间则执行burst
         if (_curTime >= preFrameTime && _curTime < curFrameTime)
         {
-            ps->EmitParticles(_count->Evaluate(_curTime / ps->_duration, 1), dt - (curFrameTime - _curTime));
+            emitCount = _count->Evaluate(_curTime / ps->_duration, 1);
+            // ps->EmitParticles(_count->Evaluate(_curTime / ps->_duration, 1), dt - (curFrameTime - _curTime));
             _curTime += _repeatInterval;
             -- _remainingCount;
         }
     }
+    
+    return emitCount;
 }
