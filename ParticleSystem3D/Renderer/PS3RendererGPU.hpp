@@ -9,26 +9,31 @@
 #include "../PS3Common.h"
 #include "PS3ParticleSystemRendererBase.hpp"
 #include "../../Function/Texture2D.hpp"
+#include "../Model/PS3ParticleBatchModelGPU.hpp"
 
-class PS3RendererGPU : public PS3ParticleSystemRendererBase
+class PS3ParticleSystem;
+
+class PS3RendererGPU
 {
-    using SuperType = PS3ParticleSystemRendererBase;
 public:
     PS3RendererGPU(PS3ParticleSystem* ps, int maxParticleCount);
     ~PS3RendererGPU() = default;
     
 public:
-    void UpdateRenderData(std::vector<PS3ParticlePtr> particles) override;
-    void Render() override;
-    void Clear() override; 
+    void Render();
+    void Clear();
     
-    void SetNewParticle(PS3ParticlePtr particle) override;
-    
-public:
-    void InitUniform() override;
-    void UpdateUniform() override;
+    void SetNewParticle(PS3ParticlePtr particle);
+    void SetNewParticles(std::vector<PS3ParticlePtr> &particles);
     
 public:
+    void InitUniform();
+    void UpdateUniform();
+    
+public:
+    PS3ParticleSystem* _ps;
+    PS3ParticleBatchModelGPUPtr _model;
+    
     // 各种曲线的texture
     Texture2DPtr _animationTexture; // 1
     Texture2DPtr _velocityTexture; // 2

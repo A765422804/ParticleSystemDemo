@@ -7,7 +7,7 @@
 
 #include "PS3ParticleProcessorGPU.hpp"
 #include "../PS3ParticleSystem.hpp"
-#include "../Model/PS3ParticleBatchModel.hpp"
+//#include "../Model/PS3ParticleBatchModel.hpp"
 
 PS3ParticleProcessorGPU::PS3ParticleProcessorGPU(PS3ParticleSystem* ps)
 : SuperType(ps)
@@ -17,7 +17,7 @@ PS3ParticleProcessorGPU::PS3ParticleProcessorGPU(PS3ParticleSystem* ps)
 
 void PS3ParticleProcessorGPU::UpdateParticles(std::vector<PS3ParticlePtr>& particles, float dt)
 {
-    _ps->_renderer->_model->UpdateGPUParticles(_ps->_time, dt);
+    //_ps->_renderer->_model->UpdateGPUParticles(_ps->_time, dt);
 }
 
 bool PS3ParticleProcessorGPU::UpdateParticle(PS3ParticlePtr p, float dt)

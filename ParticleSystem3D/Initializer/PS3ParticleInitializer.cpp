@@ -37,6 +37,10 @@ PS3ParticleInitializer::PS3ParticleInitializer(PS3ParticleSystem * ps)
 
 void PS3ParticleInitializer::InitializeParticle(PS3ParticlePtr p, float dt)
 {
+    if (_ps->_isSubEmitter)
+    {
+        int i = 0;
+    }
     if (_ps->_isSubEmitter && _ps->_spaceMode == SpaceMode::LOCAL)
     {
         // 如果是子发射器且使用相对位置，更新位置为子发射器的位置

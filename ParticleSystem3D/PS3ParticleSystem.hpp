@@ -53,35 +53,35 @@ public:
 public:
     void ToEmit(float dt); // 调用EmitParticles
     //void EmitParticles(int emitNum, float dt);
-    virtual void InitializeParticles(std::vector<PS3ParticlePtr> &particles); // 初始化粒子池
+    virtual void InitializeParticles(std::vector<PS3ParticlePtr> &particles); // 初始化粒子
     
 public:
     void Update(float dt);
     virtual void Render(); // 在原版里是beforeRender
     
 public: // updateParticle
-    virtual void UpdateParticles(float dt);
-    bool UpdateParticle(PS3ParticlePtr p, float dt); // CPU特有
+    virtual void UpdateParticles(float dt) = 0;
+    // bool UpdateParticle(PS3ParticlePtr p, float dt); // CPU特有
     
 public:
     void PrewarmSystem(); // 系统预热
     void Play();
     void Pause();
     void Stop();
-    virtual void Clear(); // 将所有粒子清除
+    virtual void Clear() = 0; // 将所有粒子清除
     void Reset(); // 重置粒子系统运行时的累积数据
     void ResetPosition(); // 重置position，将oldPosition和newPostion都重置为当前粒子系统的位置
     void Restart(); // 重新开始，MARK: 我自己添加的函数
     
 public:
-    virtual int GetParticleCount();
+    virtual int GetParticleCount() = 0;
 
 public: // 子粒子系统
     // 在子类中分为CPU和GPU两种实现
-    void NotifySubEmitters(PS3ParticlePtr p, EventType event);
-    void EmitSubParticles(PS3ParticlePtr p, std::shared_ptr<PS3ParticleSystem> ps);
-    void NotifySubEmitters(vec3 position, EventType event);
-    void EmitSubParticles(vec3 position, std::shared_ptr<PS3ParticleSystem> ps);
+//    void NotifySubEmitters(PS3ParticlePtr p, EventType event);
+//    void EmitSubParticles(PS3ParticlePtr p, std::shared_ptr<PS3ParticleSystem> ps);
+//    void NotifySubEmitters(vec3 position, EventType event);
+//    void EmitSubParticles(vec3 position, std::shared_ptr<PS3ParticleSystem> ps);
     
     void AddSubEmitter(SubEmitterConfig config)
     {
@@ -91,16 +91,16 @@ public: // 子粒子系统
     
 public: // trail module
     // CPU特有
-    void SetTrailModule(PS3TrailPtr trail);
+    //void SetTrailModule(PS3TrailPtr trail);
     
 public: // 属性 - 静
     // TODO: 对于一些初始属性，思考如何添加随机性
     
     // 粒子池
-    std::vector<PS3ParticlePtr> _particles; // CPU 特有
+    // std::vector<PS3ParticlePtr> _particles; // CPU 特有
     
     int _capacity;
-    PS3ParticleSystemRendererBasePtr _renderer; // 分开来写
+    // PS3ParticleSystemRendererBasePtr _renderer; // 分开来写
     //PS3ParticleProcessorBasePtr _processor;
     
     CurveRangePtr _startDelay;
@@ -150,7 +150,7 @@ public: // 属性 - 静
     PS3ParticleInitializerPtr _inilizer;
     
     // trail 模块
-    PS3TrailPtr _trailModule; // CPU 特有
+    // PS3TrailPtr _trailModule; // CPU 特有
     
     // 我自定的属性，更好的做法是用material
     Texture2DPtr _texture;
@@ -164,7 +164,7 @@ public: // 属性 - 静
     bool _prewarm;
     
     // 是否使用GPU粒子
-    bool _useGPU; // 不需要了
+    // bool _useGPU; // 不需要了
     
 public: // 状态 - 动
     vec3 _oldWorldPos;

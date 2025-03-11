@@ -23,14 +23,14 @@ PS3ParticleSystem::PS3ParticleSystem(int maxParticleCount)
 , _startDelay(nullptr)
 //, _rateOverTime(nullptr)
 //, _rateOverDistance(nullptr)
-, _renderer(nullptr)
+//, _renderer(nullptr)
 , _shapeModule(nullptr)
 , _texture(nullptr)
 , _spaceMode(SpaceMode::LOCAL)
-, _trailModule(nullptr)
+//, _trailModule(nullptr)
 //, _processor(nullptr)
 , _inilizer(nullptr)
-, _useGPU(true)
+//, _useGPU(false)
 , _generator(nullptr)
 {
     // processor
@@ -70,14 +70,14 @@ PS3ParticleSystem::PS3ParticleSystem(int maxParticleCount)
 //    _rateOverDistance = CurveRange::CreateCurveByConstant(0);
     
     // renderer
-    if (_useGPU)
-    {
-        _renderer = std::make_shared<PS3RendererGPU>(this, maxParticleCount);
-    }
-    else
-    {
-        _renderer = std::make_shared<PS3RendererCPU>(this, maxParticleCount);
-    }
+//    if (_useGPU)
+//    {
+//        _renderer = std::make_shared<PS3RendererGPU>(this, maxParticleCount);
+//    }
+//    else
+//    {
+//        _renderer = std::make_shared<PS3RendererCPU>(this, maxParticleCount);
+//    }
 
     //_shapeModule = PS3BoxEmitter::CreateBoxEmitter(EmitLocation::VOLUME, this);
     //_shapeModule = PS3ConeEmitter::CreateConeEmitter(EmitLocation::VOLUME, ArcMode::RANDOM, 0, 360, 0, 0.5, 1, 10, 30, 2, this);
@@ -143,7 +143,7 @@ PS3ParticleSystem::PS3ParticleSystem(int maxParticleCount)
     //_texture->BindToUniform("MainTexture", _renderer->_model->_renderer->_shader, _renderer->_model->_renderer->GetTextureUnit("MainTexture"));
     
     // 初始化renderer的uniform
-    _renderer->InitUniform();
+    // _renderer->InitUniform();
 }
 
 void PS3ParticleSystem::ToEmit(float dt) // 调用EmitParticles
@@ -321,80 +321,80 @@ void PS3ParticleSystem::Update(float dt)
 
 void PS3ParticleSystem::UpdateParticles(float dt)
 {
-    if (_useGPU)
-    {
-        _renderer->_model->UpdateGPUParticles(_time, dt);
-    }
-    else
-    {
-        for (int i = 0 ; i < _particles.size() ; ++i)
-        {
-            auto p = _particles[i];
-            if (!UpdateParticle(p, dt))
-            {
-                // 说明第i个粒子消亡
-                _particles.erase(_particles.begin() + i);
-                -- i;
-            }
-        }
-    }
+//    if (_useGPU)
+//    {
+//        _renderer->_model->UpdateGPUParticles(_time, dt);
+//    }
+//    else
+//    {
+//        for (int i = 0 ; i < _particles.size() ; ++i)
+//        {
+//            auto p = _particles[i];
+//            if (!UpdateParticle(p, dt))
+//            {
+//                // 说明第i个粒子消亡
+//                _particles.erase(_particles.begin() + i);
+//                -- i;
+//            }
+//        }
+//    }
 }
 
-bool PS3ParticleSystem::UpdateParticle(PS3ParticlePtr p, float dt)
-{
-    // 生命周期衰减
-    p->_remainingLifeTime -= dt;
-    
-    if (p->_remainingLifeTime < 0.0)
-    {
-        // Trigger了死亡事件
-        NotifySubEmitters(p, EventType::DEATH);
-        
-        if (_trailModule)
-            _trailModule->RemoveParticle(p);
-        
-        // 移除死亡粒子
-        return false; // 表示粒子死亡
-    }
-    
-    // 重力使用
-    if (_gravity != nullptr)
-    {
-        float normalizedTime = 1 - p->_remainingLifeTime / p->_startLifeTime;
-        float gravityEffect = -_gravity->Evaluate(normalizedTime, Random01()) * 9.8 * dt;
-        if (_spaceMode == SpaceMode::LOCAL)
-        {
-            vec4 gravity = vec4(0, gravityEffect, 0, 1);
-            gravity = transpose(toMat4(GetRotation()))  * gravity;
-            p->_velocity.x += gravity.x;
-            p->_velocity.y += gravity.y;
-            p->_velocity.z += gravity.z;
-        }
-        else
-        {
-            p->_velocity.y += gravityEffect;
-        }
-    }
-    
-    // 更新粒子最终速度
-    p->_ultimateVelocity = p->_velocity;
-    
-    // 应用动画
-    for (auto [key, value] : _overtimeModules)
-    {
-        if (value && value->_enable)
-            value->Animate(p, dt);
-    }
-    
-    // 更新位置
-    p->_position = p->_position + p->_ultimateVelocity * dt;
-    
-    // 更新粒子的拖尾
-    if (_trailModule)
-        _trailModule->Animate(p, dt);
-    
-    return true;
-}
+//bool PS3ParticleSystem::UpdateParticle(PS3ParticlePtr p, float dt)
+//{
+//    // 生命周期衰减
+//    p->_remainingLifeTime -= dt;
+//    
+//    if (p->_remainingLifeTime < 0.0)
+//    {
+//        // Trigger了死亡事件
+//        NotifySubEmitters(p, EventType::DEATH);
+//        
+////        if (_trailModule)
+////            _trailModule->RemoveParticle(p);
+//        
+//        // 移除死亡粒子
+//        return false; // 表示粒子死亡
+//    }
+//    
+//    // 重力使用
+//    if (_gravity != nullptr)
+//    {
+//        float normalizedTime = 1 - p->_remainingLifeTime / p->_startLifeTime;
+//        float gravityEffect = -_gravity->Evaluate(normalizedTime, Random01()) * 9.8 * dt;
+//        if (_spaceMode == SpaceMode::LOCAL)
+//        {
+//            vec4 gravity = vec4(0, gravityEffect, 0, 1);
+//            gravity = transpose(toMat4(GetRotation()))  * gravity;
+//            p->_velocity.x += gravity.x;
+//            p->_velocity.y += gravity.y;
+//            p->_velocity.z += gravity.z;
+//        }
+//        else
+//        {
+//            p->_velocity.y += gravityEffect;
+//        }
+//    }
+//    
+//    // 更新粒子最终速度
+//    p->_ultimateVelocity = p->_velocity;
+//    
+//    // 应用动画
+//    for (auto [key, value] : _overtimeModules)
+//    {
+//        if (value && value->_enable)
+//            value->Animate(p, dt);
+//    }
+//    
+//    // 更新位置
+//    p->_position = p->_position + p->_ultimateVelocity * dt;
+//    
+//    // 更新粒子的拖尾
+////    if (_trailModule)
+////        _trailModule->Animate(p, dt);
+//    
+//    return true;
+//}
 
 void PS3ParticleSystem::Play()
 {
@@ -423,15 +423,15 @@ void PS3ParticleSystem::Play()
         PrewarmSystem();
     }
     
-    if (_trailModule)
-    {
-        // TODO: 这里其实是基于trailModule的model去enable，对我而言不需要
-    }
+//    if (_trailModule)
+//    {
+//        // TODO: 这里其实是基于trailModule的model去enable，对我而言不需要
+//    }
     
-    if (_renderer)
-    {
-        _renderer->_model->_enabled = true;
-    }
+//    if (_renderer)
+//    {
+//        _renderer->_model->_enabled = true;
+//    }
     
     // MARK: 这里是我添加的逻辑，就是如果有子发射器话，让子发射器也执行对应的play函数
     for (auto sub : _subEmitters)
@@ -496,13 +496,13 @@ void PS3ParticleSystem::Restart()
 
 void PS3ParticleSystem::Clear()
 {
-    if (!_useGPU)
-        _particles.clear();
-    else
-        _renderer->_model->ClearGPUParticles();
-    
-    if (_trailModule)
-        _trailModule->Clear();
+//    if (!_useGPU)
+//        _particles.clear();
+//    else
+//        _renderer->_model->ClearGPUParticles();
+//    
+//    if (_trailModule)
+//        _trailModule->Clear();
 }
 
 void PS3ParticleSystem::Reset()
@@ -514,7 +514,6 @@ void PS3ParticleSystem::Reset()
     ResetPosition();
     
     _generator->Reset();
-    
 }
 
 void PS3ParticleSystem::PrewarmSystem()
@@ -533,14 +532,14 @@ void PS3ParticleSystem::PrewarmSystem()
 
 void PS3ParticleSystem::Render()
 {
-    _renderer->UpdateRenderData(_particles);
-    _renderer->Render();
+    //_renderer->UpdateRenderData(_particles);
+    // _renderer->Render();
     
-    if (_trailModule)
-    {
-        _trailModule->UpdateRenderData();
-        _trailModule->Render();
-    }
+//    if (_trailModule)
+//    {
+//        _trailModule->UpdateRenderData();
+//        _trailModule->Render();
+//    }
     
     // 渲染发射器的线框
     if (_shapeModule && !_isSubEmitter)
@@ -551,45 +550,46 @@ void PS3ParticleSystem::Render()
         sub.TargetEmitter->Render();
 }
 
-int PS3ParticleSystem::GetParticleCount()
-{
-    if (!_useGPU)
-        return int(_particles.size());
-    else
-        return _renderer->_model->_particleCountGPU;
-}
+//int PS3ParticleSystem::GetParticleCount()
+//{
+////    if (!_useGPU)
+////        return int(_particles.size());
+////    else
+////        return _renderer->_model->_particleCountGPU;
+//    return 0;
+//}
 
-void PS3ParticleSystem::NotifySubEmitters(PS3ParticlePtr p, EventType event)
-{
-    for (auto& sub : _subEmitters)
-    {
-        if (sub.TriggerType == event)
-        {
-            EmitSubParticles(p, sub.TargetEmitter);
-        }
-    }
-}
-
-void PS3ParticleSystem::NotifySubEmitters(vec3 position, EventType event)
-{
-    for (auto& sub : _subEmitters)
-    {
-        if (sub.TriggerType == event)
-        {
-            EmitSubParticles(position, sub.TargetEmitter);
-        }
-    }
-}
-
-void PS3ParticleSystem::EmitSubParticles(vec3 position, std::shared_ptr<PS3ParticleSystem> ps)
-{
-    ps->SetPosition3D(position); // 如果是worldSpace，此处获得worldPos，否则获得localPos
-    
-    auto particles = ps->_generator->GenerateParticles(20);
-    if (particles.size() == 0)
-        return;
-    ps->InitializeParticles(particles);
-}
+//void PS3ParticleSystem::NotifySubEmitters(PS3ParticlePtr p, EventType event)
+//{
+//    for (auto& sub : _subEmitters)
+//    {
+//        if (sub.TriggerType == event)
+//        {
+//            EmitSubParticles(p, sub.TargetEmitter);
+//        }
+//    }
+//}
+//
+//void PS3ParticleSystem::NotifySubEmitters(vec3 position, EventType event)
+//{
+//    for (auto& sub : _subEmitters)
+//    {
+//        if (sub.TriggerType == event)
+//        {
+//            EmitSubParticles(position, sub.TargetEmitter);
+//        }
+//    }
+//}
+//
+//void PS3ParticleSystem::EmitSubParticles(vec3 position, std::shared_ptr<PS3ParticleSystem> ps)
+//{
+//    ps->SetPosition3D(position); // 如果是worldSpace，此处获得worldPos，否则获得localPos
+//    
+//    auto particles = ps->_generator->GenerateParticles(20);
+//    if (particles.size() == 0)
+//        return;
+//    ps->InitializeParticles(particles);
+//}
 
 void PS3ParticleSystem::InitializeParticles(std::vector<PS3ParticlePtr> &particles)
 {
@@ -611,30 +611,32 @@ void PS3ParticleSystem::InitializeParticles(std::vector<PS3ParticlePtr> &particl
         _inilizer->InitializeParticle(particle, loopDelta);
         
         // 将粒子数据传递给渲染器
-        _renderer->SetNewParticle(particle);
+        //_renderer->SetNewParticle(particle); // GPU 特有
         
-        if (!_useGPU)
-            _particles.push_back(particle);
+//        if (!_useGPU)
+//            _particles.push_back(particle); // CPU 特有
         
         // 通知子发射器发生了粒子出生事件
-        NotifySubEmitters(particle, EventType::SPAWN);
+        //NotifySubEmitters(particle, EventType::SPAWN);
     }
-}
-
-void PS3ParticleSystem::EmitSubParticles(PS3ParticlePtr p, std::shared_ptr<PS3ParticleSystem> ps)
-{
-    // 得到子发射器的位置
-    ps->SetPosition3D(p->_position); // 如果是worldSpace，此处获得worldPos，否则获得localPos
     
-    auto particles = ps->_generator->GenerateParticles(20);
-    if (particles.size() == 0)
-        return;
-    ps->InitializeParticles(particles);
-    // ps->EmitParticles(72, 0);
+    //_particles.insert(_particles.end(), particles.begin(), particles.end());
 }
 
-void PS3ParticleSystem::SetTrailModule(PS3TrailPtr trail)
-{
-    _trailModule = trail;
-    _trailModule->_ps = this;
-}
+//void PS3ParticleSystem::EmitSubParticles(PS3ParticlePtr p, std::shared_ptr<PS3ParticleSystem> ps)
+//{
+//    // 得到子发射器的位置
+//    ps->SetPosition3D(p->_position); // 如果是worldSpace，此处获得worldPos，否则获得localPos
+//    
+//    auto particles = ps->_generator->GenerateParticles(20);
+//    if (particles.size() == 0)
+//        return;
+//    ps->InitializeParticles(particles);
+//    // ps->EmitParticles(72, 0);
+//}
+
+//void PS3ParticleSystem::SetTrailModule(PS3TrailPtr trail)
+//{
+////    _trailModule = trail;
+////    _trailModule->_ps = this;
+//}

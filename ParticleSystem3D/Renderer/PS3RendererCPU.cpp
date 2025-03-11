@@ -9,14 +9,19 @@
 #include "../PS3ParticleSystem.hpp"
 
 PS3RendererCPU::PS3RendererCPU(PS3ParticleSystem* ps, int maxParticleCount)
-: SuperType(ps, maxParticleCount, false)
+: _ps(ps)
+, _model(std::make_shared<PS3ParticleBatchModelCPU>(maxParticleCount,ps))
 {
     
 }
 
 void PS3RendererCPU::Clear()
 {
-    SuperType::Clear();
+    if (_model)
+        _model->_enabled = false;
+    // 清空粒子
+    _model->_iDataI.clear();
+    _model->_vDataF.clear();
 }
 
 void PS3RendererCPU::UpdateRenderData(std::vector<PS3ParticlePtr> particles)
@@ -47,11 +52,6 @@ void PS3RendererCPU::FillMeshData(PS3ParticlePtr p, int idx, float fi)
         _particleVertexData.Color = p->_color;
         _model->AddParticleVertexData(idx ++, _particleVertexData);
     }
-}
-
-void PS3RendererCPU::SetNewParticle(PS3ParticlePtr particle)
-{
-    // do nothing
 }
 
 void PS3RendererCPU::InitUniform()
@@ -103,5 +103,5 @@ void PS3RendererCPU::UpdateUniform()
 void PS3RendererCPU::Render()
 {
     UpdateUniform();
-    _model->RenderModelCPU(_ps->GetParticleCount());
+    _model->RenderModel(_ps->GetParticleCount());
 }

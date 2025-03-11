@@ -12,19 +12,19 @@ const int SampleNum = 128;
 const float SampleInterval = 1.0f / (SampleNum - 1);
 
 PS3RendererGPU::PS3RendererGPU(PS3ParticleSystem* ps, int maxParticleCount)
-: SuperType(ps, maxParticleCount, true)
+: _ps(ps)
+, _model(std::make_shared<PS3ParticleBatchModelGPU>(maxParticleCount,ps))
 {
     
 }
 
-void PS3RendererGPU::UpdateRenderData(std::vector<PS3ParticlePtr> particles)
-{
-    // MARK: do nothing
-}
-
 void PS3RendererGPU::Clear()
 {
-    SuperType::Clear();
+    if (_model)
+        _model->_enabled = false;
+    // 清空粒子
+    _model->_iDataI.clear();
+    _model->_vDataF.clear();
 }
 
 void PS3RendererGPU::InitUniform()
@@ -203,12 +203,20 @@ void PS3RendererGPU::UpdateUniform()
 void PS3RendererGPU::Render()
 {
     UpdateUniform();
-    _model->RenderModelGPU();
+    _model->RenderModel();
 }
 
 void PS3RendererGPU::SetNewParticle(PS3ParticlePtr p)
 {
     // 把新粒子的数据传给model
-    _model->AddGPUParticleVertexData(p, _model->_particleCountGPU, _ps->_time);
-    ++ _model->_particleCountGPU;
+    _model->AddParticleVertexData(p, _model->_particleCount, _ps->_time);
+    ++ _model->_particleCount;
+}
+
+void PS3RendererGPU::SetNewParticles(std::vector<PS3ParticlePtr> &particles)
+{
+    for (auto &p : particles)
+    {
+        SetNewParticle(p);
+    }
 }

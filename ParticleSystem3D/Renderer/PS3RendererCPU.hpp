@@ -9,32 +9,32 @@
 
 #include "../PS3Common.h"
 #include "PS3ParticleSystemRendererBase.hpp"
+#include "../Model/PS3ParticleBatchModelCPU.hpp"
 
-class PS3RendererCPU : public PS3ParticleSystemRendererBase
+class PS3ParticleSystem;
+
+class PS3RendererCPU
 {
-    using SuperType = PS3ParticleSystemRendererBase;
 public:
     PS3RendererCPU(PS3ParticleSystem* ps, int maxParticleCount);
     ~PS3RendererCPU() = default;
     
 public:
-    //int UpdateParticles(float dt) override;
+    void UpdateRenderData(std::vector<PS3ParticlePtr> particles);
+    void Render(); // 在原版里是beforeRender
+    void Clear();
     
 public:
-    void UpdateRenderData(std::vector<PS3ParticlePtr> particles) override;
-    void Render() override; // 在原版里是beforeRender
-    void Clear() override; 
-    
-    void SetNewParticle(PS3ParticlePtr particle) override;
-    
-public:
-    void InitUniform() override;
-    void UpdateUniform() override;
+    void InitUniform();
+    void UpdateUniform();
     
 public:
     void FillMeshData(PS3ParticlePtr particle, int idx, float fi); // 本来应该根据RenderMode有多种func，暂时只写FillMeshData
     
 public:
+    PS3ParticleSystem* _ps;
+    PS3ParticleBatchModelCPUPtr _model;
+    
     PVData _particleVertexData; // 顶点属性data
 };
 

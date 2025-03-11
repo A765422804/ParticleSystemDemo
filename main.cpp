@@ -9,6 +9,7 @@
 #include "Common/Node.hpp"
 #include "Point/Point.hpp"
 #include "ParticleSystem3D/PS3ParticleSystem.hpp"
+#include "ParticleSystem3D/PS3ParticleSystemGPU.hpp"
 #include "Common/Background.hpp"
 #include "Common/KeyPoint.hpp"
 #include "ParticleSystem3D/Renderer/PS3Trail.hpp"
@@ -92,12 +93,12 @@ int main()
 //    particleSystem->SetPosition3D(vec3(-4.0, -4.0f,0.0f));
     
     // ParticleSystem3D
-    PS3ParticleSystemPtr particleSystem = std::make_shared<PS3ParticleSystem>(10000);
+    PS3ParticleSystemGPUPtr particleSystem = std::make_shared<PS3ParticleSystemGPU>(10000);
     particleSystem->_renderer->_model->_renderer->SetCamera(camera);
     particleSystem->_shapeModule->_emitterRenderer->SetCamera(camera);
     particleSystem->SetRotation(vec3(0, 0, 0));
     //particleSystem->PrewarmSystem();
-    PS3ParticleSystemPtr subSystem = std::make_shared<PS3ParticleSystem>(500);
+    PS3ParticleSystemGPUPtr subSystem = std::make_shared<PS3ParticleSystemGPU>(500);
     subSystem->_renderer->_model->_renderer->SetCamera(camera);
 //////    subSystem->_shapeModule = PS3ShapeModule::CreateSphereEmitter(EmitLocation::VOLUME, 0.001, 0, subSystem.get()); // hack TODO: 把构造放到ParticleSystem之外后，删掉这里
     subSystem->_shapeModule = PS3CircleEmitter::CreateCircleEmitter(ArcMode::EVEN, 0, 360, CurveRange::CreateCurveByConstant(90), 0.1, 0, 5, subSystem.get());
