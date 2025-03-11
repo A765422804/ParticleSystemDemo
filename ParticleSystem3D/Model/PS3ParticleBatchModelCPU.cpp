@@ -25,7 +25,7 @@ PS3ParticleBatchModelCPU::PS3ParticleBatchModelCPU(int maxParticleCount, PS3Part
 
     _iDataI.resize(6 * maxParticleCount);
     
-    _renderer = std::make_shared<ParticleRenderer>(false);
+    _renderer = std::make_shared<ParticleGLInterface>(false, ps);
     
     SetVertexAttributes();
     SetIndexData();

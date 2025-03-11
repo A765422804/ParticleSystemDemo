@@ -137,7 +137,7 @@ void PS3ParticleSystemCPU::EmitSubParticles(PS3ParticlePtr p, std::shared_ptr<PS
     // 得到子发射器的位置
     ps->SetPosition3D(p->_position); // 如果是worldSpace，此处获得worldPos，否则获得localPos
     
-    auto particles = ps->_generator->GenerateParticles(20);
+    auto particles = ps->_generator->GenerateParticles(72);
     if (particles.size() == 0)
         return;
     ps->InitializeParticles(particles);

@@ -81,23 +81,44 @@ Texture2D::Texture2D(const std::vector<float>& data, int width, int height,GLenu
 
 void Texture2D::BindToUniform(const std::string& uniformName, ShaderPtr shader, GLuint textureUnit) const
 {
-    shader->use();
-    // 获取 uniform 位置
-    GLint loc = glGetUniformLocation(shader->ID, uniformName.c_str());
-    if (loc == -1)
-    {
-        throw std::runtime_error("Could not find uniform variable '" + uniformName + "'");
+    // 检查 OpenGL 上下文
+    if (!glIsProgram(shader->ID)) {
+        std::cerr << "Invalid OpenGL context or shader program." << std::endl;
+        return;
     }
 
+    // 绑定着色器程序
+    shader->use();
+
+    // 获取 Uniform 变量位置
+    GLint loc = glGetUniformLocation(shader->ID, uniformName.c_str());
+    if (loc == -1) {
+        std::cerr << "Uniform variable '" << uniformName << "' not found or not used in shader." << std::endl;
+        return;
+    }
+
+    // 检查纹理单元范围
+    GLint maxTextureUnits;
+    glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &maxTextureUnits);
+    if (textureUnit >= maxTextureUnits) {
+        std::cerr << "Texture unit " << textureUnit << " is out of range. Max supported: " << maxTextureUnits << std::endl;
+        return;
+    }
+
+    // 检查纹理 ID 有效性
+    if (textureID == 0 || !glIsTexture(textureID)) {
+        std::cerr << "Texture ID is invalid. Did you forget to generate the texture?" << std::endl;
+        return;
+    }
+
+    // 激活纹理单元并绑定纹理
     glActiveTexture(GL_TEXTURE0 + textureUnit);
-    std::cout<< " Texture2D::BindToUniform:" << textureUnit << " textureID: " << textureID <<" loc: " << loc << std::endl;
-    
-    // 绑定纹理
     glBindTexture(GL_TEXTURE_2D, textureID);
-    
-    // 设置 uniform 变量
+
+    // 设置 Uniform 变量
     glUniform1i(loc, textureUnit);
-    
+
+    // 检查 OpenGL 错误
     GLenum err;
     while ((err = glGetError()) != GL_NO_ERROR) {
         std::cerr << "OpenGL error: " << err << std::endl;

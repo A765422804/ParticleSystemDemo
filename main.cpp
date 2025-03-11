@@ -10,6 +10,7 @@
 #include "Point/Point.hpp"
 #include "ParticleSystem3D/PS3ParticleSystem.hpp"
 #include "ParticleSystem3D/PS3ParticleSystemGPU.hpp"
+#include "ParticleSystem3D/PS3ParticleSystemCPU.hpp"
 #include "Common/Background.hpp"
 #include "Common/KeyPoint.hpp"
 #include "ParticleSystem3D/Renderer/PS3Trail.hpp"
@@ -35,8 +36,8 @@ int main()
     // glfw: initialize and configure
     // ------------------------------
     glfwInit();
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 #ifdef __APPLE__
@@ -97,10 +98,8 @@ int main()
     particleSystem->_renderer->_model->_renderer->SetCamera(camera);
     particleSystem->_shapeModule->_emitterRenderer->SetCamera(camera);
     particleSystem->SetRotation(vec3(0, 0, 0));
-    //particleSystem->PrewarmSystem();
-    PS3ParticleSystemGPUPtr subSystem = std::make_shared<PS3ParticleSystemGPU>(500);
+    PS3ParticleSystemGPUPtr subSystem = std::make_shared<PS3ParticleSystemGPU>(5000);
     subSystem->_renderer->_model->_renderer->SetCamera(camera);
-//////    subSystem->_shapeModule = PS3ShapeModule::CreateSphereEmitter(EmitLocation::VOLUME, 0.001, 0, subSystem.get()); // hack TODO: 把构造放到ParticleSystem之外后，删掉这里
     subSystem->_shapeModule = PS3CircleEmitter::CreateCircleEmitter(ArcMode::EVEN, 0, 360, CurveRange::CreateCurveByConstant(90), 0.1, 0, 5, subSystem.get());
     subSystem->_isEmitting = false;
     subSystem->SetRotation(vec3(90, 0, 0));
@@ -196,6 +195,27 @@ int main()
 //    while ((err = glGetError()) != GL_NO_ERROR) {
 //        std::cerr << "OpenGL error: " << err << std::endl;
 //    }
+//    
+//    // 创建 Transform Feedback 对象
+//    unsigned int TBO;
+//    glGenTransformFeedbacks(1, &TBO);
+//    glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, TBO);
+//
+//    // 创建一个新的 VBO 用于存储 Transform Feedback 捕获的数据
+//    unsigned int feedbackVBO;
+//    glGenBuffers(1, &feedbackVBO);
+//    glBindBuffer(GL_ARRAY_BUFFER, feedbackVBO);
+//    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), nullptr, GL_STATIC_READ);
+//
+//    // 将 feedbackVBO 绑定到 Transform Feedback 对象
+//    glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, feedbackVBO);
+//    
+//    // 设置 Transform Feedback 捕获的变量
+//    const char* feedbackVaryings[] = { "outPos" };
+//    glTransformFeedbackVaryings(shader->ID, 1, feedbackVaryings, GL_INTERLEAVED_ATTRIBS);
+//
+//    // 重新链接着色器程序
+//    glLinkProgram(shader->ID);
     
     // 再来三个ps
 //    PS3ParticleSystemPtr particleSystem2 = std::make_shared<PS3ParticleSystem>(10000);
@@ -265,9 +285,32 @@ int main()
 //        shader->use();
 //        // 绑定 VAO
 //        glBindVertexArray(VAO);
+//        
+//        // 开始 Transform Feedback
+//        glBeginTransformFeedback(GL_TRIANGLES);
 //
 //        // 绘制三角形
 //        glDrawArrays(GL_TRIANGLES, 0, 3);
+//        
+//        // 结束 Transform Feedback
+//        glEndTransformFeedback();
+//        
+//        // 从 feedbackVBO 中读取捕获的顶点数据
+//        glBindBuffer(GL_ARRAY_BUFFER, feedbackVBO);
+//        float* feedbackData = (float*)glMapBuffer(GL_ARRAY_BUFFER, GL_READ_ONLY);
+//
+//        // 输出捕获的顶点数据
+//        if (feedbackData) {
+//            std::cout << "Frame " << currentFrame << " captured positions:" << std::endl;
+//            for (int i = 0; i < 3; ++i) { // 3 个顶点
+//                std::cout << "Vertex " << i << ": ("
+//                          << feedbackData[i * 3] << ", " // 位置 x
+//                          << feedbackData[i * 3 + 1] << ", " // 位置 y
+//                          << feedbackData[i * 3 + 2] << ")" // 位置 z
+//                          << std::endl;
+//            }
+//            glUnmapBuffer(GL_ARRAY_BUFFER);
+//        }
 //
 //        // 解绑 VAO
 //        glBindVertexArray(0);

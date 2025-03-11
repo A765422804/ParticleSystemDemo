@@ -59,7 +59,7 @@ void PS3ParticleSystemGPU::EmitSubParticles(vec3 position, std::shared_ptr<PS3Pa
 {
     ps->SetPosition3D(position); // 如果是worldSpace，此处获得worldPos，否则获得localPos
     
-    auto particles = ps->_generator->GenerateParticles(72);
+    auto particles = ps->_generator->GenerateParticles(36);
     if (particles.size() == 0)
         return;
     ps->InitializeParticles(particles);

@@ -198,6 +198,9 @@ void PS3RendererGPU::UpdateUniform()
     // time and delta
     vec2 timeDelta = vec2(_ps->_time, _ps->_dt);
     shader->setVec2("Time_Delta", timeDelta);
+    
+    // overtime info
+    
 }
 
 void PS3RendererGPU::Render()

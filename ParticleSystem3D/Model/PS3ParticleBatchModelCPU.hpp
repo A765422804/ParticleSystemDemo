@@ -8,7 +8,7 @@
 #pragma once
 
 #include "../PS3Common.h"
-#include "../../Renderer/ParticleRenderer.hpp"
+#include "../../Renderer/ParticleGLInterface.hpp"
 #include "../PS3Particle.hpp"
 
 // TODO: 仅保留基于CPU的逻辑
@@ -40,7 +40,7 @@ public:
 public:
     PS3ParticleSystem *_ps; // BOTH
     
-    ParticleRendererPtr _renderer; // 真正的renderer，不是PS3中的Renderer // BOTH
+    ParticleGLInterfacePtr _renderer; // 真正的renderer，不是PS3中的Renderer // BOTH
     
     std::vector<float> _vDataF; // 存储所有的顶点数据 // BOTH
     std::vector<int> _iDataI; // 这是我自己定义的，存储indexdata，对应初始化函数是SetIndexData // BOTH

@@ -7,7 +7,7 @@
 
 #pragma once
 #include "../PS3Common.h"
-#include "../../Renderer/ParticleRenderer.hpp"
+#include "../../Renderer/ParticleGLInterface.hpp"
 #include "../PS3Particle.hpp"
 
 // GPU模型的逻辑
@@ -32,11 +32,9 @@ public:
     void RenderModel();
     
     void UpdateParticles(float time, float dt);
-    
-    vec3 CalculateDeathPos(int index, float interval);
 public:
     PS3ParticleSystem *_ps;
-    ParticleRendererPtr _renderer;
+    ParticleGLInterfacePtr _renderer;
     
     std::vector<float> _vDataF; // 存储所有的顶点数据
     std::vector<int> _iDataI; // 这是我自己定义的，存储indexdata，对应初始化函数是SetIndexData

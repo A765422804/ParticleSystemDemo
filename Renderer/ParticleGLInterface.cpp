@@ -5,12 +5,15 @@
 //  Created by evanbfeng on 2025/1/17.
 //
 
-#include "ParticleRenderer.hpp"
+#include "ParticleGLInterface.hpp"
+#include "../ParticleSystem3D/PS3ParticleSystemGPU.hpp"
 
 const GLuint MAX_TEXTURE_UNITS = 80;
+const GLuint MAX_PARTICLES = 100000;
 
-ParticleRenderer::ParticleRenderer(bool useGPU)
-: VAO(0)
+ParticleGLInterface::ParticleGLInterface(bool useGPU, PS3ParticleSystem* ps)
+: _ps(ps)
+, VAO(0)
 , VBO(0)
 , EBO(0)
 , _shader(nullptr)
@@ -29,10 +32,28 @@ ParticleRenderer::ParticleRenderer(bool useGPU)
     else
     {
         _shader = std::make_shared<Shader>("./shader_file/ps3_shader_gpu_vertex.vs", "./shader_file/ps3_shader_gpu_fragment.fs");
+        
+        // 创建 Transform Feedback 缓冲区
+            glGenBuffers(1, &_deadParticleBuffer);
+            glBindBuffer(GL_TRANSFORM_FEEDBACK_BUFFER, _deadParticleBuffer);
+            glBufferData(GL_TRANSFORM_FEEDBACK_BUFFER, sizeof(vec3) * MAX_PARTICLES, nullptr, GL_STATIC_READ);
+            
+            // 创建 Transform Feedback 对象
+            glGenTransformFeedbacks(1, &_TFBO);
+            glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, _TFBO);
+        
+            glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, _deadParticleBuffer);
+        
+            // 设置 Transform Feedback 输出变量
+            const char* varyings[] = { "DeadParticlePosition" };
+            glTransformFeedbackVaryings(_shader->ID, 1, varyings, GL_SEPARATE_ATTRIBS);
+            
+            // 重新链接着色器程序
+            glLinkProgram(_shader->ID);
     }
 }
 
-void ParticleRenderer::SetupVertexDesc()
+void ParticleGLInterface::SetupVertexDesc()
 {
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
@@ -90,25 +111,25 @@ void ParticleRenderer::SetupVertexDesc()
     glBindVertexArray(0);
 }
 
-void ParticleRenderer::SetVertexData(std::vector<float> vertices)
+void ParticleGLInterface::SetVertexData(std::vector<float> vertices)
 {
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_DYNAMIC_DRAW);
 }
 
-void ParticleRenderer::SetIndexData(std::vector<unsigned int> indices)
+void ParticleGLInterface::SetIndexData(std::vector<unsigned int> indices)
 {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size()* sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
     _indexCount = (unsigned int)indices.size();
 }
 
-void ParticleRenderer::SetCamera(CameraPtr camera)
+void ParticleGLInterface::SetCamera(CameraPtr camera)
 {
     _camera = camera;
 }
 
-void ParticleRenderer::Render()
+void ParticleGLInterface::Render()
 {
     _shader->use();
     
@@ -122,18 +143,59 @@ void ParticleRenderer::Render()
     _shader->setMat4("ViewInverse", viewInverse);
     
     glBindVertexArray(VAO);
-    glDrawElements(GL_TRIANGLES, _indexCount, GL_UNSIGNED_INT, 0);
     
+    if (_type == ParticleType::GPU)
+    {
+        glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, _deadParticleBuffer);
+        
+        // 开始 Transform Feedback
+        glBeginTransformFeedback(GL_TRIANGLES);
+         
+         // 绘制粒子
+         glDrawElements(GL_TRIANGLES, _indexCount, GL_UNSIGNED_INT, 0);
+        
+         // 检查错误
+        GLenum err;
+        while ((err = glGetError()) != GL_NO_ERROR) {
+            std::cerr << "OpenGL error: " << err << std::endl;
+        }
+         
+         // 结束 Transform Feedback
+         glEndTransformFeedback();
+        
+         // 读取捕获的数据
+         glBindBuffer(GL_TRANSFORM_FEEDBACK_BUFFER, _deadParticleBuffer);
+         vec3* deadParticlePositions = (vec3*)glMapBuffer(GL_TRANSFORM_FEEDBACK_BUFFER, GL_READ_ONLY);
+        
+         // 处理死亡粒子的位置
+         for (int i = 0; i < _indexCount; i++)
+         {
+             if (!std::isinf(deadParticlePositions[i].x))
+             {
+                 // std::cout<<deadParticlePositions[i]<<std::endl;
+                 // 触发子发射器发射新粒子
+                 dynamic_cast<PS3ParticleSystemGPU*>(_ps)->NotifySubEmitters(deadParticlePositions[i], EventType::DEATH);
+             }
+         }
+         
+         // 解除映射
+         glUnmapBuffer(GL_TRANSFORM_FEEDBACK_BUFFER);
+    }
+    else
+    {
+        glDrawElements(GL_TRIANGLES, _indexCount, GL_UNSIGNED_INT, 0);
+    }
+
     glBindVertexArray(0);
 }
 
-void ParticleRenderer::SetWorldTransform(mat4 worldTransform)
+void ParticleGLInterface::SetWorldTransform(mat4 worldTransform)
 {
     _shader->use();
     _shader->setMat4("WorldTransform", worldTransform);
 }
 
-GLuint ParticleRenderer::GetTextureUnit(const std::string& uniformName)
+GLuint ParticleGLInterface::GetTextureUnit(const std::string& uniformName)
 {
     auto it = _uniforms.find(uniformName);
         if (it != _uniforms.end())

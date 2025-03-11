@@ -1,7 +1,7 @@
 // TODO: 省略了overtimeTexture的mode，也就是，只考虑height=1的情况
 
-#version 330 core
-#pragma optimize(off)
+#version 410 core
+// #pragma optimize(off)
 
 // in
 layout(location = 0) in vec4 Position_StartTime; // 位置和起始时间
@@ -14,6 +14,9 @@ layout(location = 5) in vec2 Texcoord;             // 纹理坐标
 // out
 out vec4 FragColor;
 out vec2 FragUV;
+
+// Transform Feedback 输出
+out vec3 DeadParticlePosition; // 死亡粒子的位置
 
 // uniform - overtime bool
 uniform bool UseAnimationOvertime;
@@ -235,6 +238,10 @@ void ComputeVertPos (inout vec4 pos, vec2 vertOffset, vec4 q, vec3 s, mat4 viewI
  pos.xyz += RotateInLocalSpace(viewSpaceVert, camX, camY, camZ, q);
 }
 
+// 定义无穷大值
+const float INF = 1.0 / 0.0;
+const float EPSILON = 1.0 / 1000000.0;
+
 // main
 void main()
 {
@@ -282,6 +289,16 @@ void main()
     }
     
     pos.xyz += velocity.xyz * normalizedTime * Dir_Life.w;
+    
+    // 检测粒子是否死亡
+    if (normalizedTime >= 1.0 - Time_Delta.y && Texcoord == vec2(0.0, 0.0)) // 每个粒子四个顶点，确保只发射一次子粒子
+    {
+        DeadParticlePosition = pos.xyz;
+    }
+    else
+    {
+        DeadParticlePosition = vec3(1.0 / 0.0);
+    }
     
     if (IsLocalSpace)
     {

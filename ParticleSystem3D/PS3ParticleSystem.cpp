@@ -18,7 +18,7 @@ PS3ParticleSystem::PS3ParticleSystem(int maxParticleCount)
 , _isSubEmitter(false)
 , _capacity(maxParticleCount)
 , _loop(true)
-, _duration(3.0f)
+, _duration(4.0f)
 , _simulationSpeed(1)
 , _startDelay(nullptr)
 //, _rateOverTime(nullptr)
@@ -44,7 +44,7 @@ PS3ParticleSystem::PS3ParticleSystem(int maxParticleCount)
 //    }
     
     // generator
-    auto rateOverTime = CurveRange::CreateCurveByConstant(30);
+    auto rateOverTime = CurveRange::CreateCurveByConstant(4);
     auto rateOverDistance = CurveRange::CreateCurveByConstant(0);
     _generator = std::make_shared<PS3ParticleGenerator>(this, rateOverTime ,rateOverDistance);
     
@@ -125,8 +125,9 @@ PS3ParticleSystem::PS3ParticleSystem(int maxParticleCount)
     _overtimeModules["rotationOvertime"] = rotationOvertimeModule;
     
     // burst
-//    auto burstCount = CurveRange::CreateCurveByConstant(30);
-//    auto burst = std::make_shared<PS3Burst>(2, 2, 2, burstCount);
+//    auto burstCount = CurveRange::CreateCurveByConstant(50);
+//    auto burst = std::make_shared<PS3Burst>(0, 2, 2, burstCount);
+//    _generator->AddBurst(burst);
 //    _bursts.push_back(burst);
     
     // inilizer

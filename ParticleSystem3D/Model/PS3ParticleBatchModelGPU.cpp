@@ -16,7 +16,7 @@ PS3ParticleBatchModelGPU::PS3ParticleBatchModelGPU(int maxParticleCount, PS3Part
     _vDataF.resize(4 * _vertAttrsFloatCount * maxParticleCount);
     _iDataI.resize(6 * maxParticleCount);
     
-    _renderer = std::make_shared<ParticleRenderer>(true);
+    _renderer = std::make_shared<ParticleGLInterface>(true, ps);
     
     SetVertexAttributes();
     SetIndexData();
@@ -88,7 +88,7 @@ void PS3ParticleBatchModelGPU::RenderModel()
     if (_particleCount <= 0)
         return;
     
-    std::cout<<"particle count:"<<_particleCount<<std::endl;
+    // std::cout<<"particle count:"<<_particleCount<<std::endl;
     
     // 已知顶点数据和索引数据，可以render了
     // 根据count得到vertex和index的数量
@@ -127,47 +127,7 @@ void PS3ParticleBatchModelGPU::UpdateParticles(float time, float dt)
                 _vDataF.begin() + lastBaseIndex + pSize,   // 源结束位置
                 _vDataF.begin() + pBaseIndex               // 目标起始位置
             );
-            
-            // 通知子发射器死亡事件
-            vec3 deathPos = CalculateDeathPos(pBaseIndex, interval);
-            dynamic_cast<PS3ParticleSystemGPU*>(_ps)->NotifySubEmitters(deathPos, EventType::DEATH);
             --i;
         }
     }
-}
-
-vec3 PS3ParticleBatchModelGPU::CalculateDeathPos(int index, float interval)
-{
-    float lifeTime = _vDataF[index + _lifeTimeOffset];
-    vec3 position = vec3(_vDataF[index + _positionOffset + 0], _vDataF[index + _positionOffset + 1], _vDataF[index + _positionOffset + 2]);
-    float normalizedTime = clamp(interval / lifeTime, 0.0f, 1.0f);
-    
-    auto texture = (std::dynamic_pointer_cast<PS3RendererGPU>(   (  dynamic_cast<PS3ParticleSystemGPU*>(_ps)  )  ->_renderer)   )       ->_velocityTexture;
-    // 计算纹理坐标
-    float u = normalizedTime; // 时间t作为纹理坐标的x分量
-    float v = 0.0f; // 假设高度为1，v分量为0}
-    
-    // 将纹理坐标映射到像素索引
-    float x = u * (texture->width - 1);
-    int x0 = static_cast<int>(x);
-    int x1 = x0 + 1;
-    float frac = x - x0;
-    
-    // 确保坐标在纹理范围内
-    x0 = glm::clamp(x0, 0, texture->width - 1);
-    x1 = glm::clamp(x1, 0, texture->width - 1);
-
-    // 计算像素索引
-    int index0 = (0 * texture->width + x0) * 4; // 第一个像素
-    int index1 = (0 * texture->width + x1) * 4; // 第二个像素
-
-    // 提取像素值并进行线性插值
-    glm::vec3 a(texture->dataFloat[index0], texture->dataFloat[index0 + 1], texture->dataFloat[index0 + 2]);
-    glm::vec3 b(texture->dataFloat[index1], texture->dataFloat[index1 + 1], texture->dataFloat[index1 + 2]);
-
-    vec3 vel = glm::mix(a, b, frac);
-    
-    position += (vel * (normalizedTime * lifeTime));
-    
-    return position;
 }
