@@ -87,7 +87,7 @@ PS3ParticleSystem::PS3ParticleSystem(int maxParticleCount)
     
     // velocity overtime
     auto xSpeed = CurveRange::CreateCurveByConstant(0.0f);
-    auto ySpeed = CurveRange::CreateCurveByConstant(5.0f);
+    auto ySpeed = CurveRange::CreateCurveByTwoConstant(1, 5);
     auto zSpeed = CurveRange::CreateCurveByConstant(0.0f);
     auto velocityOvertimeModule = std::make_shared<PS3VelocityOvertime>(xSpeed, ySpeed, zSpeed);
     _overtimeModules["velocityOvertime"] = velocityOvertimeModule;
@@ -120,7 +120,7 @@ PS3ParticleSystem::PS3ParticleSystem(int maxParticleCount)
     // rotate overtime
     auto xRot = CurveRange::CreateCurveByConstant(radians(0.0));
     auto yRot = CurveRange::CreateCurveByConstant(radians(0.0));
-    auto zRot = CurveRange::CreateCurveByConstant(radians(0.0));
+    auto zRot = CurveRange::CreateCurveByConstant(radians(60.0));
     auto rotationOvertimeModule = std::make_shared<PS3RotationOvertime>(xRot, yRot, zRot);
     _overtimeModules["rotationOvertime"] = rotationOvertimeModule;
     

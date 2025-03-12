@@ -17,9 +17,13 @@ PS3ForceOvertime::PS3ForceOvertime(CurveRangePtr x, CurveRangePtr y, CurveRangeP
 void PS3ForceOvertime::Animate(PS3ParticlePtr p, float dt)
 {
     float normalizeTime = 1 - p->_remainingLifeTime / p->_startLifeTime;
-    vec3 force = vec3(_xForce->Evaluate(normalizeTime, Random01()),
-                    _yForce->Evaluate(normalizeTime, Random01()),
-                    _zForce->Evaluate(normalizeTime, Random01()));
+    float randX = _xForce->IsTwoValues() ? PseudoRandom(p->_randomSeed + ModuleRandSeed::FORCE) : 0;
+    float randY = _yForce->IsTwoValues() ? PseudoRandom(p->_randomSeed + ModuleRandSeed::FORCE) : 0;
+    float randZ = _zForce->IsTwoValues() ? PseudoRandom(p->_randomSeed + ModuleRandSeed::FORCE) : 0;
+    
+    vec3 force = vec3(_xForce->Evaluate(normalizeTime, randX),
+                    _yForce->Evaluate(normalizeTime, randY),
+                    _zForce->Evaluate(normalizeTime, randZ));
     p->_velocity += force * dt;
     p->_ultimateVelocity = p->_velocity;
 }

@@ -26,8 +26,11 @@ void PS3TextureAnimationModule::Animate(PS3ParticlePtr p, float dt)
         p->_startRow = floor(Random01() * _numTilesY);
     
     float normalizedTime = 1 - p->_remainingLifeTime / p->_startLifeTime;
-    float startFrame = _startFrame->Evaluate(normalizedTime, Random01()) / (_numTilesX * _numTilesY);
-    float frameOvertime = _frameOvertime->Evaluate(normalizedTime, Random01());
+    float randStart = _startFrame->IsTwoValues() ? PseudoRandom(p->_randomSeed + ModuleRandSeed::TEXTURE) : 0;
+    float randFrame = _frameOvertime->IsTwoValues() ? PseudoRandom(p->_randomSeed + ModuleRandSeed::TEXTURE) : 0;
+    
+    float startFrame = _startFrame->Evaluate(normalizedTime, randStart) / (_numTilesX * _numTilesY);
+    float frameOvertime = _frameOvertime->Evaluate(normalizedTime, randFrame);
     
     if (_animationMode == AnimationMode::WHOLE_SHEET)
     {

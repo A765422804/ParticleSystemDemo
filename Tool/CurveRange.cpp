@@ -32,6 +32,17 @@ std::shared_ptr<CurveRange> CurveRange::CreateCurveByOneCurve(CurvePtr curve)
     return ret;
 }
 
+std::shared_ptr<CurveRange> CurveRange::CreateCurveByTwoConstant(float constantMin, float constantMax)
+{
+    std::shared_ptr<CurveRange> ret = std::make_shared<CurveRange>();
+    
+    ret->_constantMin = constantMin;
+    ret->_constantMax = constantMax;
+    ret->_mode = RangeMode::TwoConstants;
+    
+    return ret;
+}
+
 float CurveRange::Evaluate(float time, float rndRatio)
 {
     switch (_mode) {
@@ -62,6 +73,11 @@ int CurveRange::EvaluateHeight()
         default:
             AssertShouldNotReachHere();
     }
+}
+
+bool CurveRange::IsTwoValues()
+{
+    return _mode == RangeMode::TwoCurves || _mode == RangeMode::TwoConstants;
 }
 
 float CurveRange::EvaluateCurve(float time, int index)

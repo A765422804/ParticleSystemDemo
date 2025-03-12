@@ -12,13 +12,13 @@ PS3ParticleInitializer::PS3ParticleInitializer(PS3ParticleSystem * ps)
 : _ps(ps)
 {
     // startSize
-    _startSizeX = CurveRange::CreateCurveByConstant(0.2);
+    _startSizeX = CurveRange::CreateCurveByTwoConstant(0.1, 1.5);
     
     // startSpeed
-    _startSpeed = CurveRange::CreateCurveByConstant(1);
+    _startSpeed = CurveRange::CreateCurveByTwoConstant(1, 10);
     
     // startRotation
-    _startRotationZ = CurveRange::CreateCurveByConstant(0);
+    _startRotationZ = CurveRange::CreateCurveByTwoConstant(0, 90);
     
     // startColor
 //    ColorKey colorKey1 = {vec3(1.0f, 0.0f, 0.0f), 0.0f};
@@ -47,10 +47,13 @@ void PS3ParticleInitializer::InitializeParticle(PS3ParticlePtr p, float dt)
         p->_velocity = vec3(rotationMat * vec4(p->_velocity, 1.0f));
     }
     
+    const float rand = PseudoRandom(RandomRangeInt(0, 233280));
+    // std::cout<<"rand: "<<rand<<std::endl;
+    
     // TODO: textureAnimationModule
     
     // velocity
-    float curStartSpeed = _startSpeed->Evaluate(dt, Random01());
+    float curStartSpeed = _startSpeed->Evaluate(dt, rand);
     p->_velocity = p->_velocity * curStartSpeed;
     
     if (_ps->_spaceMode == SpaceMode::WORLD)
@@ -83,11 +86,11 @@ void PS3ParticleInitializer::InitializeParticle(PS3ParticlePtr p, float dt)
     // 应用起始rotation
     if (_startRotation3D)
     {
-        p->_startEuler = vec3(_startRotationX->Evaluate(dt, Random01()), _startRotationY->Evaluate(dt, Random01()), _startRotationZ->Evaluate(dt, Random01()));
+        p->_startEuler = vec3(_startRotationX->Evaluate(dt, rand), _startRotationY->Evaluate(dt, rand), _startRotationZ->Evaluate(dt, rand));
     }
     else
     {
-        p->_startEuler = vec3(0, 0, _startRotationZ->Evaluate(dt, Random01()));
+        p->_startEuler = vec3(0, 0, _startRotationZ->Evaluate(dt, rand));
     }
     p->_startQuat = quat(radians(p->_startEuler));
     p->_startMat = toMat4(p->_startQuat);
@@ -96,19 +99,22 @@ void PS3ParticleInitializer::InitializeParticle(PS3ParticlePtr p, float dt)
     // 应用起始size
     if (_startSize3D)
     {
-        p->_startSize = vec3(_startSizeX->Evaluate(dt, Random01()), _startSizeY->Evaluate(dt, Random01()), _startSizeZ->Evaluate(dt, Random01()));
+        p->_startSize = vec3(_startSizeX->Evaluate(dt, rand), _startSizeY->Evaluate(dt, rand), _startSizeZ->Evaluate(dt, rand));
     }
     else
     {
-        p->_startSize = vec3(_startSizeX->Evaluate(dt, RandomM11()));
+        p->_startSize = vec3(_startSizeX->Evaluate(dt, rand));
     }
     p->_size = p->_startSize;
     
     // 应用起始color
-    p->_startColor = _startColor->Evaluate(dt, Random01());
+    p->_startColor = _startColor->Evaluate(dt, rand);
     p->_color = p->_startColor;
     
     // 应用起始lifeTime
-    p->_startLifeTime = _startLifeTime->Evaluate(dt, Random01()) + dt;
+    p->_startLifeTime = _startLifeTime->Evaluate(dt, rand) + dt;
     p->_remainingLifeTime = p->_startLifeTime;
+    
+    // 设置随机数种子
+    p->_randomSeed = RandomRangeInt(0, 233280);
 }

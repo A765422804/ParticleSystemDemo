@@ -46,3 +46,14 @@ inline int uvs[8] =
     0, 1,
     1, 1,
 };
+
+namespace ModuleRandSeed {
+    const int SIZE = 39825;
+    const int TEXTURE = 90794;
+    const int COLOR = 91041;
+    const int FORCE = 212165;
+    const int ROTATION = 125292;
+    const int VELOCITY_X = 197866;
+    const int VELOCITY_Y = 156497;
+    const int VELOCITY_Z = 984136;
+}

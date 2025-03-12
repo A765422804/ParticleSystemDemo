@@ -46,7 +46,7 @@ public:
     vec4 _startColor;
     vec4 _color;
     
-    unsigned int randomSeed;
+    unsigned int _randomSeed;
     
     float _remainingLifeTime;
     float _startLifeTime;

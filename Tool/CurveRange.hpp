@@ -29,11 +29,15 @@ public:
 public:
     static std::shared_ptr<CurveRange> CreateCurveByConstant(float constant);
     static std::shared_ptr<CurveRange> CreateCurveByOneCurve(CurvePtr curve);
+    static std::shared_ptr<CurveRange> CreateCurveByTwoConstant(float constantMin, float constantMax);
     
 public:
     float Evaluate(float time, float rndRatio);
     int EvaluateHeight();
     float EvaluateCurve(float time, int index);
+    
+public:
+    bool IsTwoValues();
     
 public: // 生成纹理
     static Texture2DPtr PackCurveRangeXYZ(int samples, CurveRangePtr x, CurveRangePtr y, CurveRangePtr z, bool discrete = false);

@@ -62,6 +62,11 @@ int GradientRange::EvaluateHeight()
     }
 }
 
+bool GradientRange::IsTwoValues()
+{
+    return _mode == ColorMode::TWO_COLORS || _mode == ColorMode::TWO_GRADIENTS;
+}
+
 Texture2DPtr GradientRange::PackGradientRange(int samples, GradientRangePtr gr)
 {
     int height = gr->EvaluateHeight();

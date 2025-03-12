@@ -94,11 +94,11 @@ int main()
 //    particleSystem->SetPosition3D(vec3(-4.0, -4.0f,0.0f));
     
     // ParticleSystem3D
-    PS3ParticleSystemGPUPtr particleSystem = std::make_shared<PS3ParticleSystemGPU>(10000);
+    PS3ParticleSystemCPUPtr particleSystem = std::make_shared<PS3ParticleSystemCPU>(10000);
     particleSystem->_renderer->_model->_renderer->SetCamera(camera);
     particleSystem->_shapeModule->_emitterRenderer->SetCamera(camera);
     particleSystem->SetRotation(vec3(0, 0, 0));
-    PS3ParticleSystemGPUPtr subSystem = std::make_shared<PS3ParticleSystemGPU>(5000);
+    PS3ParticleSystemCPUPtr subSystem = std::make_shared<PS3ParticleSystemCPU>(5000);
     subSystem->_renderer->_model->_renderer->SetCamera(camera);
     subSystem->_shapeModule = PS3CircleEmitter::CreateCircleEmitter(ArcMode::EVEN, 0, 360, CurveRange::CreateCurveByConstant(90), 0.1, 0, 5, subSystem.get());
     subSystem->_isEmitting = false;

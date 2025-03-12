@@ -36,6 +36,9 @@ public:
     int EvaluateHeight();
     
 public:
+    bool IsTwoValues();
+    
+public:
     static Texture2DPtr PackGradientRange(int samples, GradientRangePtr gr);
     
 private:

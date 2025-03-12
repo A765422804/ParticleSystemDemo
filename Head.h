@@ -200,3 +200,15 @@ inline std::ostream& operator<<(std::ostream& os, const glm::vec3& vec) {
     os << "(" << vec.x << ", " << vec.y << ", " << vec.z << ")";
     return os;
 }
+
+// 使用 Hull-Dobell 算法的线性同余生成器构造伪随机数
+inline float PseudoRandom(unsigned int seed)
+{
+    seed = (seed * 9301 + 49297) % 233280;
+    return seed / (233280.0f);
+}
+
+inline unsigned int RandomRangeInt(unsigned int min, unsigned int max)
+{
+    return floor(RandomRange(min, max));
+}
