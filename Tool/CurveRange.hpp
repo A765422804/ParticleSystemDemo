@@ -19,8 +19,11 @@ enum RangeMode
     TwoConstants = 3,
 };
 
+class PS3ParticleSystem;
+
 class CurveRange
 {
+    friend class PS3ParticleSystem;
     using CurveRangePtr = std::shared_ptr<CurveRange>;
 public:
     CurveRange();

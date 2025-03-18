@@ -56,6 +56,7 @@ void PS3ParticleBatchModelGPU::AddParticleVertexData(PS3ParticlePtr p, int num, 
         _vDataF[offset ++] = p->_size.x;
         _vDataF[offset ++] = p->_size.y;
         _vDataF[offset ++] = p->_size.z;
+        _vDataF[offset ++] = p->_randomSeed;
         
         _vDataF[offset ++] = p->_ultimateQuat.x;
         _vDataF[offset ++] = p->_ultimateQuat.y;

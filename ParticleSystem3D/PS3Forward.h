@@ -20,12 +20,12 @@ struct PVData // 粒子顶点的数据结构
 struct PVDataGPU // 粒子顶点的数据结构
 {
     vec4 Position_StartTime; // 位置和起始时间
-    vec3 Size; // 大小
+    vec4 Size_Seed; // 大小
     vec4 Rotation; // 旋转
     vec4 Color; // 颜色
     vec4 Dir_Life; // 方向和生命
     vec2 Texcoord; // 纹理坐标
-    // 以上共有21个float
+    // 以上共有22个float
 };
 
 struct TrailData // 纹理的数据结构
@@ -57,3 +57,32 @@ namespace ModuleRandSeed {
     const int VELOCITY_Y = 156497;
     const int VELOCITY_Z = 984136;
 }
+
+class PropertyObserver
+{
+public:
+    virtual ~PropertyObserver() = default;
+    virtual void OnValueChanged(const class PropertyObservable& observable) = 0;
+};
+
+class PropertyObservable
+{
+public:
+    virtual ~PropertyObservable() = default; 
+    void SetObserver(PropertyObserver* observer)
+    {
+        _observer = observer;
+    }
+    
+protected:
+    void NotifyObserver() const 
+    {
+        if (_observer)
+        {
+            _observer->OnValueChanged(*this);
+        }
+    }
+
+private:
+    PropertyObserver* _observer;
+};

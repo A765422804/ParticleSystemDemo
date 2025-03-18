@@ -8,6 +8,7 @@
 #pragma once
 #include "PS3Common.h"
 #include "PS3ParticleSystem.hpp"
+#include "Renderer/PS3EntityCPU.hpp"
 
 class PS3ParticleSystemCPU : public PS3ParticleSystem
 {
@@ -42,6 +43,8 @@ public:
     PS3TrailPtr _trailModule; // CPU 特有
     
     PS3RendererCPUPtr _renderer;
+    
+    PS3EntityCPUPtr _entity;
 };
 
 using PS3ParticleSystemCPUPtr = std::shared_ptr<PS3ParticleSystemCPU>;

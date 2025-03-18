@@ -88,8 +88,8 @@ float Gradient::GetAlpha(float time)
         time = Repeat(time, 1);
         for (int i = 1 ; i < length; ++i)
         {
-            float preTime = _colorKeys[i - 1].Time;
-            float curTime = _colorKeys[i].Time;
+            float preTime = _alphaKeys[i - 1].Time;
+            float curTime = _alphaKeys[i].Time;
             if (time >= preTime && time <= curTime)
             {
                 if (_mode == Mode::FIXED)

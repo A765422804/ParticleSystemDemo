@@ -168,7 +168,10 @@ void main()
     // 设置uv
     if (TexCoord.z != -1)
         FragUV = ComputeUV(TexCoord.z, TexCoord.xy, FrameTile);
-    FragUV = TexCoord.xy;
+    else
+    {
+        FragUV = TexCoord.xy;
+    }
     
     // 使用VP矩阵
     pos = VPTransform * pos;

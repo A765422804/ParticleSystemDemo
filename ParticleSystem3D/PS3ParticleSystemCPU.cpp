@@ -12,9 +12,34 @@ PS3ParticleSystemCPU::PS3ParticleSystemCPU(int maxParticleCount)
 , _trailModule(nullptr)
 , _renderer(nullptr)
 {
+    _entity = std::make_shared<PS3EntityCPU>();
     _renderer = std::make_shared<PS3RendererCPU>(this, maxParticleCount);
     
-    _renderer->InitUniform();
+    // 初始化
+    _entity->SetIsLocalSpace(_spaceMode == SpaceMode::LOCAL);
+    auto textureAnimation = std::dynamic_pointer_cast<PS3TextureAnimationModule>(_overtimeModules["textureAnimationOvertime"]);
+    if (textureAnimation)
+    {
+        _entity->SetFrameTile(vec2(textureAnimation->_numTilesX, textureAnimation->_numTilesY));
+    }
+    
+//    auto shader = _model->_renderer->_shader;
+//    shader->use();
+//    
+//    // space mode
+//    shader->setBool("IsLocalSpace", _ps->_spaceMode == SpaceMode::LOCAL);
+//    
+//    // texture animation
+//    auto textureAnimation = std::dynamic_pointer_cast<PS3TextureAnimationModule>(_ps->_overtimeModules["textureAnimationOvertime"]);
+//    if (textureAnimation)
+//    {
+//        shader->setVec2("FrameTile", vec2(textureAnimation->_numTilesX, textureAnimation->_numTilesY));
+//    }
+    
+    _entity->SetTexture(_texture);
+    
+    // texture
+//    _texture->BindToUniform("MainTexture", _renderer->_model->_renderer->_shader, _renderer->_model->_renderer->GetTextureUnit("MainTexture"));
 }
 
 void PS3ParticleSystemCPU::InitializeParticles(std::vector<PS3ParticlePtr> &particles)
@@ -50,6 +75,7 @@ void PS3ParticleSystemCPU::UpdateParticles(float dt)
             -- i;
         }
     }
+    // std::cout<<_particles.size()<<std::endl;
 }
 
 bool PS3ParticleSystemCPU::UpdateParticle(PS3ParticlePtr p, float dt)

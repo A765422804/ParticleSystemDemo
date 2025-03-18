@@ -94,7 +94,13 @@ inline void Node::SetPosition3D(vec3 position)
 
 inline quat Node::GetRotation()
 {
-    return _rotation;
+    // 如果没有父节点，直接返回当前节点的旋转
+    if (_parent == nullptr) {
+        return _rotation;
+    }
+
+    // 如果有父节点，返回父节点的旋转与当前节点旋转的组合
+    return _parent->GetRotation() * _rotation;
 }
 
 inline void Node::SetRotation(vec3 eulerAngle)

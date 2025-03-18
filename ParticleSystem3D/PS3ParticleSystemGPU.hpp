@@ -8,6 +8,7 @@
 #pragma once
 #include "PS3Common.h"
 #include "PS3ParticleSystem.hpp"
+#include "Renderer/PS3EntityGPU.hpp"
 
 class PS3ParticleSystemGPU : public PS3ParticleSystem
 {
@@ -32,6 +33,19 @@ public:
     
 public:
     PS3RendererGPUPtr _renderer;
+    
+    PS3EntityGPUPtr _entity;
+    
+    Texture2DPtr _animationTexture; // 1
+    Texture2DPtr _velocityTexture; // 2
+    Texture2DPtr _forceTexture; // 3
+    Texture2DPtr _sizeTexture; // 4
+    Texture2DPtr _colorTexture; // 5
+    Texture2DPtr _rotationTexture; // 6
+    
+    Texture2DPtr _gravityTexture; // 7
 };
+
+
 
 using PS3ParticleSystemGPUPtr = std::shared_ptr<PS3ParticleSystemGPU>;

@@ -12,13 +12,15 @@ PS3ParticleInitializer::PS3ParticleInitializer(PS3ParticleSystem * ps)
 : _ps(ps)
 {
     // startSize
-    _startSizeX = CurveRange::CreateCurveByTwoConstant(0.1, 1.5);
+    _startSizeX = CurveRange::CreateCurveByTwoConstant(0.7, 1.0);
     
     // startSpeed
-    _startSpeed = CurveRange::CreateCurveByTwoConstant(1, 10);
+    //_startSpeed = CurveRange::CreateCurveByTwoConstant();
+    _startSpeed = CurveRange::CreateCurveByConstant(2.0);
     
     // startRotation
-    _startRotationZ = CurveRange::CreateCurveByTwoConstant(0, 90);
+    _startRotationZ = CurveRange::CreateCurveByTwoConstant(80, 100);
+    //_startRotationZ = CurveRange::CreateCurveByTwoConstant(0, 90);
     
     // startColor
 //    ColorKey colorKey1 = {vec3(1.0f, 0.0f, 0.0f), 0.0f};
@@ -30,9 +32,9 @@ PS3ParticleInitializer::PS3ParticleInitializer(PS3ParticleSystem * ps)
 //    GradientPtr gradient = Gradient::CreateByColorKeyAndAlphaKey(colorKeys, alphaKeys);
 //    GradientRangePtr gradientRange = GradientRange::CreateByOneGradient(gradient);
 //    _startColor = gradientRange;
-    _startColor = GradientRange::CreateByOneColor(vec4(vec3(1.0f), 0.5f));
+    _startColor = GradientRange::CreateByOneColor(vec4(vec3(1.0f), 1.0f));
     
-    _startLifeTime = CurveRange::CreateCurveByConstant(2);
+    _startLifeTime = CurveRange::CreateCurveByConstant(1.0);
 }
 
 void PS3ParticleInitializer::InitializeParticle(PS3ParticlePtr p, float dt)
@@ -112,7 +114,7 @@ void PS3ParticleInitializer::InitializeParticle(PS3ParticlePtr p, float dt)
     p->_color = p->_startColor;
     
     // 应用起始lifeTime
-    p->_startLifeTime = _startLifeTime->Evaluate(dt, rand) + dt;
+    p->_startLifeTime = _startLifeTime->Evaluate(dt, rand);
     p->_remainingLifeTime = p->_startLifeTime;
     
     // 设置随机数种子

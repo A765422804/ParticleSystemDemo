@@ -14,6 +14,7 @@
 #include "Common/Background.hpp"
 #include "Common/KeyPoint.hpp"
 #include "ParticleSystem3D/Renderer/PS3Trail.hpp"
+#include "Common/Sphere.hpp"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -94,15 +95,15 @@ int main()
 //    particleSystem->SetPosition3D(vec3(-4.0, -4.0f,0.0f));
     
     // ParticleSystem3D
-    PS3ParticleSystemCPUPtr particleSystem = std::make_shared<PS3ParticleSystemCPU>(10000);
+    PS3ParticleSystemGPUPtr particleSystem = std::make_shared<PS3ParticleSystemGPU>(20000);
     particleSystem->_renderer->_model->_renderer->SetCamera(camera);
     particleSystem->_shapeModule->_emitterRenderer->SetCamera(camera);
-    particleSystem->SetRotation(vec3(0, 0, 0));
-    PS3ParticleSystemCPUPtr subSystem = std::make_shared<PS3ParticleSystemCPU>(5000);
+    particleSystem->SetRotation(vec3(0, 0, 45));
+    PS3ParticleSystemGPUPtr subSystem = std::make_shared<PS3ParticleSystemGPU>(5000);
     subSystem->_renderer->_model->_renderer->SetCamera(camera);
-    subSystem->_shapeModule = PS3CircleEmitter::CreateCircleEmitter(ArcMode::EVEN, 0, 360, CurveRange::CreateCurveByConstant(90), 0.1, 0, 5, subSystem.get());
+    subSystem->_shapeModule = PS3CircleEmitter::CreateCircleEmitter(ArcMode::EVEN, 0, 360, CurveRange::CreateCurveByConstant(90), 0.00001, 0, 5, subSystem.get());
     subSystem->_isEmitting = false;
-    subSystem->SetRotation(vec3(90, 0, 0));
+    subSystem->SetRotation(vec3(45, 0, 0));
     subSystem->_isSubEmitter = true;
         ColorKey colorKey1 = {vec3(1.0f, 0.0f, 0.0f), 0.0f};
         ColorKey colorKey2 = {vec3(0.0f, 0.0f, 1.0f), 1.0f};
@@ -114,11 +115,19 @@ int main()
         GradientRangePtr gradientRange = GradientRange::CreateByOneGradient(gradient);
      subSystem->_overtimeModules["colorOvertime"] = std::make_shared<PS3ColorOvertime>(gradientRange);
     subSystem->_overtimeModules["velocityOvertime"]->_enable = false;
-    subSystem->_renderer->InitUniform(); // hack：手动吧overtime的module再更新一次
-    particleSystem->AddSubEmitter({
-        EventType::DEATH,
-        subSystem
-    });
+    // subSystem->_renderer->InitUniform(); // hack：手动吧overtime的module再更新一次
+//    particleSystem->AddSubEmitter({
+//        EventType::DEATH,
+//        subSystem
+//    });
+    
+    // 球体
+    SpherePtr sphere = std::make_shared<Sphere>(0.5f, 72, 36);
+    sphere->SetPosition3D(vec3(0, 0, 0));
+    sphere->_sphereRenderer->SetCamera(camera);
+    
+    // 构建父子关系
+    // sphere->AddChild(particleSystem);
     
     // particleSystem->Play();
     
@@ -236,11 +245,11 @@ int main()
 //    particleSystem4->SetRotation(vec3(0, 0, 0));
 //    particleSystem4->SetPosition3D(vec3(0, 0, 5));
 //    
-    particleSystem->Play();
+    //particleSystem->Play();
 //    particleSystem2->Play();
 //    particleSystem3->Play();
 //    particleSystem4->Play();
-    subSystem->Play();
+    // subSystem->Play();
     
     // 帧率计算变量
     float lastFrame = glfwGetTime();
@@ -270,6 +279,7 @@ int main()
 //        particleSystem->Move(vec3(-1.0f, 0.0f ,0.0f), deltaTime);
         //particleSystem->Move(vec3(1.0f,0.0f,0.0f), deltaTime * 0.5);
         particleSystem->Update(deltaTime);
+        sphere->Move(deltaTime);
 //        particleSystem2->Update(deltaTime);
 //        particleSystem3->Update(deltaTime);
 //        particleSystem4->Update(deltaTime);
@@ -281,6 +291,8 @@ int main()
         
         background->Render();
         keyPoint->Render();
+        
+        sphere->Render();
         
 //        shader->use();
 //        // 绑定 VAO

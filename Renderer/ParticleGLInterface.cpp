@@ -87,9 +87,9 @@ void ParticleGLInterface::SetupVertexDesc()
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(PVDataGPU), (void*)offsetof(PVDataGPU, Position_StartTime));
 
-        // 大小属性 (vec3)
+        // 大小和种子属性 (vec4)
         glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(PVDataGPU), (void*)offsetof(PVDataGPU, Size));
+        glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(PVDataGPU), (void*)offsetof(PVDataGPU, Size_Seed));
 
         // 旋转属性 (vec4)
         glEnableVertexAttribArray(2);

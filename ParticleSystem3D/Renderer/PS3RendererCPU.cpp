@@ -6,13 +6,14 @@
 //
 
 #include "PS3RendererCPU.hpp"
-#include "../PS3ParticleSystem.hpp"
+#include "../PS3ParticleSystemCPU.hpp"
 
-PS3RendererCPU::PS3RendererCPU(PS3ParticleSystem* ps, int maxParticleCount)
+PS3RendererCPU::PS3RendererCPU(PS3ParticleSystemCPU* ps, int maxParticleCount)
 : _ps(ps)
 , _model(std::make_shared<PS3ParticleBatchModelCPU>(maxParticleCount,ps))
 {
-    
+    _rac = std::make_shared<PS3CPURAC>(ps);
+    _ras = std::make_shared<PS3CPURAS>(_ps->_entity->_property);
 }
 
 void PS3RendererCPU::Clear()
@@ -54,54 +55,41 @@ void PS3RendererCPU::FillMeshData(PS3ParticlePtr p, int idx, float fi)
     }
 }
 
-void PS3RendererCPU::InitUniform()
-{
-    auto shader = _model->_renderer->_shader;
-    shader->use();
-    
-    // space mode
-    shader->setBool("IsLocalSpace", _ps->_spaceMode == SpaceMode::LOCAL);
-    
-    // texture animation
-    auto textureAnimation = std::dynamic_pointer_cast<PS3TextureAnimationModule>(_ps->_overtimeModules["textureAnimationOvertime"]);
-    if (textureAnimation)
-    {
-        shader->setVec2("FrameTile", vec2(textureAnimation->_numTilesX, textureAnimation->_numTilesY));
-    }
-    
-    // texture
-    _ps->_texture->BindToUniform("MainTexture", _model->_renderer->_shader, _model->_renderer->GetTextureUnit("MainTexture"));
-}
-
 void PS3RendererCPU::UpdateUniform()
 {
-    auto shader = _model->_renderer->_shader;
-    shader->use();
-    
-    // space mode
-    shader->setBool("IsLocalSpace", _ps->_spaceMode == SpaceMode::LOCAL);
-    
-    // texture animation
-    auto textureAnimation = std::dynamic_pointer_cast<PS3TextureAnimationModule>(_ps->_overtimeModules["textureAnimationOvertime"]);
-    if (textureAnimation)
-    {
-        shader->setVec2("FrameTile", vec2(textureAnimation->_numTilesX, textureAnimation->_numTilesY));
-    }
-    
-    // texture
-    _ps->_texture->BindToUniform("MainTexture", _model->_renderer->_shader, _model->_renderer->GetTextureUnit("MainTexture"));
+//    auto shader = _model->_renderer->_shader;
+//    shader->use();
+//    
+//    // space mode
+//    shader->setBool("IsLocalSpace", _ps->_spaceMode == SpaceMode::LOCAL);
+//    
+//    // texture animation
+//    auto textureAnimation = std::dynamic_pointer_cast<PS3TextureAnimationModule>(_ps->_overtimeModules["textureAnimationOvertime"]);
+//    if (textureAnimation)
+//    {
+//        shader->setVec2("FrameTile", vec2(textureAnimation->_numTilesX, textureAnimation->_numTilesY));
+//    }
+//    
+//    // texture
+//    _ps->_texture->BindToUniform("MainTexture", _model->_renderer->_shader, _model->_renderer->GetTextureUnit("MainTexture"));
     
     if (!_ps->_isSubEmitter)
-        _model->_renderer->SetWorldTransform(_ps->GetWorldTransform());
+    {
+        //_model->_renderer->SetWorldTransform(_ps->GetWorldTransform());
+        _ps->_entity->SetWorldTransform(_ps->GetWorldTransform());
+    }
     else
     {
         // 子发射器的粒子的世界矩阵，使用的是父发射器
-        _model->_renderer->SetWorldTransform(_ps->_mainEmitter->GetWorldTransform());
+        //_model->_renderer->SetWorldTransform(_ps->_mainEmitter->GetWorldTransform());
+        _ps->_entity->SetWorldTransform(_ps->_mainEmitter->GetWorldTransform());
     }
 }
 
 void PS3RendererCPU::Render()
 {
     UpdateUniform();
+    _ras->SyncOnChange(_rac);
+    _rac->RenderUpdate(_model->_renderer->_shader);
     _model->RenderModel(_ps->GetParticleCount());
 }

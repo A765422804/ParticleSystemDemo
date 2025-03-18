@@ -28,3 +28,9 @@ struct V3
 {
     vec3 Position;
 };
+
+struct Vertex {
+    float x, y, z;       // 顶点坐标
+    float nx, ny, nz;    // 法线
+    float u, v;          // 纹理坐标
+};

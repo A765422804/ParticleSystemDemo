@@ -32,6 +32,15 @@ std::shared_ptr<GradientRange> GradientRange::CreateByOneGradient(GradientPtr gr
     return ret;
 }
 
+std::shared_ptr<GradientRange> GradientRange::CreateByRandomColor()
+{
+    std::shared_ptr<GradientRange> ret = std::make_shared<GradientRange>();
+    
+    ret->_mode = ColorMode::RANDOM_COLOR;
+    
+    return ret;
+}
+
 vec4 GradientRange::Evaluate(float time, float rndRatio)
 {
     switch (_mode) {

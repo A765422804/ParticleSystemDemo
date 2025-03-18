@@ -75,8 +75,8 @@ float Curve::Evaluate(float time)
     
     int preIndex = index - 1;
     int nextIndex = index;
-    int preTime = _times[preIndex];
-    int nextTime = _times[nextIndex];
+    float preTime = _times[preIndex];
+    float nextTime = _times[nextIndex];
     KeyFrameValue preValue = _values[preIndex];
     KeyFrameValue nextValue = _values[nextIndex];
     

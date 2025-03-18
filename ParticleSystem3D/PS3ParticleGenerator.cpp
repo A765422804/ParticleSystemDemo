@@ -75,6 +75,7 @@ void PS3ParticleGenerator::BeforeGenerate(float dt)
     _emitCount = 0;
     // emit by rateOverTime 基于时间的发射
     _emitRateTimeCounter += _rateOverTime->Evaluate(_ps->_time / _ps->_duration, 1) * dt;
+
     if (_emitRateTimeCounter > 1)
     {
         int emitNum = floor(_emitRateTimeCounter);

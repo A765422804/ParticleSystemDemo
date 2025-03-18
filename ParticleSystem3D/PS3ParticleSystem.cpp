@@ -14,11 +14,11 @@ PS3ParticleSystem::PS3ParticleSystem(int maxParticleCount)
 , _isEmitting(false)
 , _needToRestart(false)
 , _needRefresh(true)
-, _prewarm(false)
+, _prewarm(true)
 , _isSubEmitter(false)
 , _capacity(maxParticleCount)
 , _loop(true)
-, _duration(4.0f)
+, _duration(10.0f)
 , _simulationSpeed(1)
 , _startDelay(nullptr)
 //, _rateOverTime(nullptr)
@@ -26,7 +26,7 @@ PS3ParticleSystem::PS3ParticleSystem(int maxParticleCount)
 //, _renderer(nullptr)
 , _shapeModule(nullptr)
 , _texture(nullptr)
-, _spaceMode(SpaceMode::LOCAL)
+, _spaceMode(SpaceMode::WORLD)
 //, _trailModule(nullptr)
 //, _processor(nullptr)
 , _inilizer(nullptr)
@@ -44,22 +44,22 @@ PS3ParticleSystem::PS3ParticleSystem(int maxParticleCount)
 //    }
     
     // generator
-    auto rateOverTime = CurveRange::CreateCurveByConstant(4);
+    auto rateOverTime = CurveRange::CreateCurveByConstant(500);
     auto rateOverDistance = CurveRange::CreateCurveByConstant(0);
     _generator = std::make_shared<PS3ParticleGenerator>(this, rateOverTime ,rateOverDistance);
     
     // spatial info
-    SetPosition3D(vec3(5, 0, 5));
+    SetPosition3D(vec3(0, 0, 0));
     SetRotation(vec3(0,0,0));
     SetScale(vec3(1, 1, 1));
     
     // gravity
-    _gravity = CurveRange::CreateCurveByConstant(0);
+    _gravity = CurveRange::CreateCurveByConstant(0.3);
     
     // 定义一个公用的curve和curveRange for debug
     std::vector<float> time = {0.0f, 1.0f};
-    KeyFrameValue keyFrame1 = {0.0f, 0.0f, 1.0f}; // (0, 0) 点，没有左切线
-    KeyFrameValue keyFrame2 = {1.0f, 1.0f, 0.0f}; // (1, 1) 点，没有右切线
+    KeyFrameValue keyFrame1 = {2.0f, 0.0f, 0.0f}; // (0, 0) 点，没有左切线
+    KeyFrameValue keyFrame2 = {2.0f, 0.0f, 0.0f}; // (1, 1) 点，没有右切线
     std::vector<KeyFrameValue> value = {keyFrame1, keyFrame2};
     CurvePtr curve = Curve::CreateCurveByTimesAndValues(time, value);
     CurveRangePtr curveRange = CurveRange::CreateCurveByOneCurve(curve);
@@ -80,14 +80,14 @@ PS3ParticleSystem::PS3ParticleSystem(int maxParticleCount)
 //    }
 
     //_shapeModule = PS3BoxEmitter::CreateBoxEmitter(EmitLocation::VOLUME, this);
-    //_shapeModule = PS3ConeEmitter::CreateConeEmitter(EmitLocation::VOLUME, ArcMode::RANDOM, 0, 360, 0, 0.5, 1, 10, 30, 2, this);
-    _shapeModule = PS3CircleEmitter::CreateCircleEmitter(ArcMode::LOOP, 0, 360, CurveRange::CreateCurveByConstant(1), 2, 1,10, this);
+    _shapeModule = PS3ConeEmitter::CreateConeEmitter(EmitLocation::BASE, ArcMode::RANDOM, 0, 360, 0, 0.001, 1, 10, 10, 0.5, this);
+//    _shapeModule = PS3CircleEmitter::CreateCircleEmitter(ArcMode::LOOP, 0, 360, CurveRange::CreateCurveByConstant(1), 2, 1,10, this);
     //_shapeModule = PS3SphereEmitter::CreateSphereEmitter(EmitLocation::VOLUME, 1, 1, this);
     //_shapeModule = PS3HemisphereEmitter::CreateHemisphereEmitter(EmitLocation::VOLUME, 1, 1, this);
     
     // velocity overtime
     auto xSpeed = CurveRange::CreateCurveByConstant(0.0f);
-    auto ySpeed = CurveRange::CreateCurveByTwoConstant(1, 5);
+    auto ySpeed = CurveRange::CreateCurveByTwoConstant(0, 0);
     auto zSpeed = CurveRange::CreateCurveByConstant(0.0f);
     auto velocityOvertimeModule = std::make_shared<PS3VelocityOvertime>(xSpeed, ySpeed, zSpeed);
     _overtimeModules["velocityOvertime"] = velocityOvertimeModule;
@@ -100,27 +100,41 @@ PS3ParticleSystem::PS3ParticleSystem(int maxParticleCount)
     _overtimeModules["forceOvertime"] = forceOvertimeModule;
     
     // size overtime
-    auto allSize = CurveRange::CreateCurveByConstant(3.0f);
+    std::vector<float> sizeTime = {0.0f, 0.5f, 1.0f};
+    KeyFrameValue sizeKeyFrame1 = {0.0f, 0.0f, 2.0f}; // (0, 0) 点，没有左切线
+    KeyFrameValue sizeKeyFrame2 = {0.2f, 0.5f, -0.5f}; // (1, 1) 点，没有右切线
+    KeyFrameValue sizeKeyFrame3 = {0.0f, -2.0f, 0.0f}; // (1, 1) 点，没有右切线
+    std::vector<KeyFrameValue> sizeValue = {sizeKeyFrame1, sizeKeyFrame2, sizeKeyFrame3};
+    CurvePtr sizeCurve = Curve::CreateCurveByTimesAndValues(sizeTime, sizeValue);
+    CurveRangePtr sizeCurveRange = CurveRange::CreateCurveByOneCurve(sizeCurve);
+    
+    auto allSize = sizeCurveRange;
 //    auto xSize = CurveRange::CreateCurveByConstant(0.1f);
 //    auto ySize = curveRange;
 //    auto zSize = CurveRange::CreateCurveByConstant(0.1f);
     _overtimeModules["sizeOvertime"] = std::make_shared<PS3SizeOvertime>(allSize);
     
     // color overtime
-        ColorKey colorKey1 = {vec3(1.0f, 0.0f, 0.0f), 0.0f};
-        ColorKey colorKey2 = {vec3(1.0f, 0.0f, 0.0f), 1.0f};
-        AlphaKey alphaKey1 = {1.0f, 0.0f};
-        AlphaKey alphaKey2 = {1.0f, 1.0f};
-        std::vector<ColorKey> colorKeys = {colorKey1, colorKey2};
-        std::vector<AlphaKey> alphaKeys = {alphaKey1, alphaKey2};
+        ColorKey colorKey1 = {vec3(0.0f, 0.0f, 1.0f), 0.0f}; // 蓝色
+    ColorKey colorKey2 = {vec3(1.0f, 0.6f, 0.0f), 0.1f}; // 黄色
+        ColorKey colorKey3 = {vec3(1.0f, 0.5f, 0.0f), 0.2f}; // 橙色
+        ColorKey colorKey4 = {vec3(1.0f, 0.0f, 0.0f), 0.8f}; // 红色
+    ColorKey colorKey5 = {vec3(1.0f, 0.0f, 0.0f), 1.0f}; // 红色
+        AlphaKey alphaKey1 = {0.0f, 0.0f}; // alpha time
+        AlphaKey alphaKey2 = {0.5f, 0.1f};
+    AlphaKey alphaKey3 = {0.1, 0.8f};
+    AlphaKey alphaKey4 = {0.0, 1.0f};
+        std::vector<ColorKey> colorKeys = {colorKey1, colorKey2, colorKey3, colorKey4, colorKey5};
+        std::vector<AlphaKey> alphaKeys = {alphaKey1, alphaKey2, alphaKey3, alphaKey4};
         GradientPtr gradient = Gradient::CreateByColorKeyAndAlphaKey(colorKeys, alphaKeys);
         GradientRangePtr gradientRange = GradientRange::CreateByOneGradient(gradient);
+    // auto randomColor = GradientRange::CreateByRandomColor();
     _overtimeModules["colorOvertime"] = std::make_shared<PS3ColorOvertime>(gradientRange);
     
     // rotate overtime
     auto xRot = CurveRange::CreateCurveByConstant(radians(0.0));
     auto yRot = CurveRange::CreateCurveByConstant(radians(0.0));
-    auto zRot = CurveRange::CreateCurveByConstant(radians(60.0));
+    auto zRot = CurveRange::CreateCurveByConstant(radians(0.0));
     auto rotationOvertimeModule = std::make_shared<PS3RotationOvertime>(xRot, yRot, zRot);
     _overtimeModules["rotationOvertime"] = rotationOvertimeModule;
     
@@ -133,14 +147,21 @@ PS3ParticleSystem::PS3ParticleSystem(int maxParticleCount)
     // inilizer
     _inilizer = std::make_shared<PS3ParticleInitializer>(this);
     
+    std::vector<float> frameTime = {0.0f, 1.0f};
+    KeyFrameValue frameKeyFrame1 = {0.0f, 0.0f, 1.0f}; // (0, 0) 点，没有左切线
+    KeyFrameValue frameKeyFrame2 = {1.0f, 1.0f, 0.0f}; // (1, 1) 点，没有右切线
+    std::vector<KeyFrameValue> frameTimeValue = {frameKeyFrame1, frameKeyFrame2};
+    CurvePtr frameCurve = Curve::CreateCurveByTimesAndValues(frameTime, frameTimeValue);
+    CurveRangePtr frameCurveRange = CurveRange::CreateCurveByOneCurve(frameCurve);
+    
     // texture animation
-//    auto startFrame = CurveRange::CreateCurveByConstant(0);
-//    auto textureAnimationModule = std::make_shared<PS3TextureAnimationModule>(4, 4, AnimationMode::WHOLE_SHEET, curveRange, startFrame, 1, true, 0);
-//    _overtimeModules["textureAnimationOvertime"] = textureAnimationModule;
-//    _overtimeModules["textureAnimationOvertime"]->_enable = false;
+    auto startFrame = CurveRange::CreateCurveByTwoConstant(1, 4);
+    auto textureAnimationModule = std::make_shared<PS3TextureAnimationModule>(2, 2, AnimationMode::WHOLE_SHEET, frameCurveRange, startFrame, 4, true, 0);
+    _overtimeModules["textureAnimationOvertime"] = textureAnimationModule;
+    _overtimeModules["textureAnimationOvertime"]->_enable = false;
     
     // texture
-    _texture = std::make_shared<Texture2D>("/Users/evanbfeng/work/resource/textures/white_effect.png");
+    _texture = std::make_shared<Texture2D>("/Users/evanbfeng/work/resource/textures/sequence_fire2.png");
     //_texture->BindToUniform("MainTexture", _renderer->_model->_renderer->_shader, _renderer->_model->_renderer->GetTextureUnit("MainTexture"));
     
     // 初始化renderer的uniform
@@ -519,7 +540,9 @@ void PS3ParticleSystem::Reset()
 
 void PS3ParticleSystem::PrewarmSystem()
 {
-    float dt = 1.0 / 60;
+    _startDelay->_mode = RangeMode::Constant;
+    _startDelay->_constant = 0.0f;
+    float dt = 1.0f;
     int cnt = _duration / dt;
     _isEmitting = true;
     
@@ -544,7 +567,7 @@ void PS3ParticleSystem::Render()
     
     // 渲染发射器的线框
     if (_shapeModule && !_isSubEmitter)
-        // _shapeModule->RenderEmitter();
+        _shapeModule->RenderEmitter();
     
     // 渲染子系统
     for (auto& sub : _subEmitters)

@@ -30,6 +30,7 @@ public:
 public:
     static std::shared_ptr<GradientRange> CreateByOneColor(vec4 color);
     static std::shared_ptr<GradientRange> CreateByOneGradient(GradientPtr gradient);
+    static std::shared_ptr<GradientRange> CreateByRandomColor();
     
 public:
     vec4 Evaluate(float time,float rndRatio);
