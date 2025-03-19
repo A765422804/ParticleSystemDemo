@@ -138,7 +138,8 @@ void PS3ParticleSystemCPU::Clear()
 {
     _particles.clear();
     
-    _trailModule->Clear();
+    if (_trailModule)
+        _trailModule->Clear();
 }
 
 void PS3ParticleSystemCPU::SetTrailModule(PS3TrailPtr trail)

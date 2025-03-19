@@ -400,7 +400,7 @@ void main()
         velocity.xyz += forceTrack.xyz * normalizedTime * Dir_Life.w;
     }
     
-    // TODO: 2.5 gravity:
+    // 2.5 gravity:
     vec3 gravity;
     if (gravity_mode == 1)
     {
@@ -449,7 +449,7 @@ void main()
     pos.xyz += velocity.xyz * normalizedTime * Dir_Life.w;
     
     // 检测粒子是否死亡
-    if (normalizedTime >= 1.0 - Time_Delta.y && Texcoord == vec2(0.0, 0.0)) // 每个粒子四个顶点，确保只发射一次子粒子
+    if (normalizedTime >= 1.0 - 2 * Time_Delta.y && Texcoord == vec2(0.0, 0.0)) // 每个粒子四个顶点，确保只发射一次子粒子
     {
         DeadParticlePosition = pos.xyz;
     }

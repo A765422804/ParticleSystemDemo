@@ -18,7 +18,7 @@ PS3ParticleSystem::PS3ParticleSystem(int maxParticleCount)
 , _isSubEmitter(false)
 , _capacity(maxParticleCount)
 , _loop(true)
-, _duration(10.0f)
+, _duration(2.0f)
 , _simulationSpeed(1)
 , _startDelay(nullptr)
 //, _rateOverTime(nullptr)
@@ -44,7 +44,7 @@ PS3ParticleSystem::PS3ParticleSystem(int maxParticleCount)
 //    }
     
     // generator
-    auto rateOverTime = CurveRange::CreateCurveByConstant(500);
+    auto rateOverTime = CurveRange::CreateCurveByConstant(250);
     auto rateOverDistance = CurveRange::CreateCurveByConstant(0);
     _generator = std::make_shared<PS3ParticleGenerator>(this, rateOverTime ,rateOverDistance);
     
@@ -306,6 +306,8 @@ void PS3ParticleSystem::Update(float dt)
     {
         _time += scaledDeltaTime; // 更新总时间
         
+        // std::cout<<"update time: " <<_time<<std::endl;
+        
         // 发射粒子
         ToEmit(scaledDeltaTime);
         
@@ -540,18 +542,26 @@ void PS3ParticleSystem::Reset()
 
 void PS3ParticleSystem::PrewarmSystem()
 {
+    if (_time > _duration)
+        return;
+    
     _startDelay->_mode = RangeMode::Constant;
     _startDelay->_constant = 0.0f;
-    float dt = 1.0f;
-    int cnt = _duration / dt;
-    _isEmitting = true;
+    float dt = 0.01f;
+    // int cnt = _duration / dt;
+    // _isEmitting = true;
     
-    for (int i = 0 ; i < cnt; ++i)
+//    for (int i = 0 ; i < cnt; ++i)
+//    {
+    while(_time < _duration)
     {
         _time += dt;
         ToEmit(dt);
         UpdateParticles(dt);
     }
+    //}
+    
+    _time = _duration;
 }
 
 void PS3ParticleSystem::Render()

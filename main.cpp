@@ -115,11 +115,11 @@ int main()
         GradientRangePtr gradientRange = GradientRange::CreateByOneGradient(gradient);
      subSystem->_overtimeModules["colorOvertime"] = std::make_shared<PS3ColorOvertime>(gradientRange);
     subSystem->_overtimeModules["velocityOvertime"]->_enable = false;
-    // subSystem->_renderer->InitUniform(); // hack：手动吧overtime的module再更新一次
-//    particleSystem->AddSubEmitter({
-//        EventType::DEATH,
-//        subSystem
-//    });
+     //subSystem->_renderer->InitUniform(); // hack：手动吧overtime的module再更新一次
+    particleSystem->AddSubEmitter({
+        EventType::DEATH,
+        subSystem
+    });
     
     // 球体
     SpherePtr sphere = std::make_shared<Sphere>(0.5f, 72, 36);
@@ -127,7 +127,7 @@ int main()
     sphere->_sphereRenderer->SetCamera(camera);
     
     // 构建父子关系
-    // sphere->AddChild(particleSystem);
+    sphere->AddChild(particleSystem);
     
     // particleSystem->Play();
     
@@ -265,11 +265,11 @@ int main()
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         // 如果当前帧时间间隔小于目标帧时间间隔，则等待一段时间
-        if (deltaTime < TARGET_FRAME_TIME) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>((TARGET_FRAME_TIME - deltaTime) * 1000)));
-            currentFrame = glfwGetTime();
-            deltaTime = currentFrame - lastFrame;
-        }
+//        if (deltaTime < TARGET_FRAME_TIME) {
+//            std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>((TARGET_FRAME_TIME - deltaTime) * 1000)));
+//            currentFrame = glfwGetTime();
+//            deltaTime = currentFrame - lastFrame;
+//        }
         lastFrame = currentFrame;
         
         // Update

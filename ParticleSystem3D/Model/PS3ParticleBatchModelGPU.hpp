@@ -48,6 +48,7 @@ public:
     int _capacity; // 最大粒子数量
     
     int _particleCount; // TODO: 这是一个hack的做法，把gpu的粒子数量存在这个地方，在emit的时候+1，在kill的时候-1
+    // TODO: 上面正确的方法是和psGPU搭建一个信号，当粒子数量变化时让ps的数量成员作相同的变化
     
     bool _enabled; // 是否启用
 };
