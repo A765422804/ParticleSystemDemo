@@ -42,7 +42,7 @@ public:
     ~Curve() = default;
     
 public:
-    static std::shared_ptr<Curve> CreateCurveByTimesAndValues(std::vector<float> times, std::vector<KeyFrameValue> values, ExtrapolationMode preExtrapolation = ExtrapolationMode::LINEAR, ExtrapolationMode postExtrapolation = ExtrapolationMode::LINEAR, InterpolationMode interpolationMode = InterpolationMode::LINEAR);
+    static std::shared_ptr<Curve> CreateCurveByTimesAndValues(std::vector<float> times, std::vector<KeyFrameValue> values, ExtrapolationMode preExtrapolation = ExtrapolationMode::LINEAR, ExtrapolationMode postExtrapolation = ExtrapolationMode::LINEAR, InterpolationMode interpolationMode = InterpolationMode::CUBIC);
     
 public:
     float Evaluate(float time);

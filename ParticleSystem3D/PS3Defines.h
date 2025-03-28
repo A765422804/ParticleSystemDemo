@@ -13,15 +13,6 @@ enum class SpaceMode
     LOCAL,
 };
 
-enum class ShapeType
-{
-    BOX, // 立方体
-    CIRCLE, // 圆形
-    CONE, // 圆锥
-    SPHERE, // 球体
-    HEMISPHERE, // 半球体
-};
-
 enum class EmitLocation
 {
      BASE, // 基础位置发射（circle cone）

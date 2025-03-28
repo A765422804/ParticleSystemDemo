@@ -47,7 +47,7 @@ vec3 Gradient::GetRGB(float time)
     int length = int(_colorKeys.size());
     if (length > 1)
     {
-        time = Repeat(time, 1.0f + 1e-6);
+        // time = Repeat(time, 1.0f + 1e-6);
         for (int i = 1; i < length; ++i)
         {
             float preTime = _colorKeys[i - 1].Time;

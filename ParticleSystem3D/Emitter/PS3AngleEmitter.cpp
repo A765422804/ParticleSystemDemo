@@ -27,6 +27,7 @@ float PS3AngleEmitter::GenerateArcAngle()
 
     float angle = _totalAngle + 2 * M_PI * _arcSpeed->Evaluate(_ps->_time, 1) * (_ps->_time - _lastTime); // 这一帧的角度 = 上一帧的角度 + 角度增量
     _totalAngle = angle;
+    std::cout<<"totalAngle: "<<angle<<std::endl;
     if (_arcSpread != 0)
     {
         angle = floor(angle / (_arc * _arcSpread)) * _arc * _arcSpread;

@@ -20,7 +20,7 @@ public:
 public:
     float GenerateArcAngle();
     
-public:
+public: // 全部角度制
     ArcMode _arcMode; // 圆曲线模式
     float _arcSpread; // 扩散步长，保证角度是步长的倍数
     float _arc; // 表示最大角度

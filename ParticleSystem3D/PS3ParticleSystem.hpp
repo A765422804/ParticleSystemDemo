@@ -163,8 +163,6 @@ public: // 属性 - 静
     // 是否需要预热
     bool _prewarm;
     
-    // 是否使用GPU粒子
-    
 public: // 状态 - 动
     vec3 _oldWorldPos;
     vec3 _curWorldPos;

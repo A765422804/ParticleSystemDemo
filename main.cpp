@@ -30,8 +30,6 @@ float lastX = (float)SCR_WIDTH / 2.0;
 float lastY = (float)SCR_HEIGHT / 2.0;
 bool firstMouse = true;
 
-
-
 int main()
 {
     // glfw: initialize and configure
