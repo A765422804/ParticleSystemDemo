@@ -97,6 +97,7 @@ int main()
     particleSystem->_renderer->_model->_renderer->SetCamera(camera);
     particleSystem->_shapeModule->_emitterRenderer->SetCamera(camera);
     particleSystem->SetRotation(vec3(0, 0, 45));
+    particleSystem->SetScale(vec3(1, 5, 1));
     PS3ParticleSystemGPUPtr subSystem = std::make_shared<PS3ParticleSystemGPU>(5000);
     subSystem->_renderer->_model->_renderer->SetCamera(camera);
     subSystem->_shapeModule = PS3CircleEmitter::CreateCircleEmitter(ArcMode::EVEN, 0, 360, CurveRange::CreateCurveByConstant(90), 0.00001, 0, 5, subSystem.get());
@@ -114,10 +115,10 @@ int main()
      subSystem->_overtimeModules["colorOvertime"] = std::make_shared<PS3ColorOvertime>(gradientRange);
     subSystem->_overtimeModules["velocityOvertime"]->_enable = false;
      //subSystem->_renderer->InitUniform(); // hack：手动吧overtime的module再更新一次
-    particleSystem->AddSubEmitter({
-        EventType::DEATH,
-        subSystem
-    });
+//    particleSystem->AddSubEmitter({
+//        EventType::DEATH,
+//        subSystem
+//    });
     
     // 球体
     SpherePtr sphere = std::make_shared<Sphere>(0.5f, 72, 36);

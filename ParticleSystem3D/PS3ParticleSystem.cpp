@@ -79,9 +79,9 @@ PS3ParticleSystem::PS3ParticleSystem(int maxParticleCount)
 //        _renderer = std::make_shared<PS3RendererCPU>(this, maxParticleCount);
 //    }
 
-    //_shapeModule = PS3BoxEmitter::CreateBoxEmitter(EmitLocation::VOLUME, this);
+    _shapeModule = PS3BoxEmitter::CreateBoxEmitter(EmitLocation::VOLUME, this);
 //    _shapeModule = PS3ConeEmitter::CreateConeEmitter(EmitLocation::BASE, ArcMode::RANDOM, 0, 360, 0, 0.001, 1, 10, 10, 0.5, this);
-    _shapeModule = PS3CircleEmitter::CreateCircleEmitter(ArcMode::LOOP, 0, 360, CurveRange::CreateCurveByConstant(1), 2, 1,10, this);
+//    _shapeModule = PS3CircleEmitter::CreateCircleEmitter(ArcMode::LOOP, 0, 360, CurveRange::CreateCurveByConstant(1), 2, 1,10, this);
     //_shapeModule = PS3SphereEmitter::CreateSphereEmitter(EmitLocation::VOLUME, 1, 1, this);
     //_shapeModule = PS3HemisphereEmitter::CreateHemisphereEmitter(EmitLocation::VOLUME, 1, 1, this);
     

@@ -15,9 +15,14 @@ public:
     unsigned int ID;
     
     Shader(const char* vertexPath, const char* fragmentPath);
+    Shader(const char* computePath);
     ~Shader()
     {
         glDeleteProgram(ID);
+    }
+    void dispatchCompute(GLuint x, GLuint y = 1, GLuint z = 1) const
+    {
+        glDispatchCompute(x, y, z);
     }
     void use();
     
